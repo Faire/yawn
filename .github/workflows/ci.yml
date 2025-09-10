@@ -1,0 +1,53 @@
+name: CI
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up JDK
+              uses: actions/setup-java@v4
+              with:
+                  java-version: 21 
+                  distribution: "temurin"
+
+            - name: Setup Gradle
+              uses: gradle/gradle-build-action@v3
+              with:
+                  gradle-home-cache-cleanup: true
+
+            - name: Validate Gradle wrapper
+              uses: gradle/wrapper-validation-action@v2
+
+            - name: Check build configuration
+              run: ./gradlew projects --no-daemon
+
+            - name: Build all modules
+              run: ./gradlew buildAll --no-daemon
+
+            - name: Run all tests
+              run: ./gradlew testAll --no-daemon --stacktrace
+
+            - name: Run code quality checks
+              run: ./gradlew check --no-daemon
+
+            - name: Generate documentation
+              run: ./gradlew dokkaHtml --no-daemon
+
+            - name: Generate test report
+              uses: dorny/test-reporter@v1
+              if: success() || failure()
+              with:
+                  name: Test Results
+                  path: "**/build/test-results/test/*.xml"
+                  reporter: java-junit
+                  fail-on-error: true
