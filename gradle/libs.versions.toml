@@ -1,5 +1,7 @@
 [versions]
 kotlin = "2.0.21"
+ksp = "2.0.21-1.0.27"
+dokka = "1.9.20"
 hibernate = "5.6.15.Final"
 javax-persistence = "2.2"
 google-auto-service = "1.1.1"
@@ -40,3 +42,8 @@ assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }

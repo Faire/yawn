@@ -4,9 +4,9 @@ import org.gradle.plugins.signing.SigningExtension
 import org.gradle.api.plugins.JavaPluginExtension
 
 plugins {
-    kotlin("jvm") version "2.0.21" apply false
-    id("com.google.devtools.ksp") version "2.0.21-1.0.27" apply false
-    id("org.jetbrains.dokka") version "1.9.20" apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.dokka) apply false
 }
 
 allprojects {
