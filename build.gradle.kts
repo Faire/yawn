@@ -9,7 +9,6 @@ plugins {
     id("org.jetbrains.dokka") version "1.9.20" apply false
 }
 
-// Common configuration for all subprojects
 allprojects {
     group = "com.faire.yawn"
     version = "1.0.0"
@@ -100,30 +99,4 @@ subprojects {
         useInMemoryPgpKeys(signingKey, signingPassword)
         sign(the<PublishingExtension>().publications["maven"])
     }
-    
-    // Only sign if we have signing credentials
-    tasks.withType<Sign> {
-        onlyIf { project.hasProperty("signingKey") || System.getenv("SIGNING_KEY") != null }
-    }
-}
-
-// Task to build all modules
-tasks.register("buildAll") {
-    dependsOn(subprojects.map { "${it.path}:build" })
-    group = "build"
-    description = "Builds all modules"
-}
-
-// Task to test all modules
-tasks.register("testAll") {
-    dependsOn(subprojects.map { "${it.path}:test" })
-    group = "verification"
-    description = "Runs tests for all modules"
-}
-
-// Task to publish all modules
-tasks.register("publishAll") {
-    dependsOn(subprojects.map { "${it.path}:publish" })
-    group = "publishing"
-    description = "Publishes all modules"
 }

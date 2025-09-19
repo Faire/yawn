@@ -21,24 +21,24 @@ jobs:
                   distribution: "temurin"
 
             - name: Setup Gradle
-              uses: gradle/gradle-build-action@v3
+              uses: gradle/gradle-build-action@v4
               with:
                   gradle-home-cache-cleanup: true
 
             - name: Check build configuration
-              run: ./gradlew projects --no-daemon
+              run: ./gradlew projects
 
             - name: Build all modules
-              run: ./gradlew buildAll --no-daemon
+              run: ./gradlew build
 
             - name: Run all tests
-              run: ./gradlew testAll --no-daemon --stacktrace
+              run: ./gradlew test --stacktrace
 
             - name: Run code quality checks
-              run: ./gradlew check --no-daemon
+              run: ./gradlew check
 
             - name: Generate documentation
-              run: ./gradlew dokkaHtml --no-daemon
+              run: ./gradlew dokkaHtml
 
             - name: Generate test report
               uses: dorny/test-reporter@v1
