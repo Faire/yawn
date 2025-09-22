@@ -11,9 +11,3 @@ include(
     "yawn-database-test",
     "yawn-integration-test"
 )
-
-// Set project directories to match the yawn/* structure
-project(":yawn-api").projectDir = file("yawn/yawn-api")
-project(":yawn-processor").projectDir = file("yawn/yawn-processor")
-project(":yawn-database-test").projectDir = file("yawn/yawn-database-test")
-project(":yawn-integration-test").projectDir = file("yawn/yawn-integration-test")
