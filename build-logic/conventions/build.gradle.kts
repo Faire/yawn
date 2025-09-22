@@ -4,8 +4,8 @@ plugins {
 
 dependencies {
   implementation(gradleKotlinDsl())
-  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
-  implementation("com.google.devtools.ksp:symbol-processing-gradle-plugin:2.0.21-1.0.27")
+  implementation(libs.kotlin.gradle.plugin)
+  implementation(libs.ksp.gradle.plugin)
 }
 
 gradlePlugin {

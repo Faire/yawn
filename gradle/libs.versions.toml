@@ -19,6 +19,9 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 
 # Hibernate
+# KSP
+ksp-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+
 hibernate-core = { module = "org.hibernate:hibernate-core", version.ref = "hibernate" }
 
 # Persistence
