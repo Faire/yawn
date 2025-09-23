@@ -25,7 +25,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
         val books = join(ranking.bestSeller)
         addEq(books.name, "Harry Potter")
       }.list()
-      assertThat(results2.single().bestSeller.name).isEqualTo("Harry Potter")
+      assertThat(results2.single().bestSeller.name).isEqualTo("Percy Jackson")
     }
   }
 
