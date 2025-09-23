@@ -1,0 +1,87 @@
+name: Publish to Maven Central
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: "temurin"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v3
+
+      - name: Extract version from tag
+        id: extract_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Set version in gradle.properties
+        run: |
+          echo "Setting version to ${{ steps.extract_version.outputs.VERSION }}"
+          sed -i "s/version = \".*\"/version = \"${{ steps.extract_version.outputs.VERSION }}\"/" build.gradle.kts
+
+      - name: Run tests
+        run: ./gradlew check
+
+      - name: Publish to Maven Central
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          # Set signing properties for Gradle
+          echo "signingKey=$SIGNING_KEY" >> gradle.properties
+          echo "signingPassword=$SIGNING_PASSWORD" >> gradle.properties
+          
+          # Publish all modules to OSSRH repository
+          ./gradlew publishAllPublicationsToOSSRHRepository
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ steps.extract_version.outputs.VERSION }}
+          generate_release_notes: true
+          body: |
+            ## Maven Coordinates
+            
+            ```xml
+            <dependency>
+                <groupId>com.faire.yawn</groupId>
+                <artifactId>yawn-api</artifactId>
+                <version>${{ steps.extract_version.outputs.VERSION }}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.faire.yawn</groupId>
+                <artifactId>yawn-processor</artifactId>
+                <version>${{ steps.extract_version.outputs.VERSION }}</version>
+            </dependency>
+            ```
+            
+            ## Gradle
+            
+            ```kotlin
+            dependencies {
+                implementation("com.faire.yawn:yawn-api:${{ steps.extract_version.outputs.VERSION }}")
+                ksp("com.faire.yawn:yawn-processor:${{ steps.extract_version.outputs.VERSION }}")
+            }
+            ```
+          draft: false
+          prerelease: false

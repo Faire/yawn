@@ -49,7 +49,7 @@ subprojects {
                 from(components["java"])
                 
                 pom {
-                    name.set("${project.group}:${project.name}")
+                    name.set("$group:${project.name}")
                     description.set("Yawn - Hibernate ORM type-safe wrapper")
                     url.set("https://github.com/faire/yawn")
                     
@@ -96,7 +96,9 @@ subprojects {
     configure<SigningExtension> {
         val signingKey: String? by project
         val signingPassword: String? by project
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign(the<PublishingExtension>().publications["maven"])
+        if (signingKey != null && signingPassword != null) {
+            useInMemoryPgpKeys(signingKey, signingPassword)
+            sign(the<PublishingExtension>().publications["maven"])
+        }
     }
 }
