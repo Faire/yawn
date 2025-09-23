@@ -1,0 +1,9 @@
+# generated gradle folders
+.gradle/
+build/
+
+# generated IJ folder
+.idea/
+
+# generated kotlin folder
+.kotlin/
