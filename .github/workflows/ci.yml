@@ -28,13 +28,10 @@ jobs:
             - name: Check build configuration
               run: ./gradlew projects
 
-            - name: Build all modules
-              run: ./gradlew build
+            - name: Assemble all modules
+              run: ./gradlew assemble
 
-            - name: Run all tests
-              run: ./gradlew test --stacktrace
-
-            - name: Run code quality checks
+            - name: Run test, lint and checks
               run: ./gradlew check
 
             - name: Generate documentation
