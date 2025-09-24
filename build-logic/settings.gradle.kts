@@ -7,10 +7,6 @@ pluginManagement {
   }
 }
 
-include(
-    ":conventions"
-)
-
 dependencyResolutionManagement {
   repositories {
     mavenCentral()

@@ -3,11 +3,14 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
+includeBuild("build-logic")
+
 rootProject.name = "yawn"
 
 include(
     "yawn-api",
-    "yawn-processor", 
     "yawn-database-test",
-    "yawn-integration-test"
+    "yawn-gradle-plugin",
+    "yawn-processor",
+    "yawn-integration-test",
 )
