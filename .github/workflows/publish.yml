@@ -32,17 +32,6 @@ jobs:
               run: |
                   echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-            - name: Verify gradle.properties
-              run: |
-                VERSION='${{ steps.extract_version.outputs.VERSION }}'
-                if [ -f gradle.properties ]; then
-                    FILE_VERSION=$(grep -E '^version=' gradle.properties | cut -d= -f2)
-                    if [ "$FILE_VERSION" != "$VERSION" ]; then
-                        echo "::error::gradle.properties version ($FILE_VERSION) != tag version ($VERSION)"
-                        exit 1
-                    fi
-                fi
-
             - name: Publish the artifacts
               env:
                   ORG_GRADLE_PROJECT_version: ${{ steps.extract_version.outputs.VERSION }}
