@@ -1,10 +1,13 @@
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.kotlin.dsl.support.KotlinCompilerOptions
-
 plugins {
     kotlin("jvm")
     id("org.jetbrains.dokka")
     id("com.vanniktech.maven.publish")
+}
+
+group = "com.faire.yawn"
+
+repositories {
+    mavenCentral()
 }
 
 val javaVersionText = providers.fileContents(
