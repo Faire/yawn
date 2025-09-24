@@ -12,6 +12,7 @@ h2database = "2.3.232"
 assertj = "3.26.3"
 junit-jupiter = "5.11.3"
 junit-platform = "1.11.3"
+vanniktech = "0.34.0"
 
 [libraries]
 # Kotlin
@@ -50,3 +51,4 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
