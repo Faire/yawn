@@ -1,4 +1,5 @@
 plugins {
+    id("yawn.library")
     id("com.google.devtools.ksp")
 }
 

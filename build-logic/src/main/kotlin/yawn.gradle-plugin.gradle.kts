@@ -1,0 +1,4 @@
+
+plugins {
+    id("yawn.kotlin")
+}
