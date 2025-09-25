@@ -1,6 +1,9 @@
 package com.faire.ksp
 
-import com.google.devtools.ksp.symbol.*
+import com.google.devtools.ksp.symbol.KSAnnotation
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.KModifier
 import kotlin.reflect.KClass
@@ -25,7 +28,7 @@ fun KSDeclaration.getEffectiveVisibility(): KModifier {
             val isInTestContext = qualifiedName?.asString()?.contains("Test") == true
             val parentDeclaration = parentDeclaration
             val isNestedInInternal = parentDeclaration?.modifiers?.contains(Modifier.INTERNAL) == true
-            
+
             if (isInTestContext || isNestedInInternal) {
                 KModifier.INTERNAL
             } else {
@@ -87,7 +90,7 @@ fun ClassName.getUniqueSimpleName(): String {
     // If this is a nested class, flatten the names with underscores
     return if (enclosingClassName() != null) {
         val enclosingName = enclosingClassName()!!.getUniqueSimpleName()
-        "${enclosingName}_${simpleName}"
+        "${enclosingName}_$simpleName"
     } else {
         simpleName
     }

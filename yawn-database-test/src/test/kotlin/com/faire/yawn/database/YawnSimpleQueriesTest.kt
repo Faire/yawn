@@ -476,7 +476,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
         addIn(books.name, listOf("The Hobbit"))
         project(books.name)
       }.list()
-      assertThat(oneBook.single()).isEqualTo("The Hobbit")
+      assertThat(oneBook).containsOnly("The Hobbit")
       val twoBooks = session.project(BookTable) { books ->
         addIn(books.name, listOf("The Hobbit", "Harry Potter"))
         project(books.name)
@@ -531,7 +531,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
         addNotIn(books.name, allBookNames - "The Hobbit")
         project(books.name)
       }.list()
-      assertThat(oneBook.single()).isEqualTo("The Hobbit")
+      assertThat(oneBook).containsOnly("The Hobbit")
       val noBooks = session.project(BookTable) { books ->
         addNotIn(books.name, allBookNames)
         project(books.name)
@@ -561,7 +561,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
         val genres = join(books.genres)
         addEq(genres.elements, FAIRY_TALE)
       }.list()
-      assertThat(fairyTaleBooks.map { it.author.name }.toSet().single()).isEqualTo("Hans Christian Andersen")
+      assertThat(fairyTaleBooks.map { it.author.name }.toSet()).containsOnly("Hans Christian Andersen")
 
       val results = session.query(BookTable) { books ->
         addLe(books.numberOfPages, 300L)
