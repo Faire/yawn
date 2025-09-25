@@ -12,13 +12,13 @@ import com.faire.yawn.query.YawnCompilationContext
  * @param SOURCE the type of the original table that the criteria is based off of.
  */
 abstract class YawnProjectionDef<SOURCE : Any, D : Any> : YawnDef<SOURCE, D>() {
-  /**
-   * A column definition for a projection.
-   * It is the equivalent of [com.faire.yawn.YawnTableDef.ColumnDef], but for projections.
-   *
-   * @param T the type of the column.
-   */
-  inner class ProjectionColumnDef<T>(private val name: String) : YawnColumnDef<T>() {
-    override fun generatePath(context: YawnCompilationContext): String = name
-  }
+    /**
+     * A column definition for a projection.
+     * It is the equivalent of [com.faire.yawn.YawnTableDef.ColumnDef], but for projections.
+     *
+     * @param T the type of the column.
+     */
+    inner class ProjectionColumnDef<T>(private val name: String) : YawnColumnDef<T>() {
+        override fun generatePath(context: YawnCompilationContext): String = name
+    }
 }

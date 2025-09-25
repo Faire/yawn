@@ -16,39 +16,39 @@ import com.faire.yawn.query.YawnQueryFactory
 class Yawn(
     private val queryFactory: YawnQueryFactory,
 ) {
-  fun <T : Any, DEF : YawnTableDef<T, T>> query(
-      tClass: Class<T>,
-      tableRef: YawnTableRef<T, DEF>,
-      lambda: TypeSafeCriteriaQuery<T, DEF>.(tableDef: DEF) -> Unit = {},
-  ): TypeSafeCriteriaBuilder<T, DEF> {
-    val query = YawnQuery<T, T>(tClass)
-    val tableDef = tableRef.create(parent = RootTableDefParent)
-    return TypeSafeCriteriaBuilder.create(tableDef, queryFactory, query, lambda)
-  }
-
-  fun <T : Any, DEF : YawnTableDef<T, T>, PROJECTION : Any?> project(
-      tClass: Class<T>,
-      tableRef: YawnTableRef<T, DEF>,
-      lambda: ProjectedTypeSafeCriteriaQuery<T, T, DEF, PROJECTION>.(
-        tableDef: DEF,
-    ) -> YawnQueryProjection<T, PROJECTION>,
-  ): ProjectedTypeSafeCriteriaBuilder<T, DEF, PROJECTION> {
-    val query = YawnQuery<T, T>(tClass)
-    val tableDef = tableRef.create(parent = RootTableDefParent)
-    return ProjectedTypeSafeCriteriaBuilder.create(tableDef, queryFactory, query, lambda)
-  }
-
-  companion object {
-    inline fun <reified T : Any, DEF : YawnTableDef<T, T>, PROJECTION : Any?> createProjectedDetachedCriteria(
+    fun <T : Any, DEF : YawnTableDef<T, T>> query(
+        tClass: Class<T>,
         tableRef: YawnTableRef<T, DEF>,
-        noinline lambda:
-        ProjectedTypeSafeCriteriaQuery<T, T, DEF, PROJECTION>.(tableDef: DEF) -> YawnQueryProjection<T, PROJECTION>,
-    ): DetachedProjectedTypeSafeCriteriaBuilder<T, T, DEF, PROJECTION> {
-      val query = YawnQuery<T, T>(T::class.java)
-
-      @Suppress("UNCHECKED_CAST") // DEF is YawnTableDef<T, T>, so this cast is safe
-      val tableDef = tableRef.forSubQuery<T>() as DEF
-      return DetachedProjectedTypeSafeCriteriaBuilder.create(tableDef, query, lambda)
+        lambda: TypeSafeCriteriaQuery<T, DEF>.(tableDef: DEF) -> Unit = {},
+    ): TypeSafeCriteriaBuilder<T, DEF> {
+        val query = YawnQuery<T, T>(tClass)
+        val tableDef = tableRef.create(parent = RootTableDefParent)
+        return TypeSafeCriteriaBuilder.create(tableDef, queryFactory, query, lambda)
     }
-  }
+
+    fun <T : Any, DEF : YawnTableDef<T, T>, PROJECTION : Any?> project(
+        tClass: Class<T>,
+        tableRef: YawnTableRef<T, DEF>,
+        lambda: ProjectedTypeSafeCriteriaQuery<T, T, DEF, PROJECTION>.(
+            tableDef: DEF,
+        ) -> YawnQueryProjection<T, PROJECTION>,
+    ): ProjectedTypeSafeCriteriaBuilder<T, DEF, PROJECTION> {
+        val query = YawnQuery<T, T>(tClass)
+        val tableDef = tableRef.create(parent = RootTableDefParent)
+        return ProjectedTypeSafeCriteriaBuilder.create(tableDef, queryFactory, query, lambda)
+    }
+
+    companion object {
+        inline fun <reified T : Any, DEF : YawnTableDef<T, T>, PROJECTION : Any?> createProjectedDetachedCriteria(
+            tableRef: YawnTableRef<T, DEF>,
+            noinline lambda:
+            ProjectedTypeSafeCriteriaQuery<T, T, DEF, PROJECTION>.(tableDef: DEF) -> YawnQueryProjection<T, PROJECTION>,
+        ): DetachedProjectedTypeSafeCriteriaBuilder<T, T, DEF, PROJECTION> {
+            val query = YawnQuery<T, T>(T::class.java)
+
+            @Suppress("UNCHECKED_CAST") // DEF is YawnTableDef<T, T>, so this cast is safe
+            val tableDef = tableRef.forSubQuery<T>() as DEF
+            return DetachedProjectedTypeSafeCriteriaBuilder.create(tableDef, query, lambda)
+        }
+    }
 }

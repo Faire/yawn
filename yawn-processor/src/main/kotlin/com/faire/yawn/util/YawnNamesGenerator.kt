@@ -11,51 +11,51 @@ import com.squareup.kotlinpoet.ClassName
  * naming collisions (see [getUniqueSimpleName] for more details).
  */
 internal object YawnNamesGenerator {
-  /**
-   * For entities annotated with @YawnEntity
-   * For example: DbBook -> DbBookTableDef
-   */
-  fun generateTableDefClassName(originalClassName: ClassName): String {
-    return "${originalClassName.getUniqueSimpleName()}TableDef"
-  }
+    /**
+     * For entities annotated with @YawnEntity
+     * For example: DbBook -> DbBookTableDef
+     */
+    fun generateTableDefClassName(originalClassName: ClassName): String {
+        return "${originalClassName.getUniqueSimpleName()}TableDef"
+    }
 
-  /**
-   * For entities annotated with @YawnEntity
-   * For example: DbBook -> DbBookTable
-   */
-  fun generateTableObjectName(originalClassName: ClassName): String {
-    return "${originalClassName.getUniqueSimpleName()}Table"
-  }
+    /**
+     * For entities annotated with @YawnEntity
+     * For example: DbBook -> DbBookTable
+     */
+    fun generateTableObjectName(originalClassName: ClassName): String {
+        return "${originalClassName.getUniqueSimpleName()}Table"
+    }
 
-  /**
-   * For classes annotated with @Embedded or @EmbeddedId
-   * For example: FooCompositeId -> FooCompositeIdDef
-   */
-  fun generateEmbeddedDefClassName(originalClassName: ClassName): String {
-    return "${originalClassName.getUniqueSimpleName()}Def"
-  }
+    /**
+     * For classes annotated with @Embedded or @EmbeddedId
+     * For example: FooCompositeId -> FooCompositeIdDef
+     */
+    fun generateEmbeddedDefClassName(originalClassName: ClassName): String {
+        return "${originalClassName.getUniqueSimpleName()}Def"
+    }
 
-  /**
-   * For projections annotated with @YawnProjection
-   * For example: YawnProjectionTest.SimpleBook -> YawnProjectionTest_SimpleBookProjectionDef
-   */
-  fun generateProjectionDefClassName(originalClassName: ClassName): String {
-    return "${originalClassName.getUniqueSimpleName()}ProjectionDef"
-  }
+    /**
+     * For projections annotated with @YawnProjection
+     * For example: YawnProjectionTest.SimpleBook -> YawnProjectionTest_SimpleBookProjectionDef
+     */
+    fun generateProjectionDefClassName(originalClassName: ClassName): String {
+        return "${originalClassName.getUniqueSimpleName()}ProjectionDef"
+    }
 
-  /**
-   * For projections annotated with @YawnProjection
-   * For example: YawnProjectionTest.SimpleBook -> YawnProjectionTest_SimpleBookProjection
-   */
-  fun generateProjectionObjectName(originalClassName: ClassName): String {
-    return "${originalClassName.getUniqueSimpleName()}Projection"
-  }
+    /**
+     * For projections annotated with @YawnProjection
+     * For example: YawnProjectionTest.SimpleBook -> YawnProjectionTest_SimpleBookProjection
+     */
+    fun generateProjectionObjectName(originalClassName: ClassName): String {
+        return "${originalClassName.getUniqueSimpleName()}Projection"
+    }
 
-  /**
-   * For embedded properties, we need to create an internal field to store the current path, and we need it to
-   * not clash with any user defined values.
-   */
-  fun generateInternalPathName(): String {
-    return "_yawnPath"
-  }
+    /**
+     * For embedded properties, we need to create an internal field to store the current path, and we need it to
+     * not clash with any user defined values.
+     */
+    fun generateInternalPathName(): String {
+        return "_yawnPath"
+    }
 }

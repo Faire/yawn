@@ -40,53 +40,53 @@ import com.squareup.kotlinpoet.ksp.toClassName
  * ```
  */
 internal object JoinColumnDefWithCompositeKeyGenerator : YawnPropertyGenerator() {
-  override val generatedType = YawnTableDef.JoinColumnDefWithCompositeKey::class
+    override val generatedType = YawnTableDef.JoinColumnDefWithCompositeKey::class
 
-  override fun generate(
-      yawnContext: YawnContext,
-      fieldName: String, // in this example, `fooComposite`
-      fieldType: KSType, // in this example,  `DbFooComposite`
-      foreignKeyRef: ForeignKeyReference?, // pre-parsed info from the FK matching on the other side
-  ): PropertySpec {
-    checkNotNull(foreignKeyRef)
+    override fun generate(
+        yawnContext: YawnContext,
+        fieldName: String, // in this example, `fooComposite`
+        fieldType: KSType, // in this example,  `DbFooComposite`
+        foreignKeyRef: ForeignKeyReference?, // pre-parsed info from the FK matching on the other side
+    ): PropertySpec {
+        checkNotNull(foreignKeyRef)
 
-    val fieldTypeClassName = fieldType
-        .toClassName() // reference to DbFooComposite
-        // TODO(yawn): we should make JoinColumnDefWithCompositeKey null-aware;
-        //             check faire.link/yawn-nullability for more details.
-        .makeNonNullable()
+        val fieldTypeClassName = fieldType
+            .toClassName() // reference to DbFooComposite
+            // TODO(yawn): we should make JoinColumnDefWithCompositeKey null-aware;
+            //             check faire.link/yawn-nullability for more details.
+            .makeNonNullable()
 
-    // reference to FooCompositeTableDef
-    val fieldYawnTableDef = tableDefForType(fieldTypeClassName)
+        // reference to FooCompositeTableDef
+        val fieldYawnTableDef = tableDefForType(fieldTypeClassName)
 
-    // reference to FooCompositeIdDef
-    val compositeIdRef = generateEmbeddedDefClassName(foreignKeyRef.toClassName())
+        // reference to FooCompositeIdDef
+        val compositeIdRef = generateEmbeddedDefClassName(foreignKeyRef.toClassName())
 
-    // reference to FooCompositeTableDef<SOURCE>
-    val tableDefWithSource = fieldYawnTableDef.parameterizedBy(yawnContext.sourceTypeVariable)
+        // reference to FooCompositeTableDef<SOURCE>
+        val tableDefWithSource = fieldYawnTableDef.parameterizedBy(yawnContext.sourceTypeVariable)
 
-    // These are the 3 type arguments that JoinColumnDefWithCompositeKey takes:
-    val typeArguments = listOf(
-        // T = DbFooComposite
-        fieldTypeClassName,
-        // DEF = FooCompositeTableDef<SOURCE>
-        tableDefWithSource,
-        // CID = FooCompositeTableDef<SOURCE>.FooCompositeIdDef
-        tableDefWithSource.nestedClass(compositeIdRef, typeArguments = listOf()),
-    )
+        // These are the 3 type arguments that JoinColumnDefWithCompositeKey takes:
+        val typeArguments = listOf(
+            // T = DbFooComposite
+            fieldTypeClassName,
+            // DEF = FooCompositeTableDef<SOURCE>
+            tableDefWithSource,
+            // CID = FooCompositeTableDef<SOURCE>.FooCompositeIdDef
+            tableDefWithSource.nestedClass(compositeIdRef, typeArguments = listOf()),
+        )
 
-    // These are the parameters to the JoinColumnDefWithCompositeKey constructor:
-    val parameters = listOf(
-        // tableDefParent = parent
-        YawnParameter.literal(PARENT_PARAMETER_NAME),
-        // name = "fooComposite"
-        YawnParameter.string(fieldName),
-        // foreignKeyProvider = { FooCompositeTableDef<SOURCE>(parent).FooCompositeIdDef(it) }
-        YawnParameter("{ %T(parent).%N(it) }", listOf(tableDefWithSource, compositeIdRef)),
-        // tableDefProvider = { FooCompositeTableDef(it) }
-        YawnParameter.simple("{ %T(it) }", fieldYawnTableDef),
-    )
+        // These are the parameters to the JoinColumnDefWithCompositeKey constructor:
+        val parameters = listOf(
+            // tableDefParent = parent
+            YawnParameter.literal(PARENT_PARAMETER_NAME),
+            // name = "fooComposite"
+            YawnParameter.string(fieldName),
+            // foreignKeyProvider = { FooCompositeTableDef<SOURCE>(parent).FooCompositeIdDef(it) }
+            YawnParameter("{ %T(parent).%N(it) }", listOf(tableDefWithSource, compositeIdRef)),
+            // tableDefProvider = { FooCompositeTableDef(it) }
+            YawnParameter.simple("{ %T(it) }", fieldYawnTableDef),
+        )
 
-    return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
-  }
+        return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
+    }
 }

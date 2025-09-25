@@ -7,10 +7,10 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 
 @AutoService(SymbolProcessorProvider::class)
 class TestProcessorProvider : SymbolProcessorProvider {
-  override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-    return TestEntityProcessor(
-        logger = environment.logger,
-        codeGenerator = environment.codeGenerator,
-    )
-  }
+    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
+        return TestEntityProcessor(
+            logger = environment.logger,
+            codeGenerator = environment.codeGenerator,
+        )
+    }
 }

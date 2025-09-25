@@ -22,29 +22,29 @@ private constructor(
     TypeSafeCriteriaWithJoin<SOURCE, T> by TypeSafeCriteriaWithJoinDelegate(query),
     TypeSafeCriteriaWithOrder<SOURCE, T> by TypeSafeCriteriaWithOrderDelegate(query) {
 
-  private var projectionCalled: Boolean = false
+    private var projectionCalled: Boolean = false
 
-  private fun ensureUniqueProjection() {
-    if (projectionCalled) {
-      throw IllegalStateException("Projection already called")
-    } else {
-      projectionCalled = true
+    private fun ensureUniqueProjection() {
+        if (projectionCalled) {
+            throw IllegalStateException("Projection already called")
+        } else {
+            projectionCalled = true
+        }
     }
-  }
 
-  fun project(
-      projection: YawnQueryProjection<SOURCE, PROJECTION>,
-  ): YawnQueryProjection<SOURCE, PROJECTION> {
-    ensureUniqueProjection()
-    return projection
-  }
-
-  companion object {
-    internal fun <SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>, PROJECTION : Any?> applyLambda(
-        query: YawnQuery<SOURCE, T>,
-        lambda: ProjectedTypeSafeCriteriaQuery<SOURCE, T, DEF, PROJECTION>.() -> Unit,
-    ): ProjectedTypeSafeCriteriaQuery<SOURCE, T, DEF, PROJECTION> {
-      return ProjectedTypeSafeCriteriaQuery<SOURCE, T, DEF, PROJECTION>(query).apply(lambda)
+    fun project(
+        projection: YawnQueryProjection<SOURCE, PROJECTION>,
+    ): YawnQueryProjection<SOURCE, PROJECTION> {
+        ensureUniqueProjection()
+        return projection
     }
-  }
+
+    companion object {
+        internal fun <SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>, PROJECTION : Any?> applyLambda(
+            query: YawnQuery<SOURCE, T>,
+            lambda: ProjectedTypeSafeCriteriaQuery<SOURCE, T, DEF, PROJECTION>.() -> Unit,
+        ): ProjectedTypeSafeCriteriaQuery<SOURCE, T, DEF, PROJECTION> {
+            return ProjectedTypeSafeCriteriaQuery<SOURCE, T, DEF, PROJECTION>(query).apply(lambda)
+        }
+    }
 }

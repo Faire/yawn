@@ -31,50 +31,50 @@ class ProjectedTypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>, RETURN
     queryFactory,
     query,
 ) {
-  override fun builderReturn(): ProjectedTypeSafeCriteriaBuilder<T, DEF, RETURNS> = this
+    override fun builderReturn(): ProjectedTypeSafeCriteriaBuilder<T, DEF, RETURNS> = this
 
-  override fun clone(): ProjectedTypeSafeCriteriaBuilder<T, DEF, RETURNS> {
-    return ProjectedTypeSafeCriteriaBuilder(tableDef, queryFactory, query.copy())
-  }
-
-  // to be used by `create` only
-  internal fun applyFilter(
-      lambda: ProjectedTypeSafeCriteriaQuery<T, T, DEF, RETURNS>.(tableDef: DEF) -> YawnQueryProjection<T, RETURNS>,
-  ) {
-    ProjectedTypeSafeCriteriaQuery.applyLambda<T, T, DEF, RETURNS>(query) {
-      check(query.projection == null) { "At most one projection can be configured per query." }
-      val projection = lambda(tableDef)
-      query.projection = projection
-      mapper = { projection.project(it) }
+    override fun clone(): ProjectedTypeSafeCriteriaBuilder<T, DEF, RETURNS> {
+        return ProjectedTypeSafeCriteriaBuilder(tableDef, queryFactory, query.copy())
     }
-  }
 
-  inline fun doPaginated(
-      pageSize: Int,
-      orders: List<DEF.() -> YawnQueryOrder<T>>,
-      action: (List<RETURNS>) -> Unit,
-  ) {
-    // only apply the orders once
-    applyOrders(orders)
-
-    var pageNumber = 0
-    do {
-      val results = paginateZeroIndexed(pageNumber++, pageSize, orders = listOf()).list()
-      action(results)
-    } while (results.size == pageSize)
-  }
-
-  companion object {
-    fun <T : Any, DEF : YawnTableDef<T, T>, PROJECTION : Any?> create(
-        tableDef: DEF,
-        queryFactory: YawnQueryFactory,
-        query: YawnQuery<T, T>,
-        lambda:
-        ProjectedTypeSafeCriteriaQuery<T, T, DEF, PROJECTION>.(tableDef: DEF) -> YawnQueryProjection<T, PROJECTION>,
-    ): ProjectedTypeSafeCriteriaBuilder<T, DEF, PROJECTION> {
-      val typeSafeCriteria = ProjectedTypeSafeCriteriaBuilder<T, DEF, PROJECTION>(tableDef, queryFactory, query)
-      typeSafeCriteria.applyFilter(lambda)
-      return typeSafeCriteria
+    // to be used by `create` only
+    internal fun applyFilter(
+        lambda: ProjectedTypeSafeCriteriaQuery<T, T, DEF, RETURNS>.(tableDef: DEF) -> YawnQueryProjection<T, RETURNS>,
+    ) {
+        ProjectedTypeSafeCriteriaQuery.applyLambda<T, T, DEF, RETURNS>(query) {
+            check(query.projection == null) { "At most one projection can be configured per query." }
+            val projection = lambda(tableDef)
+            query.projection = projection
+            mapper = { projection.project(it) }
+        }
     }
-  }
+
+    inline fun doPaginated(
+        pageSize: Int,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+        action: (List<RETURNS>) -> Unit,
+    ) {
+        // only apply the orders once
+        applyOrders(orders)
+
+        var pageNumber = 0
+        do {
+            val results = paginateZeroIndexed(pageNumber++, pageSize, orders = listOf()).list()
+            action(results)
+        } while (results.size == pageSize)
+    }
+
+    companion object {
+        fun <T : Any, DEF : YawnTableDef<T, T>, PROJECTION : Any?> create(
+            tableDef: DEF,
+            queryFactory: YawnQueryFactory,
+            query: YawnQuery<T, T>,
+            lambda:
+            ProjectedTypeSafeCriteriaQuery<T, T, DEF, PROJECTION>.(tableDef: DEF) -> YawnQueryProjection<T, PROJECTION>,
+        ): ProjectedTypeSafeCriteriaBuilder<T, DEF, PROJECTION> {
+            val typeSafeCriteria = ProjectedTypeSafeCriteriaBuilder<T, DEF, PROJECTION>(tableDef, queryFactory, query)
+            typeSafeCriteria.applyFilter(lambda)
+            return typeSafeCriteria
+        }
+    }
 }

@@ -35,25 +35,25 @@ import com.squareup.kotlinpoet.ksp.toTypeName
  * ```
  */
 internal object ProjectionColumnDefGenerator : YawnPropertyGenerator() {
-  override val generatedType = YawnProjectionDef.ProjectionColumnDef::class
+    override val generatedType = YawnProjectionDef.ProjectionColumnDef::class
 
-  override fun generate(
-      yawnContext: YawnContext,
-      fieldName: String,
-      fieldType: KSType,
-      foreignKeyRef: ForeignKeyReference?, // always ignored
-  ): PropertySpec {
-    val parameters = listOf(
-        YawnParameter.string(fieldName), // in the example, "field"
-    )
-    val typeArguments = listOf(
-        fieldType.toTypeName(), // in the example, `Type`
-    )
-    return generatePropertySpec(
-        yawnContext,
-        fieldName,
-        parameters,
-        typeArguments,
-    )
-  }
+    override fun generate(
+        yawnContext: YawnContext,
+        fieldName: String,
+        fieldType: KSType,
+        foreignKeyRef: ForeignKeyReference?, // always ignored
+    ): PropertySpec {
+        val parameters = listOf(
+            YawnParameter.string(fieldName), // in the example, "field"
+        )
+        val typeArguments = listOf(
+            fieldType.toTypeName(), // in the example, `Type`
+        )
+        return generatePropertySpec(
+            yawnContext,
+            fieldName,
+            parameters,
+            typeArguments,
+        )
+    }
 }

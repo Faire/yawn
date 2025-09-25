@@ -39,47 +39,47 @@ import com.squareup.kotlinpoet.ksp.toClassName
  * ```
  */
 internal object JoinColumnDefWithForeignKeyGenerator : YawnPropertyGenerator() {
-  override val generatedType = YawnTableDef.JoinColumnDefWithForeignKey::class
+    override val generatedType = YawnTableDef.JoinColumnDefWithForeignKey::class
 
-  override fun generate(
-      yawnContext: YawnContext,
-      fieldName: String, // in this example, `foo`
-      fieldType: KSType, // in this example,  `DbFoo`
-      foreignKeyRef: ForeignKeyReference?, // pre-parsed info from the FK matching on the other side
-  ): PropertySpec {
-    checkNotNull(foreignKeyRef)
+    override fun generate(
+        yawnContext: YawnContext,
+        fieldName: String, // in this example, `foo`
+        fieldType: KSType, // in this example,  `DbFoo`
+        foreignKeyRef: ForeignKeyReference?, // pre-parsed info from the FK matching on the other side
+    ): PropertySpec {
+        checkNotNull(foreignKeyRef)
 
-    val fieldTypeClassName: ClassName = fieldType
-        .toClassName() // reference to DbFoo
-        // TODO(yawn): we should make JoinColumnDefWithCompositeKey null-aware;
-        //             check faire.link/yawn-nullability for more details.
-        .makeNonNullable()
+        val fieldTypeClassName: ClassName = fieldType
+            .toClassName() // reference to DbFoo
+            // TODO(yawn): we should make JoinColumnDefWithCompositeKey null-aware;
+            //             check faire.link/yawn-nullability for more details.
+            .makeNonNullable()
 
-    // reference to FooTableDef
-    val fieldYawnTableDef = tableDefForType(fieldTypeClassName)
+        // reference to FooTableDef
+        val fieldYawnTableDef = tableDefForType(fieldTypeClassName)
 
-    // These are the 3 type arguments that JoinColumnDefWithForeignKey takes:
-    val typeArguments = listOf(
-        // T = DbFoo
-        fieldTypeClassName,
-        // DEF = FooTableDef<SOURCE>
-        fieldYawnTableDef
-            .parameterizedBy(yawnContext.sourceTypeVariable),
-        // ID = Id<DbFoo>
-        foreignKeyRef.toTypeName(),
-    )
+        // These are the 3 type arguments that JoinColumnDefWithForeignKey takes:
+        val typeArguments = listOf(
+            // T = DbFoo
+            fieldTypeClassName,
+            // DEF = FooTableDef<SOURCE>
+            fieldYawnTableDef
+                .parameterizedBy(yawnContext.sourceTypeVariable),
+            // ID = Id<DbFoo>
+            foreignKeyRef.toTypeName(),
+        )
 
-    val parameters = listOf(
-        // tableDefParent = parent
-        YawnParameter.literal(PARENT_PARAMETER_NAME),
-        // name = "foo"
-        YawnParameter.string(fieldName),
-        // foreignKeyName = "id"
-        YawnParameter.string(foreignKeyRef.columnName),
-        // tableDefProvider = { FooTableDef(it) }
-        YawnParameter.simple("{ %T(it) }", fieldYawnTableDef),
-    )
+        val parameters = listOf(
+            // tableDefParent = parent
+            YawnParameter.literal(PARENT_PARAMETER_NAME),
+            // name = "foo"
+            YawnParameter.string(fieldName),
+            // foreignKeyName = "id"
+            YawnParameter.string(foreignKeyRef.columnName),
+            // tableDefProvider = { FooTableDef(it) }
+            YawnParameter.simple("{ %T(it) }", fieldYawnTableDef),
+        )
 
-    return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
-  }
+        return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
+    }
 }

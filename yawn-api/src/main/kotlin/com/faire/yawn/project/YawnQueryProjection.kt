@@ -12,11 +12,11 @@ import org.hibernate.criterion.Projection
  * @param TO the type being projected to
  */
 interface YawnQueryProjection<SOURCE : Any, TO> {
-  fun compile(context: YawnCompilationContext): Projection
+    fun compile(context: YawnCompilationContext): Projection
 
-  fun project(value: Any?): TO
+    fun project(value: Any?): TO
 
-  fun apply(context: YawnCompilationContext, criteria: Criteria) {
-    criteria.setProjection(compile(context))
-  }
+    fun apply(context: YawnCompilationContext, criteria: Criteria) {
+        criteria.setProjection(compile(context))
+    }
 }

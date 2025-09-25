@@ -3,20 +3,22 @@ insert_final_newline = true
 charset = utf-8
 end_of_line = lf
 indent_size = 4
-tab_width = 4
 indent_style = space
 max_line_length = 120
+tab_width = 4
+ij_continuation_indent_size = 4
 ij_formatter_off_tag = @formatter:off
 ij_formatter_on_tag = @formatter:on
 ij_formatter_tags_enabled = false
 ij_smart_tabs = false
-ij_visual_guides = 120
+ij_visual_guides = 160
 ij_wrap_on_typing = false
 
 [*.txt]
 insert_final_newline = false
 
 [*.java]
+ij_continuation_indent_size = 4
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
 ij_java_align_group_field_declarations = false
@@ -105,7 +107,7 @@ ij_java_for_statement_wrap = off
 ij_java_generate_final_locals = false
 ij_java_generate_final_parameters = false
 ij_java_if_brace_force = never
-ij_java_imports_layout = *,|,$*
+ij_java_imports_layout = *, |, $*
 ij_java_indent_case_from_switch = true
 ij_java_insert_inner_class_imports = false
 ij_java_insert_override_annotation = true

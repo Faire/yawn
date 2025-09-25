@@ -15,35 +15,35 @@ data class YawnQueryOrder<SOURCE : Any>(
     val direction: Direction,
     val nullPrecedence: NullPrecedence,
 ) {
-  /**
-   * Sort direction, either ascending or descending.
-   */
-  enum class Direction {
-    ASC,
-    DESC,
-  }
-
-  fun compile(context: YawnCompilationContext): Order {
-    val path = property.generatePath(context)
-    return when (direction) {
-      Direction.ASC -> Order.asc(path).nulls(nullPrecedence)
-      Direction.DESC -> Order.desc(path).nulls(nullPrecedence)
-    }
-  }
-
-  companion object {
-    fun <SOURCE : Any> asc(
-        property: YawnTableDef<SOURCE, *>.ColumnDef<*>,
-        nullPrecedence: NullPrecedence = NONE,
-    ): YawnQueryOrder<SOURCE> {
-      return YawnQueryOrder(property, Direction.ASC, nullPrecedence)
+    /**
+     * Sort direction, either ascending or descending.
+     */
+    enum class Direction {
+        ASC,
+        DESC,
     }
 
-    fun <SOURCE : Any> desc(
-        property: YawnTableDef<SOURCE, *>.ColumnDef<*>,
-        nullPrecedence: NullPrecedence = NONE,
-    ): YawnQueryOrder<SOURCE> {
-      return YawnQueryOrder(property, Direction.DESC, nullPrecedence)
+    fun compile(context: YawnCompilationContext): Order {
+        val path = property.generatePath(context)
+        return when (direction) {
+            Direction.ASC -> Order.asc(path).nulls(nullPrecedence)
+            Direction.DESC -> Order.desc(path).nulls(nullPrecedence)
+        }
     }
-  }
+
+    companion object {
+        fun <SOURCE : Any> asc(
+            property: YawnTableDef<SOURCE, *>.ColumnDef<*>,
+            nullPrecedence: NullPrecedence = NONE,
+        ): YawnQueryOrder<SOURCE> {
+            return YawnQueryOrder(property, Direction.ASC, nullPrecedence)
+        }
+
+        fun <SOURCE : Any> desc(
+            property: YawnTableDef<SOURCE, *>.ColumnDef<*>,
+            nullPrecedence: NullPrecedence = NONE,
+        ): YawnQueryOrder<SOURCE> {
+            return YawnQueryOrder(property, Direction.DESC, nullPrecedence)
+        }
+    }
 }

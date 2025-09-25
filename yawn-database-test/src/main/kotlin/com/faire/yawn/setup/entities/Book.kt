@@ -24,72 +24,72 @@ import javax.persistence.Version
 @Table(
     name = "books",
     indexes = [
-    Index(name = "idx_name", columnList = "name"),
-],
+        Index(name = "idx_name", columnList = "name"),
+    ],
 )
 @YawnEntity
 internal class Book : TimestampedEntity<Book>() {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  override lateinit var id: YawnId<Book>
-    protected set
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    override lateinit var id: YawnId<Book>
+        protected set
 
-  @Column
-  @Version
-  var version: Long = 0
+    @Column
+    @Version
+    var version: Long = 0
 
-  @Column
-  lateinit var name: String
+    @Column
+    lateinit var name: String
 
-  @ElementCollection(targetClass = Genre::class)
-  @CollectionTable(name = "book_genres", joinColumns = [JoinColumn(name = "book_id")])
-  @Column(name = "genre")
-  @Enumerated(EnumType.STRING)
-  var genres = setOf<Genre>()
+    @ElementCollection(targetClass = Genre::class)
+    @CollectionTable(name = "book_genres", joinColumns = [JoinColumn(name = "book_id")])
+    @Column(name = "genre")
+    @Enumerated(EnumType.STRING)
+    var genres = setOf<Genre>()
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  lateinit var author: Person
+    @ManyToOne(fetch = FetchType.LAZY)
+    lateinit var author: Person
 
-  @Column
-  lateinit var originalLanguage: Language
+    @Column
+    lateinit var originalLanguage: Language
 
-  @Column
-  var numberOfPages: Long = 0
+    @Column
+    var numberOfPages: Long = 0
 
-  @Column
-  var rating: Int? = null
+    @Column
+    var rating: Int? = null
 
-  @Column
-  var notes: String? = null
+    @Column
+    var notes: String? = null
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "publisher_id")
-  var publisher: Publisher? = null
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publisher_id")
+    var publisher: Publisher? = null
 
-  @Formula("publisher_id IS NOT NULL")
-  var hasPublisher: Boolean = false
-    protected set
+    @Formula("publisher_id IS NOT NULL")
+    var hasPublisher: Boolean = false
+        protected set
 
-  @Embedded
-  lateinit var sales: BookSales
+    @Embedded
+    lateinit var sales: BookSales
 
-  @Column
-  @SerializeAsJson
-  var bookMetadata: BookMetadata? = null
+    @Column
+    @SerializeAsJson
+    var bookMetadata: BookMetadata? = null
 
-  data class BookMetadata(
-      val publicationYear: Int,
-      val isbn: String,
-  )
+    data class BookMetadata(
+        val publicationYear: Int,
+        val isbn: String,
+    )
 
-  enum class Language {
-    DANISH,
-    ENGLISH,
-  }
+    enum class Language {
+        DANISH,
+        ENGLISH,
+    }
 
-  enum class Genre {
-    FANTASY,
-    FAIRY_TALE,
-    ADVENTURE,
-  }
+    enum class Genre {
+        FANTASY,
+        FAIRY_TALE,
+        ADVENTURE,
+    }
 }

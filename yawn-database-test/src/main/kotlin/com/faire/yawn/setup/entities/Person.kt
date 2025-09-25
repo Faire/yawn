@@ -18,31 +18,31 @@ import javax.persistence.Version
 @Table(name = "people")
 @YawnEntity
 internal class Person : TimestampedEntity<Person>(), PersonInterface {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  override lateinit var id: YawnId<Person>
-    protected set
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    override lateinit var id: YawnId<Person>
+        protected set
 
-  @Column
-  @Version
-  var version: Long = 0
+    @Column
+    @Version
+    var version: Long = 0
 
-  @Column
-  override lateinit var name: String
+    @Column
+    override lateinit var name: String
 
-  /**
-   * Test for custom adapter via [com.faire.yawn.setup.custom.EmailAddressConverter]
-   */
-  @Column
-  lateinit var email: EmailAddress
+    /**
+     * Test for custom adapter via [com.faire.yawn.setup.custom.EmailAddressConverter]
+     */
+    @Column
+    lateinit var email: EmailAddress
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  var favoriteBook: Book? = null
+    @ManyToOne(fetch = FetchType.LAZY)
+    var favoriteBook: Book? = null
 
-  @ManyToOne(fetch = FetchType.LAZY, targetEntity = Person::class)
-  @JoinColumn
-  var favoriteAuthor: PersonInterface? = null
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = Person::class)
+    @JoinColumn
+    var favoriteAuthor: PersonInterface? = null
 
-  @ManyToMany(mappedBy = "owners", fetch = FetchType.LAZY, targetEntity = Publisher::class)
-  var ownedPublishers: List<Publisher> = listOf()
+    @ManyToMany(mappedBy = "owners", fetch = FetchType.LAZY, targetEntity = Publisher::class)
+    var ownedPublishers: List<Publisher> = listOf()
 }

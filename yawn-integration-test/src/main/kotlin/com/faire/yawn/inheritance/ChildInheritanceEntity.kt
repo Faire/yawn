@@ -6,9 +6,9 @@ import javax.persistence.Column
 
 @YawnEntity
 internal class ChildInheritanceEntity : ParentInheritanceEntity(), InterfaceInheritanceEntity {
-  @Column
-  var childValue: String = ""
+    @Column
+    var childValue: String = ""
 
-  @Column
-  override var token: FakeToken<ChildInheritanceEntity> = FakeToken.generate()
+    @Column
+    override var token: FakeToken<ChildInheritanceEntity> = FakeToken.generate()
 }

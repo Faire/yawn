@@ -12,8 +12,8 @@ import com.squareup.kotlinpoet.TypeSpec
  * contain the properties of the embedded class.
  */
 internal interface YawnEmbeddableTypeGenerator {
-  fun generate(
-      yawnContext: YawnContext,
-      propertyDeclaration: KSPropertyDeclaration,
-  ): TypeSpec?
+    fun generate(
+        yawnContext: YawnContext,
+        propertyDeclaration: KSPropertyDeclaration,
+    ): TypeSpec?
 }

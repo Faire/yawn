@@ -26,12 +26,12 @@ class TypeSafeCriteriaQuery<SOURCE : Any, DEF : YawnTableDef<SOURCE, SOURCE>> pr
     TypeSafeCriteriaWithWhere<SOURCE, SOURCE> by TypeSafeCriteriaWithWhereDelegate(query),
     TypeSafeCriteriaWithJoin<SOURCE, SOURCE> by TypeSafeCriteriaWithJoinDelegate(query),
     TypeSafeCriteriaWithOrder<SOURCE, SOURCE> by TypeSafeCriteriaWithOrderDelegate(query) {
-  companion object {
-    internal fun <T : Any, DEF : YawnTableDef<T, T>> applyLambda(
-        query: YawnQuery<T, T>,
-        lambda: TypeSafeCriteriaQuery<T, DEF>.() -> Unit,
-    ): TypeSafeCriteriaQuery<T, DEF> {
-      return TypeSafeCriteriaQuery<T, DEF>(query).apply(lambda)
+    companion object {
+        internal fun <T : Any, DEF : YawnTableDef<T, T>> applyLambda(
+            query: YawnQuery<T, T>,
+            lambda: TypeSafeCriteriaQuery<T, DEF>.() -> Unit,
+        ): TypeSafeCriteriaQuery<T, DEF> {
+            return TypeSafeCriteriaQuery<T, DEF>(query).apply(lambda)
+        }
     }
-  }
 }

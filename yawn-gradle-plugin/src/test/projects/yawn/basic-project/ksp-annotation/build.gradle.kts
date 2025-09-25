@@ -1,7 +1,7 @@
 plugins {
-  kotlin("jvm")
+    kotlin("jvm")
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }

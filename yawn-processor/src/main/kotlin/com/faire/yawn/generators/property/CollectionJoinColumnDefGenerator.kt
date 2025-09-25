@@ -37,41 +37,41 @@ import com.squareup.kotlinpoet.ksp.toTypeName
  * ```
  */
 internal object CollectionJoinColumnDefGenerator : YawnPropertyGenerator() {
-  override val generatedType = YawnTableDef.CollectionJoinColumnDef::class
+    override val generatedType = YawnTableDef.CollectionJoinColumnDef::class
 
-  override fun generate(
-      yawnContext: YawnContext,
-      fieldName: String, // in this example, `oneToManyYawn`
-      fieldType: KSType, // in this example, `List<YawnEntityInAnotherPackage>`
-      foreignKeyRef: ForeignKeyReference?, // null
-  ): PropertySpec? {
-    check(foreignKeyRef == null)
+    override fun generate(
+        yawnContext: YawnContext,
+        fieldName: String, // in this example, `oneToManyYawn`
+        fieldType: KSType, // in this example, `List<YawnEntityInAnotherPackage>`
+        foreignKeyRef: ForeignKeyReference?, // null
+    ): PropertySpec? {
+        check(foreignKeyRef == null)
 
-    val genericType = fieldType.arguments.first().type!!.resolve() // reference to YawnEntityInAnotherPackage
-    if (!genericType.declaration.isYawnEntity()) {
-      return null
+        val genericType = fieldType.arguments.first().type!!.resolve() // reference to YawnEntityInAnotherPackage
+        if (!genericType.declaration.isYawnEntity()) {
+            return null
+        }
+
+        // reference to YawnEntityInAnotherPackageTableDef
+        val fieldYawnTableDef = tableDefForType(genericType.toClassName())
+
+        // These are the 2 type arguments that CollectionJoinColumnDef takes:
+        val typeArguments = listOf(
+            // T = YawnEntityInAnotherPackage
+            genericType.toTypeName(),
+            // DEF = YawnEntityInAnotherPackageTableDef<SOURCE>
+            fieldYawnTableDef.parameterizedBy(yawnContext.sourceTypeVariable),
+        )
+
+        val parameters = listOf(
+            // tableDefParent = parent
+            YawnParameter.literal(PARENT_PARAMETER_NAME),
+            // name = "oneToManyYawn"
+            YawnParameter.string(fieldName),
+            // tableDefProvider = { YawnEntityInAnotherPackageTableDef(it) }
+            YawnParameter.simple("{ %T(it) }", fieldYawnTableDef),
+        )
+
+        return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
     }
-
-    // reference to YawnEntityInAnotherPackageTableDef
-    val fieldYawnTableDef = tableDefForType(genericType.toClassName())
-
-    // These are the 2 type arguments that CollectionJoinColumnDef takes:
-    val typeArguments = listOf(
-        // T = YawnEntityInAnotherPackage
-        genericType.toTypeName(),
-        // DEF = YawnEntityInAnotherPackageTableDef<SOURCE>
-        fieldYawnTableDef.parameterizedBy(yawnContext.sourceTypeVariable),
-    )
-
-    val parameters = listOf(
-        // tableDefParent = parent
-        YawnParameter.literal(PARENT_PARAMETER_NAME),
-        // name = "oneToManyYawn"
-        YawnParameter.string(fieldName),
-        // tableDefProvider = { YawnEntityInAnotherPackageTableDef(it) }
-        YawnParameter.simple("{ %T(it) }", fieldYawnTableDef),
-    )
-
-    return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
-  }
 }

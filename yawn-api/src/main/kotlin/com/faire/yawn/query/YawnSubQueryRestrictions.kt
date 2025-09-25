@@ -28,138 +28,138 @@ import org.hibernate.criterion.Subqueries
  * Equivalent to Hibernate's [Subqueries].
  */
 object YawnSubQueryRestrictions {
-  // TODO(yawn): Decouple these from Hibernate
+    // TODO(yawn): Decouple these from Hibernate
 
-  fun <SOURCE : Any, F : Any?> eq(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(EqualsDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> eq(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(EqualsDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> ne(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(NotEqualsDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> ne(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(NotEqualsDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> gt(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(GreaterThanDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> gt(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> ge(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(GreaterThanOrEqualToDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> ge(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanOrEqualToDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> le(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(LessThanOrEqualToDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> le(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanOrEqualToDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> lt(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(LessThanDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> lt(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> `in`(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(InDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> `in`(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(InDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> notIn(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(NotInDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> notIn(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(NotInDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> exists(
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(ExistsDetached(detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> exists(
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(ExistsDetached(detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> notExists(
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(NotExistsDetached(detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> notExists(
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(NotExistsDetached(detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> eqAll(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(EqualsAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> eqAll(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(EqualsAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> geAll(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(GreaterThanOrEqualToAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> geAll(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanOrEqualToAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> geSome(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(GreaterThanOrEqualToSomeDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> geSome(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanOrEqualToSomeDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> gtAll(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(GreaterThanAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> gtAll(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> gtSome(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(GreaterThanSomeDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> gtSome(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanSomeDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> leAll(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(LessThanOrEqualToAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> leAll(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanOrEqualToAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> leSome(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(LessThanOrEqualToSomeDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> leSome(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanOrEqualToSomeDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> ltAll(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(LessThanAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> ltAll(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanAllDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  fun <SOURCE : Any, F : Any?> ltSome(
-      column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-      detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
-  ): YawnQueryCriterion<SOURCE> {
-    return YawnQueryCriterion(LessThanSomeDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
-  }
+    fun <SOURCE : Any, F : Any?> ltSome(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanSomeDetached(column, detachedProjectedTypeSafeCriteriaBuilder))
+    }
 
-  // TODO(yawn): Support properties... functions using a data class projection
+    // TODO(yawn): Support properties... functions using a data class projection
 }

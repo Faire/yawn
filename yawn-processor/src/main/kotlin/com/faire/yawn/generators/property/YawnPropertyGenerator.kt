@@ -10,9 +10,6 @@ import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
-import kotlin.collections.flatMap
-import kotlin.collections.joinToString
-import kotlin.collections.toTypedArray
 import kotlin.reflect.KClass
 
 /**
@@ -35,65 +32,65 @@ import kotlin.reflect.KClass
  * To be used when constructing the meta-definition classes.
  */
 internal abstract class YawnPropertyGenerator {
-  protected abstract val generatedType: KClass<*>
+    protected abstract val generatedType: KClass<*>
 
-  private val generatedTypeName
-    get() = generatedType.simpleName!!
+    private val generatedTypeName
+        get() = generatedType.simpleName!!
 
-  fun generate(
-      yawnContext: YawnContext,
-      property: KSPropertyDeclaration,
-      foreignKeyRef: ForeignKeyReference? = null,
-  ): PropertySpec? {
-    return generate(
-        yawnContext = yawnContext,
-        fieldName = property.simpleName.asString(),
-        fieldType = property.resolveTargetType(),
-        foreignKeyRef = foreignKeyRef,
-    )
-  }
+    fun generate(
+        yawnContext: YawnContext,
+        property: KSPropertyDeclaration,
+        foreignKeyRef: ForeignKeyReference? = null,
+    ): PropertySpec? {
+        return generate(
+            yawnContext = yawnContext,
+            fieldName = property.simpleName.asString(),
+            fieldType = property.resolveTargetType(),
+            foreignKeyRef = foreignKeyRef,
+        )
+    }
 
-  abstract fun generate(
-      yawnContext: YawnContext,
-      fieldName: String,
-      fieldType: KSType,
-      foreignKeyRef: ForeignKeyReference?,
-  ): PropertySpec?
+    abstract fun generate(
+        yawnContext: YawnContext,
+        fieldName: String,
+        fieldType: KSType,
+        foreignKeyRef: ForeignKeyReference?,
+    ): PropertySpec?
 
-  protected fun tableDefForType(type: ClassName): ClassName {
-    return ClassName(
-        type.packageName,
-        generateTableDefClassName(type),
-    )
-  }
+    protected fun tableDefForType(type: ClassName): ClassName {
+        return ClassName(
+            type.packageName,
+            generateTableDefClassName(type),
+        )
+    }
 
-  /**
-   * Builds a property following the template:
-   *
-   * ```
-   *    val fieldName: Type<typeArguments...> = Type(parameters...)
-   * ```
-   *
-   * The type is controlled by the `generatedType` property.
-   * This makes sure that types are properly imported and correctly referenced.
-   */
-  protected fun generatePropertySpec(
-      yawnContext: YawnContext,
-      fieldName: String,
-      parameters: List<YawnParameter>,
-      typeArguments: List<TypeName> = listOf(),
-  ): PropertySpec {
-    val fieldType = yawnContext.superClassName.nestedClass(generatedTypeName, typeArguments)
+    /**
+     * Builds a property following the template:
+     *
+     * ```
+     *    val fieldName: Type<typeArguments...> = Type(parameters...)
+     * ```
+     *
+     * The type is controlled by the `generatedType` property.
+     * This makes sure that types are properly imported and correctly referenced.
+     */
+    protected fun generatePropertySpec(
+        yawnContext: YawnContext,
+        fieldName: String,
+        parameters: List<YawnParameter>,
+        typeArguments: List<TypeName> = listOf(),
+    ): PropertySpec {
+        val fieldType = yawnContext.superClassName.nestedClass(generatedTypeName, typeArguments)
 
-    val parameterFormats = parameters.joinToString(", ") { it.format }
-    val parameterValues = parameters.flatMap { it.arguments }
+        val parameterFormats = parameters.joinToString(", ") { it.format }
+        val parameterValues = parameters.flatMap { it.arguments }
 
-    return PropertySpec.builder(
-        fieldName,
-        fieldType,
-    ).initializer(
-        "$generatedTypeName($parameterFormats)",
-        *parameterValues.toTypedArray(),
-    ).build()
-  }
+        return PropertySpec.builder(
+            fieldName,
+            fieldType,
+        ).initializer(
+            "$generatedTypeName($parameterFormats)",
+            *parameterValues.toTypedArray(),
+        ).build()
+    }
 }

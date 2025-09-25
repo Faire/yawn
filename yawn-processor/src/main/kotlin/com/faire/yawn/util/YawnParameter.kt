@@ -8,17 +8,17 @@ internal data class YawnParameter(
     val format: String, // %N, %S, %T, etc., or combinations thereof
     val arguments: List<Any> = listOf(),
 ) {
-  companion object {
-    fun simple(format: String, value: Any): YawnParameter {
-      return YawnParameter(format, listOf(value))
-    }
+    companion object {
+        fun simple(format: String, value: Any): YawnParameter {
+            return YawnParameter(format, listOf(value))
+        }
 
-    fun literal(value: String): YawnParameter {
-      return simple("%N", value)
-    }
+        fun literal(value: String): YawnParameter {
+            return simple("%N", value)
+        }
 
-    fun string(value: String): YawnParameter {
-      return simple("%S", value)
+        fun string(value: String): YawnParameter {
+            return simple("%S", value)
+        }
     }
-  }
 }
