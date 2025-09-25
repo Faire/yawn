@@ -1,4 +1,5 @@
 plugins {
+    id("yawn.gradle-plugin")
     `kotlin-dsl`
 }
 

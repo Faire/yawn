@@ -1,4 +1,5 @@
 plugins {
+    id("yawn.kotlin")
     id("com.google.devtools.ksp")
 }
 

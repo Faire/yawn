@@ -1,3 +1,7 @@
+plugins {
+    id("yawn.library")
+}
+
 dependencies {
     api(libs.kotlin.stdlib)
     api(libs.hibernate.core)
