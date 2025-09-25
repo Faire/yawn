@@ -4,7 +4,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     id("org.jetbrains.dokka")
-    id("com.vanniktech.maven.publish")
 }
 
 group = "com.faire.yawn"
