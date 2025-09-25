@@ -9,4 +9,5 @@ dependencies {
     implementation(libs.jetbrains.dokka)
     implementation(libs.kotlin.gradle.plugin)
     implementation(libs.vanniktech.maven.publish)
+    implementation(libs.detekt.gradle.plugin)
 }

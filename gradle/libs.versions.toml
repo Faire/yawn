@@ -14,6 +14,8 @@ assertj = "3.26.3"
 junit-jupiter = "5.11.3"
 junit-platform = "1.11.3"
 vanniktech = "0.34.0"
+faire-detekt-rules = "0.5.3"
+detekt = "1.23.8"
 
 [libraries]
 # Kotlin
@@ -56,9 +58,13 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 
 navatwo-gradle-better-testing-junit5 = { module = "net.navatwo.gradle:gradle-plugin-better-testing-junit5", version.ref = "gradle-better-testing" }
 navatwo-gradle-better-testing-asserts = { module = "net.navatwo.gradle:gradle-plugin-better-testing-assertj-asserts", version.ref = "gradle-better-testing" }
+faire-detekt-rules = { module = "com.faire:faire-detekt-rules", version.ref = "faire-detekt-rules" }
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
