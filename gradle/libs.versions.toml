@@ -5,6 +5,7 @@ dokka = "1.9.20"
 hibernate = "5.6.15.Final"
 javax-persistence = "2.2"
 google-auto-service = "1.1.1"
+gradle-better-testing = "0.0.6"
 zacsweers-autoservice = "1.2.0"
 gson = "2.11.0"
 guice = "7.0.0"
@@ -18,6 +19,12 @@ vanniktech = "0.34.0"
 # Kotlin
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+
+# Build
+
+vanniktech-maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "vanniktech" }
+jetbrains-dokka = { module = "org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin", version.ref = "dokka" }
 
 # Hibernate
 # KSP
@@ -46,6 +53,9 @@ assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+
+navatwo-gradle-better-testing-junit5 = { module = "net.navatwo.gradle:gradle-plugin-better-testing-junit5", version.ref = "gradle-better-testing" }
+navatwo-gradle-better-testing-asserts = { module = "net.navatwo.gradle:gradle-plugin-better-testing-assertj-asserts", version.ref = "gradle-better-testing" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

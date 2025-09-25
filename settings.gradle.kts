@@ -7,7 +7,8 @@ rootProject.name = "yawn"
 
 include(
     "yawn-api",
-    "yawn-processor", 
     "yawn-database-test",
-    "yawn-integration-test"
+    "yawn-gradle-plugin",
+    "yawn-processor",
+    "yawn-integration-test",
 )
