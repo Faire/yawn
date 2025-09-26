@@ -1,4 +1,4 @@
-package com.faire.yawn.generators.property
+package com.faire.yawn.generators.properties
 
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.processors.BaseYawnProcessor.Companion.PARENT_PARAMETER_NAME

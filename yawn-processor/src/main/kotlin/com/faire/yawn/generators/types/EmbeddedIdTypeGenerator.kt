@@ -1,4 +1,4 @@
-package com.faire.yawn.generators.type
+package com.faire.yawn.generators.types
 
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.util.YawnContext
@@ -47,7 +47,7 @@ import com.squareup.kotlinpoet.TypeSpec
  * Note that the class takes in an optional `_yawnPath` parameter. This will not be set by the main reference on
  * this class, but rather to allow for foreign keys using this composite id on other classes.
  *
- * A column definition will be generated using [com.faire.yawn.generators.property.EmbeddedIdDefGenerator] using this
+ * A column definition will be generated using [com.faire.yawn.generators.properties.EmbeddedIdDefGenerator] using this
  * type.
  */
 internal object EmbeddedIdTypeGenerator : YawnEmbeddableTypeGenerator {

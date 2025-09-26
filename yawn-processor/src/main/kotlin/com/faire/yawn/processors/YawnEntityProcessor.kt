@@ -3,17 +3,17 @@ package com.faire.yawn.processors
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnEntity
 import com.faire.yawn.YawnTableDef
-import com.faire.yawn.generators.`object`.YawnTableRefObjectGenerator
-import com.faire.yawn.generators.property.CollectionJoinColumnDefGenerator
-import com.faire.yawn.generators.property.ColumnDefGenerator
-import com.faire.yawn.generators.property.ElementCollectionColumnDefGenerator
-import com.faire.yawn.generators.property.EmbeddedDefGenerator
-import com.faire.yawn.generators.property.EmbeddedIdDefGenerator
-import com.faire.yawn.generators.property.JoinColumnDefGenerator
-import com.faire.yawn.generators.property.JoinColumnDefWithCompositeKeyGenerator
-import com.faire.yawn.generators.property.JoinColumnDefWithForeignKeyGenerator
-import com.faire.yawn.generators.type.EmbeddedIdTypeGenerator
-import com.faire.yawn.generators.type.EmbeddedTypeGenerator
+import com.faire.yawn.generators.objects.YawnTableRefObjectGenerator
+import com.faire.yawn.generators.properties.CollectionJoinColumnDefGenerator
+import com.faire.yawn.generators.properties.ColumnDefGenerator
+import com.faire.yawn.generators.properties.ElementCollectionColumnDefGenerator
+import com.faire.yawn.generators.properties.EmbeddedDefGenerator
+import com.faire.yawn.generators.properties.EmbeddedIdDefGenerator
+import com.faire.yawn.generators.properties.JoinColumnDefGenerator
+import com.faire.yawn.generators.properties.JoinColumnDefWithCompositeKeyGenerator
+import com.faire.yawn.generators.properties.JoinColumnDefWithForeignKeyGenerator
+import com.faire.yawn.generators.types.EmbeddedIdTypeGenerator
+import com.faire.yawn.generators.types.EmbeddedTypeGenerator
 import com.faire.yawn.util.YawnContext
 import com.faire.yawn.util.YawnNamesGenerator.generateTableDefClassName
 import com.faire.yawn.util.getHibernateForeignKeyReference
@@ -61,7 +61,7 @@ internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProce
         val generator = when {
             property.isTransient() -> null
 
-            (property.isOneToOneJoin() || property.isManyToOneJoin()) -> {
+            property.isOneToOneJoin() || property.isManyToOneJoin() -> {
                 when {
                     !property.isYawnEntity() -> ColumnDefGenerator
                     foreignKeyRef == null -> JoinColumnDefGenerator
@@ -70,7 +70,7 @@ internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProce
                 }
             }
 
-            (property.isOneToManyJoin() || property.isManyToManyJoin()) -> CollectionJoinColumnDefGenerator
+            property.isOneToManyJoin() || property.isManyToManyJoin() -> CollectionJoinColumnDefGenerator
             property.isEmbeddedId() -> EmbeddedIdDefGenerator
             property.isEmbedded() -> EmbeddedDefGenerator
             property.isElementCollection() -> ElementCollectionColumnDefGenerator

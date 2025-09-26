@@ -1,4 +1,4 @@
-package com.faire.yawn.generators.property
+package com.faire.yawn.generators.properties
 
 import com.faire.yawn.project.YawnProjectionDef
 import com.faire.yawn.util.ForeignKeyReference

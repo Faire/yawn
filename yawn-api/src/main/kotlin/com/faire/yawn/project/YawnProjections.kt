@@ -213,7 +213,7 @@ object YawnProjections {
         ): Projection = projection.compile(context)
 
         @Suppress("UNCHECKED_CAST")
-        override fun project(value: Any?): FROM = (value as FROM?) ?: defaultValue
+        override fun project(value: Any?): FROM = value as FROM? ?: defaultValue
     }
 
     fun <SOURCE : Any, FROM : Any> coalesce(

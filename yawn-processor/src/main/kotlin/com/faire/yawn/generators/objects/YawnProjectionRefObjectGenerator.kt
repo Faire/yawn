@@ -1,4 +1,4 @@
-package com.faire.yawn.generators.`object`
+package com.faire.yawn.generators.objects
 
 import com.faire.ksp.getEffectiveVisibility
 import com.faire.yawn.generators.addGeneratedAnnotation

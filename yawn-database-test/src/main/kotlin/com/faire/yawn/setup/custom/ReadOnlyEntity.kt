@@ -12,16 +12,16 @@ import javax.persistence.PreUpdate
 internal class ReadOnlyEntity {
     @PrePersist
     fun onPrePersist(entity: Any?) {
-        throw IllegalStateException("Attempting to persist a read-only entity of type ${entity?.javaClass}.")
+        error("Attempting to persist a read-only entity of type ${entity?.javaClass}.")
     }
 
     @PreUpdate
     fun onPreUpdate(entity: Any?) {
-        throw IllegalStateException("Attempting to update a read-only entity of type ${entity?.javaClass}.")
+        error("Attempting to update a read-only entity of type ${entity?.javaClass}.")
     }
 
     @PreRemove
     fun onPreRemove(entity: Any?) {
-        throw IllegalStateException("Attempting to remove a read-only entity of type ${entity?.javaClass}.")
+        error("Attempting to remove a read-only entity of type ${entity?.javaClass}.")
     }
 }

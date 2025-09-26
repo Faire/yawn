@@ -219,14 +219,18 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
             }
 
             // All null
-            assertThat(getSumRatingsByLanguage("J.K. Rowling")).containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to null))
+            assertThat(
+                getSumRatingsByLanguage("J.K. Rowling"),
+            ).containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to null))
 
             // Mixed null and non-null, nulls are ignored
             assertThat(getSumRatingsByLanguage("J.K. Rowling", "J.R.R. Tolkien"))
                 .containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to 19))
 
             // All non-null
-            assertThat(getSumRatingsByLanguage("J.R.R. Tolkien")).containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to 19))
+            assertThat(
+                getSumRatingsByLanguage("J.R.R. Tolkien"),
+            ).containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to 19))
         }
     }
 
@@ -273,14 +277,18 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
             }
 
             // All null
-            assertThat(getAvgRatingsByLanguage("J.K. Rowling")).containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to null))
+            assertThat(
+                getAvgRatingsByLanguage("J.K. Rowling"),
+            ).containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to null))
 
             // Mixed null and non-null, nulls are ignored
             assertThat(getAvgRatingsByLanguage("J.K. Rowling", "J.R.R. Tolkien"))
                 .containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to 9.5))
 
             // All non-null
-            assertThat(getAvgRatingsByLanguage("J.R.R. Tolkien")).containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to 9.5))
+            assertThat(
+                getAvgRatingsByLanguage("J.R.R. Tolkien"),
+            ).containsExactlyInAnyOrderEntriesOf(mapOf(ENGLISH to 9.5))
         }
     }
 
