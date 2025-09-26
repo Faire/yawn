@@ -740,7 +740,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
                     .applyFilter { books -> addEq(books.name, "The Hobbit") }
                     .uniqueResult()!!
             }
-                .rootCause
+                .rootCause()
                 .isInstanceOf(SQLException::class.java)
                 .hasMessageStartingWith("Index \"idx_INVALID\" not found;")
         }
