@@ -180,7 +180,7 @@ internal class BookFixtures(
         transactor.open { session -> Context(session).setup() }
     }
 
-    private inner class Context(
+    private class Context(
         private val session: YawnTestSession,
     ) {
         fun createPerson(setup: Person.() -> Unit): Person {

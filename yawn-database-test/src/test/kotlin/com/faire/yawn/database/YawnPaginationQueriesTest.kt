@@ -76,7 +76,7 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
                         ),
                         uniqueColumn = { id },
                     )
-                    .let { it.first to it.second.map { it.name } }
+                    .let { (count, results) -> count to results.map { it.name } }
             }
 
             val (total1, books1) = paginate(pageNumber = 0)
@@ -127,9 +127,7 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
                 .listPaginatedWithTotalResultsZeroIndexed(
                     pageNumber = 1,
                     pageSize = 2,
-                    orders = listOf(
-                        { YawnQueryOrder.desc(name) },
-                    ),
+                    orders = listOf { YawnQueryOrder.desc(name) },
                     uniqueColumn = { id },
                 )
 

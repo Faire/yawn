@@ -10,7 +10,7 @@ import com.faire.yawn.query.YawnSubQueryRestrictions
 import org.hibernate.criterion.MatchMode
 
 /**
- * A type-safe Yawn queries DSL that supports where filters (addEq, etc).
+ * A type-safe Yawn queries DSL that supports where filters (addEq, etc.).
  * This serves for all implementations of [BaseTypeSafeCriteriaQuery] (just extracted for organization).
  */
 sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {

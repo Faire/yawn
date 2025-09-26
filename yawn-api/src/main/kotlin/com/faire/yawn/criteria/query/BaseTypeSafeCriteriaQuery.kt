@@ -11,7 +11,7 @@ import com.faire.yawn.query.YawnQuery
  * An abstract super-class for all type-safe Yawn queries DSL; not be used directly.
  *
  * This breaks down into the following:
- * * [BaseTypeSafeCriteriaQuery], everyone inherits, includes the general filter methods (addEq, etc)
+ * * [BaseTypeSafeCriteriaQuery], everyone inherits, includes the general filter methods (addEq, etc.)
  * * [TypeSafeCriteriaQuery], the most common case, adds the join methods
  * * [ProjectedTypeSafeCriteriaQuery], for defining projections, adds the project methods
  * * [ProjectionTypeSafeCriteriaQuery], for further refine define projections, no additions

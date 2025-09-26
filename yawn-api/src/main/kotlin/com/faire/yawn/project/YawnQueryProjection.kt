@@ -5,7 +5,7 @@ import org.hibernate.Criteria
 import org.hibernate.criterion.Projection
 
 /**
- * Return type of a call to a `project` method.
+ * Return-type of a call to a `project` method.
  * This is what the Query DSL expects to be returned from the lambda.
  *
  * @param SOURCE the type of the original table that the criteria is based off of.

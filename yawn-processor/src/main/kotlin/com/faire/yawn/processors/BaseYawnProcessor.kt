@@ -136,7 +136,7 @@ internal abstract class BaseYawnProcessor(
         const val PARENT_PARAMETER_NAME = "parent"
         val parentType = YawnTableDefParent::class.asTypeName()
 
-        private val nullableParentParameter = ParameterSpec.Companion.builder(
+        private val nullableParentParameter = ParameterSpec.builder(
             PARENT_PARAMETER_NAME,
             parentType,
         ).build()

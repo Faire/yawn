@@ -22,7 +22,7 @@ dependencies {
  *
  * @see com.faire.gradle.test.PluginTestClasspathLoader
  */
-val testProjectPluginClasspath by configurations.creating {
+val testProjectPluginClasspath: Configuration by configurations.creating {
     isCanBeConsumed = false
     isCanBeResolved = true
 }

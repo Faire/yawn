@@ -13,7 +13,7 @@ import com.squareup.kotlinpoet.ksp.toClassName
 /**
  * This generates a meta-property using the "raw" [com.faire.yawn.YawnTableDef.JoinColumnDef] class.
  * Note that this class is ONLY used when a matching foreign key can not be found on the other side; this either
- * means a Hibernate issue or a Yawn issue. As examples we have entities without `@Id` columns, which would not
+ * means a Hibernate issue or a Yawn issue. As examples, we have entities without `@Id` columns, which would not
  * be allowed by Hibernate.
  *
  * For example, for a given:
