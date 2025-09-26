@@ -28,12 +28,10 @@ kotlin {
     jvmToolchain {
         languageVersion = javaVersionText.map { JavaLanguageVersion.of(it) }
     }
-}
-
-tasks.withType<KotlinCompile> {
     compilerOptions {
         jvmTarget = javaVersionText.map { JvmTarget.fromTarget(it) }
         freeCompilerArgs.add("-Xjsr305=strict")
+        allWarningsAsErrors.set(true)
     }
 }
 

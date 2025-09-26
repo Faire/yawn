@@ -14,10 +14,12 @@ internal class YawnTestQueryFactory(
     override fun <T : Any> compile(query: YawnQuery<*, T>, tableDef: YawnTableDef<*, *>): CompiledYawnQuery<T> {
         val context = YawnCompilationContext.fromQuery(query)
 
-        @Suppress("UNCHECKED_CAST", "ReplaceCreateCriteriaWithCreateYawnCriteria")
-        val rawQuery = context.generateAlias(tableDef)?.let { rootAlias ->
-            session.createCriteria(query.clazz, rootAlias)
-        } ?: session.createCriteria(query.clazz)
+        val rawQuery = context.generateAlias(tableDef)
+            ?.let { rootAlias ->
+                @Suppress("DEPRECATION")
+                session.createCriteria(query.clazz, rootAlias)
+            } ?: @Suppress("DEPRECATION")
+        session.createCriteria(query.clazz)
 
         for (hint in query.queryHints) {
             rawQuery.addQueryHint(hint.hint)
