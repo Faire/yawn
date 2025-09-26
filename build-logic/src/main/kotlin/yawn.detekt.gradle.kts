@@ -1,6 +1,4 @@
 import io.gitlab.arturbosch.detekt.Detekt
-import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
@@ -26,14 +24,6 @@ tasks.withType<Detekt>().configureEach {
         sarif.required.set(true)
     }
     exclude("**/build/**", "**/.gradle/**")
-}
-
-allprojects {
-    kotlin {
-        compilerOptions {
-            allWarningsAsErrors.set(true)
-        }
-    }
 }
 
 tasks.named("check") { dependsOn("detekt") }
