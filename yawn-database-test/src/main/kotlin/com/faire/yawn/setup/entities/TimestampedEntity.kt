@@ -6,11 +6,11 @@ import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
 internal abstract class TimestampedEntity<T : Any> : BaseEntity<T> {
-  @Column(updatable = false)
-  lateinit var createdAt: Instant
+    @Column(updatable = false)
+    lateinit var createdAt: Instant
 
-  @Column
-  lateinit var updatedAt: Instant
+    @Column
+    lateinit var updatedAt: Instant
 
-  internal fun isCreatedAtInitialized(): Boolean = this::createdAt.isInitialized
+    internal fun isCreatedAtInitialized(): Boolean = this::createdAt.isInitialized
 }

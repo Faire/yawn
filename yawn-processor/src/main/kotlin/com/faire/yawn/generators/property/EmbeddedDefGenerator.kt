@@ -28,23 +28,23 @@ import com.squareup.kotlinpoet.ksp.toClassName
  * Note that `FooDef` extends [YawnTableDef.EmbeddedDef].
  */
 internal object EmbeddedDefGenerator : YawnPropertyGenerator() {
-  override val generatedType = YawnTableDef.EmbeddedDef::class
+    override val generatedType = YawnTableDef.EmbeddedDef::class
 
-  override fun generate(
-      yawnContext: YawnContext,
-      fieldName: String, // in this example, `foo`
-      fieldType: KSType, // in this example, `Foo`
-      foreignKeyRef: ForeignKeyReference?, // always null
-  ): PropertySpec {
-    check(foreignKeyRef == null)
+    override fun generate(
+        yawnContext: YawnContext,
+        fieldName: String, // in this example, `foo`
+        fieldType: KSType, // in this example, `Foo`
+        foreignKeyRef: ForeignKeyReference?, // always null
+    ): PropertySpec {
+        check(foreignKeyRef == null)
 
-    // in this example, `FooDef`
-    val typeName = yawnContext.newClassName
-        .nestedClass(generateEmbeddedDefClassName(fieldType.toClassName()))
+        // in this example, `FooDef`
+        val typeName = yawnContext.newClassName
+            .nestedClass(generateEmbeddedDefClassName(fieldType.toClassName()))
 
-    // val foo: FooDef = FooDef()
-    return PropertySpec.builder(fieldName, typeName)
-        .initializer("%T()", typeName)
-        .build()
-  }
+        // val foo: FooDef = FooDef()
+        return PropertySpec.builder(fieldName, typeName)
+            .initializer("%T()", typeName)
+            .build()
+    }
 }

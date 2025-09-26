@@ -4,7 +4,7 @@ import javax.persistence.Embedded
 
 @YawnEntity
 internal class EntityWithEmbeddedProperties {
-  @Embedded
-  lateinit var embedded: EmbeddableEntity
-    private set
+    @Embedded
+    lateinit var embedded: EmbeddableEntity
+        private set
 }

@@ -41,38 +41,38 @@ import com.squareup.kotlinpoet.ksp.toClassName
  * by Hibernate.
  */
 internal object JoinColumnDefGenerator : YawnPropertyGenerator() {
-  override val generatedType = YawnTableDef.JoinColumnDef::class
+    override val generatedType = YawnTableDef.JoinColumnDef::class
 
-  override fun generate(
-      yawnContext: YawnContext,
-      fieldName: String, // in this example, `nullableOneToOneYawn`
-      fieldType: KSType, // in this example, `YawnEntityInAnotherPackage?`
-      foreignKeyRef: ForeignKeyReference?,
-  ): PropertySpec {
-    check(foreignKeyRef == null)
+    override fun generate(
+        yawnContext: YawnContext,
+        fieldName: String, // in this example, `nullableOneToOneYawn`
+        fieldType: KSType, // in this example, `YawnEntityInAnotherPackage?`
+        foreignKeyRef: ForeignKeyReference?,
+    ): PropertySpec {
+        check(foreignKeyRef == null)
 
-    val fieldTypeClassName = fieldType.toClassName() // reference to YawnEntityInAnotherPackage
+        val fieldTypeClassName = fieldType.toClassName() // reference to YawnEntityInAnotherPackage
 
-    // reference to YawnEntityInAnotherPackageTableDef
-    val fieldYawnTableDef = tableDefForType(fieldTypeClassName)
+        // reference to YawnEntityInAnotherPackageTableDef
+        val fieldYawnTableDef = tableDefForType(fieldTypeClassName)
 
-    // These are the 2 type arguments that JoinColumnDef takes:
-    val typeArguments = listOf(
-        // T = YawnEntityInAnotherPackage
-        fieldTypeClassName,
-        // DEF = YawnEntityInAnotherPackageTableDef<SOURCE>
-        fieldYawnTableDef.parameterizedBy(yawnContext.sourceTypeVariable),
-    )
+        // These are the 2 type arguments that JoinColumnDef takes:
+        val typeArguments = listOf(
+            // T = YawnEntityInAnotherPackage
+            fieldTypeClassName,
+            // DEF = YawnEntityInAnotherPackageTableDef<SOURCE>
+            fieldYawnTableDef.parameterizedBy(yawnContext.sourceTypeVariable),
+        )
 
-    val parameters = listOf(
-        // tableDefParent = parent
-        YawnParameter.literal(PARENT_PARAMETER_NAME),
-        // name = "nullableOneToOneYawn"
-        YawnParameter.string(fieldName),
-        // tableDefProvider = { YawnEntityInAnotherPackageTableDef(it) }
-        YawnParameter.simple("{ %T(it) }", fieldYawnTableDef),
-    )
+        val parameters = listOf(
+            // tableDefParent = parent
+            YawnParameter.literal(PARENT_PARAMETER_NAME),
+            // name = "nullableOneToOneYawn"
+            YawnParameter.string(fieldName),
+            // tableDefProvider = { YawnEntityInAnotherPackageTableDef(it) }
+            YawnParameter.simple("{ %T(it) }", fieldYawnTableDef),
+        )
 
-    return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
-  }
+        return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
+    }
 }

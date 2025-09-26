@@ -51,14 +51,14 @@ import com.squareup.kotlinpoet.TypeSpec
  * type.
  */
 internal object EmbeddedIdTypeGenerator : YawnEmbeddableTypeGenerator {
-  private val superClassType = YawnTableDef.EmbeddedDef::class
-  private val superClassTypeName = superClassType.simpleName!!
+    private val superClassType = YawnTableDef.EmbeddedDef::class
+    private val superClassTypeName = superClassType.simpleName!!
 
-  override fun generate(
-      yawnContext: YawnContext,
-      /** This will be the property `var cid: FooCompositeId` from the example above */
-      propertyDeclaration: KSPropertyDeclaration,
-  ): TypeSpec {
-    return EmbeddedTypeGenerator.generate(yawnContext, propertyDeclaration, superClassTypeName)
-  }
+    override fun generate(
+        yawnContext: YawnContext,
+        /** This will be the property `var cid: FooCompositeId` from the example above */
+        propertyDeclaration: KSPropertyDeclaration,
+    ): TypeSpec {
+        return EmbeddedTypeGenerator.generate(yawnContext, propertyDeclaration, superClassTypeName)
+    }
 }

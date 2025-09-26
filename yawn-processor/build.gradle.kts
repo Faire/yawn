@@ -14,11 +14,11 @@ dependencies {
 
     // KSP dependencies for the processor itself
     implementation("com.google.devtools.ksp:symbol-processing-api:2.0.21-1.0.27")
-    
+
     // KotlinPoet for code generation
     implementation("com.squareup:kotlinpoet:1.18.1")
     implementation("com.squareup:kotlinpoet-ksp:1.18.1")
-    
+
     // Additional KSP utilities (might provide missing extension functions)
     implementation("com.google.devtools.ksp:symbol-processing-common-deps:2.0.21-1.0.27")
 }

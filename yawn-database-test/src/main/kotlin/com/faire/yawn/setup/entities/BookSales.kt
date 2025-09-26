@@ -5,30 +5,30 @@ import javax.persistence.Embeddable
 
 @Embeddable
 internal class BookSales {
-  @Column
-  var paperBacksSold: Long = 0
+    @Column
+    var paperBacksSold: Long = 0
 
-  @Column
-  var hardBacksSold: Long = 0
+    @Column
+    var hardBacksSold: Long = 0
 
-  @Column
-  var eBooksSold: Long = 0
+    @Column
+    var eBooksSold: Long = 0
 
-  @Column
-  var countryWithMostCopiesSold: String = ""
+    @Column
+    var countryWithMostCopiesSold: String = ""
 
-  // Default no-argument constructor required by Hibernate
-  constructor()
+    // Default no-argument constructor required by Hibernate
+    constructor()
 
-  constructor(
-      paperBacksSold: Long = 0,
-      hardBacksSold: Long = 0,
-      eBooksSold: Long = 0,
-      countryWithMostCopiesSold: String = "",
-  ) {
-    this.paperBacksSold = paperBacksSold
-    this.hardBacksSold = hardBacksSold
-    this.eBooksSold = eBooksSold
-    this.countryWithMostCopiesSold = countryWithMostCopiesSold
-  }
+    constructor(
+        paperBacksSold: Long = 0,
+        hardBacksSold: Long = 0,
+        eBooksSold: Long = 0,
+        countryWithMostCopiesSold: String = "",
+    ) {
+        this.paperBacksSold = paperBacksSold
+        this.hardBacksSold = hardBacksSold
+        this.eBooksSold = eBooksSold
+        this.countryWithMostCopiesSold = countryWithMostCopiesSold
+    }
 }

@@ -16,16 +16,16 @@ class ProjectionTypeSafeCriteriaQuery<T : Any, DEF : YawnProjectionDef<T, T>> pr
 ) : BaseTypeSafeCriteriaQuery<T, T, DEF>(query),
     TypeSafeCriteriaWithWhere<T, T> by TypeSafeCriteriaWithWhereDelegate(query),
     TypeSafeCriteriaWithOrder<T, T> by TypeSafeCriteriaWithOrderDelegate(query) {
-  companion object {
-    @Suppress("unused")
-    fun <T : Any, DEF : YawnProjectionDef<T, T>> create(
-        tableDef: DEF,
-        query: YawnQuery<T, T>,
-        lambda: ProjectionTypeSafeCriteriaQuery<T, DEF>.(tableDef: DEF) -> Unit,
-    ): ProjectionTypeSafeCriteriaQuery<T, DEF> {
-      val typeSafeCriteria = ProjectionTypeSafeCriteriaQuery<T, DEF>(query)
-      typeSafeCriteria.lambda(tableDef)
-      return typeSafeCriteria
+    companion object {
+        @Suppress("unused")
+        fun <T : Any, DEF : YawnProjectionDef<T, T>> create(
+            tableDef: DEF,
+            query: YawnQuery<T, T>,
+            lambda: ProjectionTypeSafeCriteriaQuery<T, DEF>.(tableDef: DEF) -> Unit,
+        ): ProjectionTypeSafeCriteriaQuery<T, DEF> {
+            val typeSafeCriteria = ProjectionTypeSafeCriteriaQuery<T, DEF>(query)
+            typeSafeCriteria.lambda(tableDef)
+            return typeSafeCriteria
+        }
     }
-  }
 }

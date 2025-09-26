@@ -17,12 +17,12 @@ import javax.persistence.Table
 @YawnEntity
 @Immutable
 internal class BookView : BaseEntity<BookView> {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  final override lateinit var id: YawnId<BookView>
-    private set
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    final override lateinit var id: YawnId<BookView>
+        private set
 
-  @Column
-  final lateinit var name: String
-    private set
+    @Column
+    final lateinit var name: String
+        private set
 }

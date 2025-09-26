@@ -58,68 +58,68 @@ import com.squareup.kotlinpoet.ksp.toClassName
  * type.
  */
 internal object EmbeddedTypeGenerator : YawnEmbeddableTypeGenerator {
-  private val superClassType = YawnTableDef.EmbeddedDef::class
-  private val superClassTypeName = superClassType.simpleName!!
+    private val superClassType = YawnTableDef.EmbeddedDef::class
+    private val superClassTypeName = superClassType.simpleName!!
 
-  override fun generate(
-      yawnContext: YawnContext,
-      /** This will be the property `var foo: Foo` from the example above */
-      propertyDeclaration: KSPropertyDeclaration,
-  ): TypeSpec {
-    return generate(yawnContext, propertyDeclaration, superClassTypeName)
-  }
+    override fun generate(
+        yawnContext: YawnContext,
+        /** This will be the property `var foo: Foo` from the example above */
+        propertyDeclaration: KSPropertyDeclaration,
+    ): TypeSpec {
+        return generate(yawnContext, propertyDeclaration, superClassTypeName)
+    }
 
-  fun generate(
-      yawnContext: YawnContext,
-      propertyDeclaration: KSPropertyDeclaration,
-      superClassTypeName: String,
-  ): TypeSpec {
-    val originalType = propertyDeclaration.type.resolve() // Foo
-    val generatedTypeName = generateEmbeddedDefClassName(originalType.toClassName()) // FooDef
+    fun generate(
+        yawnContext: YawnContext,
+        propertyDeclaration: KSPropertyDeclaration,
+        superClassTypeName: String,
+    ): TypeSpec {
+        val originalType = propertyDeclaration.type.resolve() // Foo
+        val generatedTypeName = generateEmbeddedDefClassName(originalType.toClassName()) // FooDef
 
-    val yawnPathName = generateInternalPathName()
-    val yawnPathType = String::class.asTypeName().copy(nullable = true)
+        val yawnPathName = generateInternalPathName()
+        val yawnPathType = String::class.asTypeName().copy(nullable = true)
 
-    val pathPrefix = propertyDeclaration.simpleName.asString()
-    val pathPrefixes = listOf(
-        YawnParameter.literal(yawnPathName),
-        YawnParameter.string(pathPrefix),
-    )
-
-    val typeSpec = TypeSpec.classBuilder(generatedTypeName)
-        .addGeneratedAnnotation(EmbeddedTypeGenerator::class)
-        .addModifiers(KModifier.INNER)
-        .primaryConstructor(
-            FunSpec.constructorBuilder()
-                .addParameter(
-                    ParameterSpec.builder(yawnPathName, yawnPathType)
-                        .defaultValue("null")
-                        .build(),
-                )
-                .build(),
+        val pathPrefix = propertyDeclaration.simpleName.asString()
+        val pathPrefixes = listOf(
+            YawnParameter.literal(yawnPathName),
+            YawnParameter.string(pathPrefix),
         )
-        .addProperty(
-            PropertySpec.builder(yawnPathName, yawnPathType)
-                .addModifiers(KModifier.PRIVATE)
-                .initializer(yawnPathName)
-                .build(),
-        )
-        .superclass(
-            yawnContext.superClassName.nestedClass(
-                name = superClassTypeName,
-                typeArguments = listOf(originalType.toClassName()),
-            ),
-        )
-        .addSuperclassConstructorParameter("%N", yawnPathName)
-        .addSuperclassConstructorParameter("%S", pathPrefix)
 
-    propertyDeclaration.typeAsClassDeclaration()
-        ?.getAllProperties()
-        ?.forEach { property ->
-          val propertySpec = ColumnDefGenerator.generate(yawnContext, property, pathPrefixes)
-          typeSpec.addProperty(propertySpec)
-        }
+        val typeSpec = TypeSpec.classBuilder(generatedTypeName)
+            .addGeneratedAnnotation(EmbeddedTypeGenerator::class)
+            .addModifiers(KModifier.INNER)
+            .primaryConstructor(
+                FunSpec.constructorBuilder()
+                    .addParameter(
+                        ParameterSpec.builder(yawnPathName, yawnPathType)
+                            .defaultValue("null")
+                            .build(),
+                    )
+                    .build(),
+            )
+            .addProperty(
+                PropertySpec.builder(yawnPathName, yawnPathType)
+                    .addModifiers(KModifier.PRIVATE)
+                    .initializer(yawnPathName)
+                    .build(),
+            )
+            .superclass(
+                yawnContext.superClassName.nestedClass(
+                    name = superClassTypeName,
+                    typeArguments = listOf(originalType.toClassName()),
+                ),
+            )
+            .addSuperclassConstructorParameter("%N", yawnPathName)
+            .addSuperclassConstructorParameter("%S", pathPrefix)
 
-    return typeSpec.build()
-  }
+        propertyDeclaration.typeAsClassDeclaration()
+            ?.getAllProperties()
+            ?.forEach { property ->
+                val propertySpec = ColumnDefGenerator.generate(yawnContext, property, pathPrefixes)
+                typeSpec.addProperty(propertySpec)
+            }
+
+        return typeSpec.build()
+    }
 }

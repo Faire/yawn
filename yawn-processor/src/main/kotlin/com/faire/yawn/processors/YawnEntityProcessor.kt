@@ -44,75 +44,75 @@ import kotlin.reflect.KClass
  * Implementation of [BaseYawnProcessor] for [YawnEntity] annotated classes.
  */
 internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProcessor(codeGenerator) {
-  override val annotationClass: KClass<out Annotation> = YawnEntity::class
-  override val yawnDefClass: KClass<out YawnDef<*, *>> = YawnTableDef::class
+    override val annotationClass: KClass<out Annotation> = YawnEntity::class
+    override val yawnDefClass: KClass<out YawnDef<*, *>> = YawnTableDef::class
 
-  override fun generateYawnDefClassName(originalClassName: ClassName): String {
-    return generateTableDefClassName(originalClassName)
-  }
-
-  override val objectRefGenerator = YawnTableRefObjectGenerator
-
-  override fun generateProperty(
-      yawnContext: YawnContext,
-      property: KSPropertyDeclaration,
-  ): PropertySpec? {
-    val foreignKeyRef = property.getHibernateForeignKeyReference()
-    val generator = when {
-      property.isTransient() -> null
-
-      (property.isOneToOneJoin() || property.isManyToOneJoin()) -> {
-        when {
-          !property.isYawnEntity() -> ColumnDefGenerator
-          foreignKeyRef == null -> JoinColumnDefGenerator
-          foreignKeyRef.isCompositeKey -> JoinColumnDefWithCompositeKeyGenerator
-          else -> JoinColumnDefWithForeignKeyGenerator
-        }
-      }
-
-      (property.isOneToManyJoin() || property.isManyToManyJoin()) -> CollectionJoinColumnDefGenerator
-      property.isEmbeddedId() -> EmbeddedIdDefGenerator
-      property.isEmbedded() -> EmbeddedDefGenerator
-      property.isElementCollection() -> ElementCollectionColumnDefGenerator
-
-      property.isColumn() || property.isId() || property.isFormula() -> ColumnDefGenerator
-      else -> null
+    override fun generateYawnDefClassName(originalClassName: ClassName): String {
+        return generateTableDefClassName(originalClassName)
     }
 
-    return generator?.generate(
-        yawnContext = yawnContext,
-        property = property,
-        foreignKeyRef = foreignKeyRef,
-    )
-  }
+    override val objectRefGenerator = YawnTableRefObjectGenerator
 
-  override fun additionalClassBuilder(
-      yawnContext: YawnContext,
-      classBuilder: TypeSpec.Builder,
-  ): TypeSpec.Builder {
-    return classBuilder
-        .addSuperclassConstructorParameter(PARENT_PARAMETER_NAME)
-        .addTypes(generateEmbeddedDefinitions(yawnContext))
-  }
+    override fun generateProperty(
+        yawnContext: YawnContext,
+        property: KSPropertyDeclaration,
+    ): PropertySpec? {
+        val foreignKeyRef = property.getHibernateForeignKeyReference()
+        val generator = when {
+            property.isTransient() -> null
 
-  /**
-   * Within the generated table definition, we might need to define subclasses to represent embedded definitions.
-   * This will be either fields tagged with @Embedded or composite primary keys tagged with @EmbeddedId.
-   */
-  private fun generateEmbeddedDefinitions(
-      yawnContext: YawnContext,
-  ): List<TypeSpec> {
-    return yawnContext.classDeclaration.getAllProperties()
-        .mapNotNull { property ->
-          val generator = when {
-            property.isEmbeddedId() -> EmbeddedIdTypeGenerator
-            property.isEmbedded() -> EmbeddedTypeGenerator
+            (property.isOneToOneJoin() || property.isManyToOneJoin()) -> {
+                when {
+                    !property.isYawnEntity() -> ColumnDefGenerator
+                    foreignKeyRef == null -> JoinColumnDefGenerator
+                    foreignKeyRef.isCompositeKey -> JoinColumnDefWithCompositeKeyGenerator
+                    else -> JoinColumnDefWithForeignKeyGenerator
+                }
+            }
+
+            (property.isOneToManyJoin() || property.isManyToManyJoin()) -> CollectionJoinColumnDefGenerator
+            property.isEmbeddedId() -> EmbeddedIdDefGenerator
+            property.isEmbedded() -> EmbeddedDefGenerator
+            property.isElementCollection() -> ElementCollectionColumnDefGenerator
+
+            property.isColumn() || property.isId() || property.isFormula() -> ColumnDefGenerator
             else -> null
-          }
-          generator?.generate(yawnContext, property)
         }
-        .toList()
-  }
+
+        return generator?.generate(
+            yawnContext = yawnContext,
+            property = property,
+            foreignKeyRef = foreignKeyRef,
+        )
+    }
+
+    override fun additionalClassBuilder(
+        yawnContext: YawnContext,
+        classBuilder: TypeSpec.Builder,
+    ): TypeSpec.Builder {
+        return classBuilder
+            .addSuperclassConstructorParameter(PARENT_PARAMETER_NAME)
+            .addTypes(generateEmbeddedDefinitions(yawnContext))
+    }
+
+    /**
+     * Within the generated table definition, we might need to define subclasses to represent embedded definitions.
+     * This will be either fields tagged with @Embedded or composite primary keys tagged with @EmbeddedId.
+     */
+    private fun generateEmbeddedDefinitions(
+        yawnContext: YawnContext,
+    ): List<TypeSpec> {
+        return yawnContext.classDeclaration.getAllProperties()
+            .mapNotNull { property ->
+                val generator = when {
+                    property.isEmbeddedId() -> EmbeddedIdTypeGenerator
+                    property.isEmbedded() -> EmbeddedTypeGenerator
+                    else -> null
+                }
+                generator?.generate(yawnContext, property)
+            }
+            .toList()
+    }
 }
 
 /**
@@ -120,9 +120,9 @@ internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProce
  */
 @AutoService(SymbolProcessorProvider::class)
 internal class YawnEntityProcessorProvider : SymbolProcessorProvider {
-  override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-    return YawnEntityProcessor(
-        codeGenerator = environment.codeGenerator,
-    )
-  }
+    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
+        return YawnEntityProcessor(
+            codeGenerator = environment.codeGenerator,
+        )
+    }
 }

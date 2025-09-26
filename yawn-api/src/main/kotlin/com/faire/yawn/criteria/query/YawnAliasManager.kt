@@ -21,41 +21,41 @@ private val tableNamePrefixMap = ConcurrentHashMap<String, String>()
  * - `customer` (repeated) -> `c2`
  */
 internal class YawnAliasManager {
-  private val aliasCounters = mutableMapOf<String, Int>()
-  private val utilizedAliases = mutableSetOf<String>()
-  private val aliasesByParent = mutableMapOf<YawnTableDefParent, String?>()
+    private val aliasCounters = mutableMapOf<String, Int>()
+    private val utilizedAliases = mutableSetOf<String>()
+    private val aliasesByParent = mutableMapOf<YawnTableDefParent, String?>()
 
-  fun generate(parent: YawnTableDefParent, context: YawnCompilationContext): String? {
-    return aliasesByParent.getOrPut(parent) {
-      parent.getAliasBaseString(context)?.let { generate(it) }
-    }
-  }
-
-  internal fun generate(path: String): String {
-    val prefix = computePrefix(path)
-
-    var counter = aliasCounters.getOrPut(prefix) { 2 }
-    var alias = prefix
-    while (!utilizedAliases.add(alias)) {
-      alias = "${prefix}${counter++}"
+    fun generate(parent: YawnTableDefParent, context: YawnCompilationContext): String? {
+        return aliasesByParent.getOrPut(parent) {
+            parent.getAliasBaseString(context)?.let { generate(it) }
+        }
     }
 
-    aliasCounters[prefix] = counter
+    internal fun generate(path: String): String {
+        val prefix = computePrefix(path)
 
-    return alias
-  }
+        var counter = aliasCounters.getOrPut(prefix) { 2 }
+        var alias = prefix
+        while (!utilizedAliases.add(alias)) {
+            alias = "${prefix}${counter++}"
+        }
 
-  internal fun computePrefix(path: String): String {
-    val tableName = path.split('.').last()
+        aliasCounters[prefix] = counter
 
-    return tableNamePrefixMap.computeIfAbsent(tableName) { _ ->
-      (
-          sequenceOf(tableName.first()) + tableName.asSequence()
-          .drop(1)
-          .filter { it.isUpperCase() }
-          .map { it.lowercaseChar() }
-      )
-          .joinToString("")
+        return alias
     }
-  }
+
+    internal fun computePrefix(path: String): String {
+        val tableName = path.split('.').last()
+
+        return tableNamePrefixMap.computeIfAbsent(tableName) { _ ->
+            (
+                sequenceOf(tableName.first()) + tableName.asSequence()
+                    .drop(1)
+                    .filter { it.isUpperCase() }
+                    .map { it.lowercaseChar() }
+                )
+                .joinToString("")
+        }
+    }
 }

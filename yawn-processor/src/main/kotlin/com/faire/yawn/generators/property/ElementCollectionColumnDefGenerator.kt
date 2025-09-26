@@ -36,40 +36,40 @@ import com.squareup.kotlinpoet.ksp.toTypeName
  * ```
  */
 internal object ElementCollectionColumnDefGenerator : YawnPropertyGenerator() {
-  override val generatedType = YawnTableDef.JoinColumnDef::class
-  private val elementCollectionDefName = YawnTableDef.ElementCollectionDef::class.asClassName().simpleName
+    override val generatedType = YawnTableDef.JoinColumnDef::class
+    private val elementCollectionDefName = YawnTableDef.ElementCollectionDef::class.asClassName().simpleName
 
-  override fun generate(
-      yawnContext: YawnContext,
-      fieldName: String, // in this example, `genres`
-      fieldType: KSType, // in this example, `Set<Genre>`
-      foreignKeyRef: ForeignKeyReference?, // always null
-  ): PropertySpec {
-    check(foreignKeyRef == null)
+    override fun generate(
+        yawnContext: YawnContext,
+        fieldName: String, // in this example, `genres`
+        fieldType: KSType, // in this example, `Set<Genre>`
+        foreignKeyRef: ForeignKeyReference?, // always null
+    ): PropertySpec {
+        check(foreignKeyRef == null)
 
-    // in this example, `Genre`
-    val elementType = fieldType.arguments.first().type!!.resolve()
-    val elementTypeName = elementType.toTypeName()
+        // in this example, `Genre`
+        val elementType = fieldType.arguments.first().type!!.resolve()
+        val elementTypeName = elementType.toTypeName()
 
-    // These are the 2 type arguments that ElementCollectionColumnDef takes:
-    val typeArguments = listOf(
-        elementTypeName, // T = Genre
-        // DEF = ElementCollectionDef<Genre>
-        yawnContext.superClassName.nestedClass(
-            elementCollectionDefName,
-            listOf(elementTypeName),
-        ),
-    )
+        // These are the 2 type arguments that ElementCollectionColumnDef takes:
+        val typeArguments = listOf(
+            elementTypeName, // T = Genre
+            // DEF = ElementCollectionDef<Genre>
+            yawnContext.superClassName.nestedClass(
+                elementCollectionDefName,
+                listOf(elementTypeName),
+            ),
+        )
 
-    val parameters = listOf(
-        // parentPath = path
-        YawnParameter.literal(PARENT_PARAMETER_NAME),
-        // name = "genre"
-        YawnParameter.string(fieldName),
-        // tableDefProvider = { ElementCollectionDef(it) }
-        YawnParameter("{ ElementCollectionDef(it) }"),
-    )
+        val parameters = listOf(
+            // parentPath = path
+            YawnParameter.literal(PARENT_PARAMETER_NAME),
+            // name = "genre"
+            YawnParameter.string(fieldName),
+            // tableDefProvider = { ElementCollectionDef(it) }
+            YawnParameter("{ ElementCollectionDef(it) }"),
+        )
 
-    return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
-  }
+        return generatePropertySpec(yawnContext, fieldName, parameters, typeArguments)
+    }
 }

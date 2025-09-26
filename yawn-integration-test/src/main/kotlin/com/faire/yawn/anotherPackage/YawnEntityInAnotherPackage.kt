@@ -5,6 +5,6 @@ import javax.persistence.Column
 
 @YawnEntity
 internal class YawnEntityInAnotherPackage {
-  @Column
-  var randomField: String = ""
+    @Column
+    var randomField: String = ""
 }

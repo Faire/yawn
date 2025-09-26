@@ -22,83 +22,83 @@ private val yawnQueryProjection = YawnQueryProjection::class.asClassName()
 private val typedProjectionImpl = YawnCompositeQueryProjection::class.asClassName()
 
 internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator {
-  /**
-   * Generate an object to facilitate creating the generated [com.faire.yawn.project.YawnProjectionDef].
-   * This acts as a singleton for the projection and is referenced by the user to perform queries.
-   *
-   * The output code will look like:
-   * object SimpleBookProjection: YawnProjectionRef<SimpleBook, SimpleBookProjectionDef<SimpleBook>>() {
-   *  // see the definition of the create function below
-   *  fun create(...): TypedProjection<SOURCE, YawnProjectionTest.SimpleBook> { ... }
-   * }
-   */
-  override fun generate(
-      yawnContext: YawnContext,
-  ): TypeSpec {
-    val classDeclaration = yawnContext.classDeclaration
-    val newClassName = yawnContext.newClassName.simpleName
+    /**
+     * Generate an object to facilitate creating the generated [com.faire.yawn.project.YawnProjectionDef].
+     * This acts as a singleton for the projection and is referenced by the user to perform queries.
+     *
+     * The output code will look like:
+     * object SimpleBookProjection: YawnProjectionRef<SimpleBook, SimpleBookProjectionDef<SimpleBook>>() {
+     *  // see the definition of the create function below
+     *  fun create(...): TypedProjection<SOURCE, YawnProjectionTest.SimpleBook> { ... }
+     * }
+     */
+    override fun generate(
+        yawnContext: YawnContext,
+    ): TypeSpec {
+        val classDeclaration = yawnContext.classDeclaration
+        val newClassName = yawnContext.newClassName.simpleName
 
-    val originalClassName = classDeclaration.toClassName()
-    val objectName = generateProjectionObjectName(originalClassName)
+        val originalClassName = classDeclaration.toClassName()
+        val objectName = generateProjectionObjectName(originalClassName)
 
-    val typeParameter = ClassName(originalClassName.packageName, newClassName).parameterizedBy(originalClassName)
-    val superInterface = YawnProjectionRef::class.asClassName().parameterizedBy(originalClassName, typeParameter)
+        val typeParameter = ClassName(originalClassName.packageName, newClassName).parameterizedBy(originalClassName)
+        val superInterface = YawnProjectionRef::class.asClassName().parameterizedBy(originalClassName, typeParameter)
 
-    return TypeSpec.objectBuilder(objectName)
-        .addGeneratedAnnotation(YawnProjectionRefObjectGenerator::class)
-        .addSuperinterface(superInterface)
-        .addModifiers(classDeclaration.getEffectiveVisibility())
-        .addFunction(generateCreateFunction(yawnContext = yawnContext))
-        .build()
-  }
-
-  private fun generateCreateFunction(
-      yawnContext: YawnContext,
-  ): FunSpec {
-    val source = TypeVariableName("SOURCE", Any::class.asTypeName())
-    val f = yawnContext.classDeclaration.toClassName()
-
-    val create = FunSpec.builder("create")
-        .addTypeVariable(source)
-        .returns(yawnQueryProjection.parameterizedBy(source, f))
-
-    data class Property(
-        val index: Int,
-        val name: String,
-        val type: TypeName,
-    )
-
-    val properties = yawnContext.classDeclaration.getAllProperties().mapIndexed { idx, property ->
-      Property(
-          index = idx,
-          name = property.simpleName.asString(),
-          type = property.type.toTypeName(),
-      )
+        return TypeSpec.objectBuilder(objectName)
+            .addGeneratedAnnotation(YawnProjectionRefObjectGenerator::class)
+            .addSuperinterface(superInterface)
+            .addModifiers(classDeclaration.getEffectiveVisibility())
+            .addFunction(generateCreateFunction(yawnContext = yawnContext))
+            .build()
     }
 
-    var extraTypeParametersIdx = 0
-    for (property in properties) {
-      // if the type is nullable, we want to accept both nullable and non-nullable projections
-      // so we add an extra type parameter `Tx : Type?`, so that Projection<SOURCE, Tx> can be either
-      // Projection<SOURCE, Type> or Projection<SOURCE, Type?>.
-      val projectionType = if (property.type.isNullable) {
-        val typeVariable = TypeVariableName("T$extraTypeParametersIdx", property.type)
-        extraTypeParametersIdx++
+    private fun generateCreateFunction(
+        yawnContext: YawnContext,
+    ): FunSpec {
+        val source = TypeVariableName("SOURCE", Any::class.asTypeName())
+        val f = yawnContext.classDeclaration.toClassName()
 
-        create.addTypeVariable(typeVariable)
-        typeVariable
-      } else {
-        property.type
-      }
-      create.addParameter(property.name, yawnQueryProjection.parameterizedBy(source, projectionType))
-    }
+        val create = FunSpec.builder("create")
+            .addTypeVariable(source)
+            .returns(yawnQueryProjection.parameterizedBy(source, f))
 
-    val propertyProjections = properties.joinToString(separator = ",\n") { it.name }
-    val propertyParameters = properties.joinToString(separator = ",\n") {
-      "${it.name} = ${it.name}.project(queryResult[${it.index}])"
-    }
-    create.addStatement(
-        """
+        data class Property(
+            val index: Int,
+            val name: String,
+            val type: TypeName,
+        )
+
+        val properties = yawnContext.classDeclaration.getAllProperties().mapIndexed { idx, property ->
+            Property(
+                index = idx,
+                name = property.simpleName.asString(),
+                type = property.type.toTypeName(),
+            )
+        }
+
+        var extraTypeParametersIdx = 0
+        for (property in properties) {
+            // if the type is nullable, we want to accept both nullable and non-nullable projections
+            // so we add an extra type parameter `Tx : Type?`, so that Projection<SOURCE, Tx> can be either
+            // Projection<SOURCE, Type> or Projection<SOURCE, Type?>.
+            val projectionType = if (property.type.isNullable) {
+                val typeVariable = TypeVariableName("T$extraTypeParametersIdx", property.type)
+                extraTypeParametersIdx++
+
+                create.addTypeVariable(typeVariable)
+                typeVariable
+            } else {
+                property.type
+            }
+            create.addParameter(property.name, yawnQueryProjection.parameterizedBy(source, projectionType))
+        }
+
+        val propertyProjections = properties.joinToString(separator = ",\n") { it.name }
+        val propertyParameters = properties.joinToString(separator = ",\n") {
+            "${it.name} = ${it.name}.project(queryResult[${it.index}])"
+        }
+        create.addStatement(
+            """
           return (
             %T(
                 $propertyProjections
@@ -109,11 +109,11 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
                 )
             }
           )
-        """.trimIndent(),
-        typedProjectionImpl.parameterizedBy(source, f),
-        yawnContext.classDeclaration.toClassName(),
-    )
+            """.trimIndent(),
+            typedProjectionImpl.parameterizedBy(source, f),
+            yawnContext.classDeclaration.toClassName(),
+        )
 
-    return create.build()
-  }
+        return create.build()
+    }
 }

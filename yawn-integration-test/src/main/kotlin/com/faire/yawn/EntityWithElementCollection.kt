@@ -7,17 +7,17 @@ import javax.persistence.JoinTable
 
 @YawnEntity
 internal class EntityWithElementCollection {
-  @ElementCollection
-  @JoinTable
-  var strings = mutableListOf<String>()
+    @ElementCollection
+    @JoinTable
+    var strings = mutableListOf<String>()
 
-  @ElementCollection(targetClass = Enums::class)
-  @JoinTable
-  @Enumerated(EnumType.STRING)
-  var enums = listOf<Enums>()
+    @ElementCollection(targetClass = Enums::class)
+    @JoinTable
+    @Enumerated(EnumType.STRING)
+    var enums = listOf<Enums>()
 }
 
 internal enum class Enums {
-  HELLO,
-  THERE,
+    HELLO,
+    THERE,
 }

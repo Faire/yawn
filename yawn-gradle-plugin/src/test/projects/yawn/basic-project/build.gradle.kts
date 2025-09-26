@@ -1,11 +1,11 @@
 plugins {
-  id("com.faire.yawn")
+    id("com.faire.yawn")
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-  implementation(project(":ksp-annotation"))
+    implementation(project(":ksp-annotation"))
 }

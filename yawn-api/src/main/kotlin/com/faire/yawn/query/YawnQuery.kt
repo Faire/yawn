@@ -22,58 +22,58 @@ data class YawnQuery<SOURCE : Any, T : Any>(
     var maxResults: Int? = null,
 ) : YawnCriteriaQuery<SOURCE, T> {
 
-  override fun addCriterion(criterion: YawnQueryCriterion<SOURCE>) {
-    criteria.add(criterion)
-  }
-
-  internal fun <D : YawnTableDef<SOURCE, F>, F : Any> registerJoin(
-      column: YawnTableDef<SOURCE, *>.JoinColumnDef<F, D>,
-      joinType: JoinType,
-      lambda: JoinTypeSafeCriteriaQuery<SOURCE, F, D>.(tableDef: D) -> Unit = {},
-  ): YawnQueryJoin<SOURCE> {
-    val parent = AssociationTableDefParent(column)
-    val join = YawnQueryJoin<SOURCE>(
-        columnDef = column,
-        parent = parent,
-        joinType = joinType,
-    )
-    join.joinCriteria.addAll(
-        createJoinCriteria(column, join, lambda),
-    )
-
-    joins.add(join)
-    return join
-  }
-
-  private fun <F : Any, D : YawnTableDef<SOURCE, F>> createJoinCriteria(
-      column: YawnTableDef<SOURCE, *>.JoinColumnDef<F, D>,
-      join: YawnQueryJoin<SOURCE>,
-      lambda: JoinTypeSafeCriteriaQuery<SOURCE, F, D>.(tableDef: D) -> Unit,
-  ): List<YawnQueryCriterion<SOURCE>> {
-    val def = column.joinTableDef(join.parent)
-
-    val criteria = mutableListOf<YawnQueryCriterion<SOURCE>>()
-    val subQuery = object : YawnCriteriaQuery<SOURCE, F> {
-      override fun addCriterion(criterion: YawnQueryCriterion<SOURCE>) {
+    override fun addCriterion(criterion: YawnQueryCriterion<SOURCE>) {
         criteria.add(criterion)
-      }
     }
 
-    JoinTypeSafeCriteriaQuery.applyLambda<SOURCE, F, D>(subQuery, def, lambda)
+    internal fun <D : YawnTableDef<SOURCE, F>, F : Any> registerJoin(
+        column: YawnTableDef<SOURCE, *>.JoinColumnDef<F, D>,
+        joinType: JoinType,
+        lambda: JoinTypeSafeCriteriaQuery<SOURCE, F, D>.(tableDef: D) -> Unit = {},
+    ): YawnQueryJoin<SOURCE> {
+        val parent = AssociationTableDefParent(column)
+        val join = YawnQueryJoin<SOURCE>(
+            columnDef = column,
+            parent = parent,
+            joinType = joinType,
+        )
+        join.joinCriteria.addAll(
+            createJoinCriteria(column, join, lambda),
+        )
 
-    return criteria
-  }
+        joins.add(join)
+        return join
+    }
 
-  fun clone(): YawnQuery<SOURCE, T> {
-    return copy(
-        criteria = MutableList(criteria.size) { criteria[it].copy() },
-        joins = MutableList(joins.size) { joins[it].copy() },
-        orders = MutableList(orders.size) { orders[it].copy() },
-        queryHints = MutableList(queryHints.size) { queryHints[it] },
-    )
-  }
+    private fun <F : Any, D : YawnTableDef<SOURCE, F>> createJoinCriteria(
+        column: YawnTableDef<SOURCE, *>.JoinColumnDef<F, D>,
+        join: YawnQueryJoin<SOURCE>,
+        lambda: JoinTypeSafeCriteriaQuery<SOURCE, F, D>.(tableDef: D) -> Unit,
+    ): List<YawnQueryCriterion<SOURCE>> {
+        val def = column.joinTableDef(join.parent)
 
-  fun hasSubQuery(): Boolean {
-    return criteria.any { it.yawnRestriction is YawnDetachedQueryRestriction<*, *> }
-  }
+        val criteria = mutableListOf<YawnQueryCriterion<SOURCE>>()
+        val subQuery = object : YawnCriteriaQuery<SOURCE, F> {
+            override fun addCriterion(criterion: YawnQueryCriterion<SOURCE>) {
+                criteria.add(criterion)
+            }
+        }
+
+        JoinTypeSafeCriteriaQuery.applyLambda<SOURCE, F, D>(subQuery, def, lambda)
+
+        return criteria
+    }
+
+    fun clone(): YawnQuery<SOURCE, T> {
+        return copy(
+            criteria = MutableList(criteria.size) { criteria[it].copy() },
+            joins = MutableList(joins.size) { joins[it].copy() },
+            orders = MutableList(orders.size) { orders[it].copy() },
+            queryHints = MutableList(queryHints.size) { queryHints[it] },
+        )
+    }
+
+    fun hasSubQuery(): Boolean {
+        return criteria.any { it.yawnRestriction is YawnDetachedQueryRestriction<*, *> }
+    }
 }

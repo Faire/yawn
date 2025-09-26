@@ -8,5 +8,5 @@ import com.squareup.kotlinpoet.TypeSpec
  * These reference objects are accessed by the user to perform queries.
  */
 internal interface YawnReferenceObjectGenerator {
-  fun generate(yawnContext: YawnContext): TypeSpec
+    fun generate(yawnContext: YawnContext): TypeSpec
 }

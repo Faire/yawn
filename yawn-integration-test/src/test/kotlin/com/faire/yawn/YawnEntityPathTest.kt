@@ -7,40 +7,40 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class YawnEntityPathTest {
-  val context = YawnCompilationContext(withSubQuery = false)
+    val context = YawnCompilationContext(withSubQuery = false)
 
-  @Test
-  fun `can generate path with an unaliased root`() {
-    val noParentAlias = EntityWithoutRelationsTable.create(parent = RootTableDefParent)
-    assertThat(noParentAlias.token.generatePath(context)).isEqualTo("token")
-  }
+    @Test
+    fun `can generate path with an unaliased root`() {
+        val noParentAlias = EntityWithoutRelationsTable.create(parent = RootTableDefParent)
+        assertThat(noParentAlias.token.generatePath(context)).isEqualTo("token")
+    }
 
-  @Test
-  fun `can generate path with an aliased root for subqueries`() {
-    val subQueryCompilationContext = YawnCompilationContext(withSubQuery = true)
+    @Test
+    fun `can generate path with an aliased root for subqueries`() {
+        val subQueryCompilationContext = YawnCompilationContext(withSubQuery = true)
 
-    val rootAlias = EntityWithoutRelationsTable.create(parent = RootTableDefParent)
-    assertThat(rootAlias.token.generatePath(subQueryCompilationContext)).isEqualTo("r.token")
-  }
+        val rootAlias = EntityWithoutRelationsTable.create(parent = RootTableDefParent)
+        assertThat(rootAlias.token.generatePath(subQueryCompilationContext)).isEqualTo("r.token")
+    }
 
-  @Test
-  fun `join column def path contains whole chain`() {
-    val withParent = EntityWithSimpleRelationsTableDef<EntityWithoutRelations>(parent = RootTableDefParent)
-    val asField = withParent.nonNullOneToOneYawn
-    assertThat(asField.path(context)).isEqualTo("nonNullOneToOneYawn")
+    @Test
+    fun `join column def path contains whole chain`() {
+        val withParent = EntityWithSimpleRelationsTableDef<EntityWithoutRelations>(parent = RootTableDefParent)
+        val asField = withParent.nonNullOneToOneYawn
+        assertThat(asField.path(context)).isEqualTo("nonNullOneToOneYawn")
 
-    val asJoinWithAlias = withParent.nonNullOneToOneYawn.joinTableDef(AssociationTableDefParent(asField))
-    assertThat(asJoinWithAlias.randomField.generatePath(context)).isEqualTo("nnotoy.randomField")
-  }
+        val asJoinWithAlias = withParent.nonNullOneToOneYawn.joinTableDef(AssociationTableDefParent(asField))
+        assertThat(asJoinWithAlias.randomField.generatePath(context)).isEqualTo("nnotoy.randomField")
+    }
 
-  @Test
-  fun `join column def path contains whole chain including root aliases`() {
-    val subQueryCompilationContext = YawnCompilationContext(withSubQuery = true)
-    val withParent = EntityWithSimpleRelationsTableDef<EntityWithoutRelations>(parent = RootTableDefParent)
-    val asField = withParent.nonNullOneToOneYawn
-    assertThat(asField.path(subQueryCompilationContext)).isEqualTo("r.nonNullOneToOneYawn")
+    @Test
+    fun `join column def path contains whole chain including root aliases`() {
+        val subQueryCompilationContext = YawnCompilationContext(withSubQuery = true)
+        val withParent = EntityWithSimpleRelationsTableDef<EntityWithoutRelations>(parent = RootTableDefParent)
+        val asField = withParent.nonNullOneToOneYawn
+        assertThat(asField.path(subQueryCompilationContext)).isEqualTo("r.nonNullOneToOneYawn")
 
-    val asJoinWithAlias = withParent.nonNullOneToOneYawn.joinTableDef(AssociationTableDefParent(asField))
-    assertThat(asJoinWithAlias.randomField.generatePath(subQueryCompilationContext)).isEqualTo("nnotoy.randomField")
-  }
+        val asJoinWithAlias = withParent.nonNullOneToOneYawn.joinTableDef(AssociationTableDefParent(asField))
+        assertThat(asJoinWithAlias.randomField.generatePath(subQueryCompilationContext)).isEqualTo("nnotoy.randomField")
+    }
 }

@@ -18,24 +18,24 @@ import com.squareup.kotlinpoet.PropertySpec
 import kotlin.reflect.KClass
 
 internal class YawnProjectionProcessor(codeGenerator: CodeGenerator) : BaseYawnProcessor(codeGenerator) {
-  override val annotationClass: KClass<out Annotation> = YawnProjection::class
-  override val yawnDefClass: KClass<out YawnDef<*, *>> = YawnProjectionDef::class
+    override val annotationClass: KClass<out Annotation> = YawnProjection::class
+    override val yawnDefClass: KClass<out YawnDef<*, *>> = YawnProjectionDef::class
 
-  override fun generateYawnDefClassName(originalClassName: ClassName): String {
-    return generateProjectionDefClassName(originalClassName)
-  }
+    override fun generateYawnDefClassName(originalClassName: ClassName): String {
+        return generateProjectionDefClassName(originalClassName)
+    }
 
-  override val objectRefGenerator = YawnProjectionRefObjectGenerator
+    override val objectRefGenerator = YawnProjectionRefObjectGenerator
 
-  override fun generateProperty(
-      yawnContext: YawnContext,
-      property: KSPropertyDeclaration,
-  ): PropertySpec? {
-    return ProjectionColumnDefGenerator.generate(
-        yawnContext = yawnContext,
-        property = property,
-    )
-  }
+    override fun generateProperty(
+        yawnContext: YawnContext,
+        property: KSPropertyDeclaration,
+    ): PropertySpec? {
+        return ProjectionColumnDefGenerator.generate(
+            yawnContext = yawnContext,
+            property = property,
+        )
+    }
 }
 
 /**
@@ -43,9 +43,9 @@ internal class YawnProjectionProcessor(codeGenerator: CodeGenerator) : BaseYawnP
  */
 @AutoService(SymbolProcessorProvider::class)
 internal class YawnProjectionProcessorProvider : SymbolProcessorProvider {
-  override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-    return YawnProjectionProcessor(
-        codeGenerator = environment.codeGenerator,
-    )
-  }
+    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
+        return YawnProjectionProcessor(
+            codeGenerator = environment.codeGenerator,
+        )
+    }
 }

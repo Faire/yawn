@@ -7,13 +7,13 @@ class JoinTypeSafeCriteriaQuery<SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE
     query: YawnCriteriaQuery<SOURCE, T>,
 ) : BaseTypeSafeCriteriaQuery<SOURCE, T, DEF>(query),
     TypeSafeCriteriaWithWhere<SOURCE, T> by TypeSafeCriteriaWithWhereDelegate(query) {
-  companion object {
-    internal fun <SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>> applyLambda(
-        query: YawnCriteriaQuery<SOURCE, T>,
-        tableDef: DEF,
-        lambda: JoinTypeSafeCriteriaQuery<SOURCE, T, DEF>.(tableDef: DEF) -> Unit,
-    ): JoinTypeSafeCriteriaQuery<SOURCE, T, DEF> {
-      return JoinTypeSafeCriteriaQuery<SOURCE, T, DEF>(query).apply { lambda(tableDef) }
+    companion object {
+        internal fun <SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>> applyLambda(
+            query: YawnCriteriaQuery<SOURCE, T>,
+            tableDef: DEF,
+            lambda: JoinTypeSafeCriteriaQuery<SOURCE, T, DEF>.(tableDef: DEF) -> Unit,
+        ): JoinTypeSafeCriteriaQuery<SOURCE, T, DEF> {
+            return JoinTypeSafeCriteriaQuery<SOURCE, T, DEF>(query).apply { lambda(tableDef) }
+        }
     }
-  }
 }

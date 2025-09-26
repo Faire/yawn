@@ -13,5 +13,5 @@ data class YawnQueryJoin<SOURCE : Any>(
     val joinType: JoinType,
     val joinCriteria: MutableList<YawnQueryCriterion<SOURCE>> = mutableListOf(),
 ) {
-  fun path(context: YawnCompilationContext): String = columnDef.path(context)
+    fun path(context: YawnCompilationContext): String = columnDef.path(context)
 }

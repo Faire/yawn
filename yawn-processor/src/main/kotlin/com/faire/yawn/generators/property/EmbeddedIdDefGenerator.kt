@@ -30,23 +30,23 @@ import com.squareup.kotlinpoet.ksp.toClassName
  * Note that `FooCompositeIdDef` extends [YawnTableDef.EmbeddedDef].
  */
 internal object EmbeddedIdDefGenerator : YawnPropertyGenerator() {
-  override val generatedType = YawnTableDef.EmbeddedDef::class
+    override val generatedType = YawnTableDef.EmbeddedDef::class
 
-  override fun generate(
-      yawnContext: YawnContext,
-      fieldName: String, // in this example, `cid`
-      fieldType: KSType, // in this example, `FooCompositeId`
-      foreignKeyRef: ForeignKeyReference?, // always null
-  ): PropertySpec {
-    check(foreignKeyRef == null)
+    override fun generate(
+        yawnContext: YawnContext,
+        fieldName: String, // in this example, `cid`
+        fieldType: KSType, // in this example, `FooCompositeId`
+        foreignKeyRef: ForeignKeyReference?, // always null
+    ): PropertySpec {
+        check(foreignKeyRef == null)
 
-    // in this example, `FooCompositeIdDef`
-    val typeName = yawnContext.newClassName
-        .nestedClass(generateEmbeddedDefClassName(fieldType.toClassName()))
+        // in this example, `FooCompositeIdDef`
+        val typeName = yawnContext.newClassName
+            .nestedClass(generateEmbeddedDefClassName(fieldType.toClassName()))
 
-    // val cid: FooCompositeIdDef = FooCompositeIdDef()
-    return PropertySpec.builder(fieldName, typeName)
-        .initializer("%T()", typeName)
-        .build()
-  }
+        // val cid: FooCompositeIdDef = FooCompositeIdDef()
+        return PropertySpec.builder(fieldName, typeName)
+            .initializer("%T()", typeName)
+            .build()
+    }
 }

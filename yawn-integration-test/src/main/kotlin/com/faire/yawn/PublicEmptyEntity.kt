@@ -6,6 +6,6 @@ package com.faire.yawn
 @YawnEntity
 class PublicEmptyEntity {
 
-  @YawnEntity
-  internal class InternalInsidePublic
+    @YawnEntity
+    internal class InternalInsidePublic
 }

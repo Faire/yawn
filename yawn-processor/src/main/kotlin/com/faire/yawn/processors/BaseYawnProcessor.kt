@@ -39,106 +39,106 @@ import kotlin.reflect.KClass
 internal abstract class BaseYawnProcessor(
     private val codeGenerator: CodeGenerator,
 ) : SymbolProcessor {
-  protected abstract val annotationClass: KClass<out Annotation>
-  protected abstract val yawnDefClass: KClass<out YawnDef<*, *>>
+    protected abstract val annotationClass: KClass<out Annotation>
+    protected abstract val yawnDefClass: KClass<out YawnDef<*, *>>
 
-  abstract val objectRefGenerator: YawnReferenceObjectGenerator
+    abstract val objectRefGenerator: YawnReferenceObjectGenerator
 
-  override fun process(resolver: Resolver): List<KSAnnotated> {
-    val ksClassDeclarationWithYawnAnnotation = resolver
-        .getSymbolsWithAnnotation(annotationClass.qualifiedName!!)
-        .filterIsInstance<KSClassDeclaration>()
+    override fun process(resolver: Resolver): List<KSAnnotated> {
+        val ksClassDeclarationWithYawnAnnotation = resolver
+            .getSymbolsWithAnnotation(annotationClass.qualifiedName!!)
+            .filterIsInstance<KSClassDeclaration>()
 
-    for (ksClassDeclaration in ksClassDeclarationWithYawnAnnotation) {
-      generateFile(ksClassDeclaration)
+        for (ksClassDeclaration in ksClassDeclarationWithYawnAnnotation) {
+            generateFile(ksClassDeclaration)
+        }
+
+        return listOf()
     }
 
-    return listOf()
-  }
+    private fun generateFile(classDeclaration: KSClassDeclaration) {
+        val packageName = classDeclaration.packageName.asString()
+        val newClassName = generateYawnDefClassName(classDeclaration.toClassName())
 
-  private fun generateFile(classDeclaration: KSClassDeclaration) {
-    val packageName = classDeclaration.packageName.asString()
-    val newClassName = generateYawnDefClassName(classDeclaration.toClassName())
+        val yawnContext = buildYawnContext(classDeclaration, newClassName)
+        val objectDef = objectRefGenerator.generate(yawnContext)
+        val classDef = generateClassDefinition(yawnContext)
 
-    val yawnContext = buildYawnContext(classDeclaration, newClassName)
-    val objectDef = objectRefGenerator.generate(yawnContext)
-    val classDef = generateClassDefinition(yawnContext)
+        val fileSpec = FileSpec.builder(packageName, newClassName)
+            .addType(objectDef)
+            .addType(classDef)
+            .build()
 
-    val fileSpec = FileSpec.builder(packageName, newClassName)
-        .addType(objectDef)
-        .addType(classDef)
-        .build()
-
-    val outputFile = codeGenerator.createNewFile(
-        Dependencies.ALL_FILES,
-        classDeclaration.packageName.asString(),
-        newClassName,
-    )
-
-    fileSpec.writeTo(PrintStream(outputFile))
-  }
-
-  private fun buildYawnContext(
-      classDeclaration: KSClassDeclaration,
-      newClassName: String,
-  ): YawnContext {
-    val sourceTypeVariable = TypeVariableName("SOURCE", Any::class.asTypeName())
-    val superClassName = yawnDefClass.asClassName()
-        .parameterizedBy(sourceTypeVariable, classDeclaration.toClassName())
-    return YawnContext(
-        classDeclaration = classDeclaration,
-        superClassName = superClassName,
-        sourceTypeVariable = sourceTypeVariable,
-        newClassName = ClassName(classDeclaration.packageName.asString(), newClassName),
-    )
-  }
-
-  private fun generateClassDefinition(
-      yawnContext: YawnContext,
-  ): TypeSpec {
-    val classBuilder = TypeSpec.classBuilder(yawnContext.newClassName)
-        .addGeneratedAnnotation(BaseYawnProcessor::class)
-        .addModifiers(KModifier.OPEN)
-        .addModifiers(yawnContext.classDeclaration.getEffectiveVisibility())
-        .primaryConstructor(
-            FunSpec.constructorBuilder()
-                .addParameter(nullableParentParameter)
-                .build(),
+        val outputFile = codeGenerator.createNewFile(
+            Dependencies.ALL_FILES,
+            classDeclaration.packageName.asString(),
+            newClassName,
         )
-        .addTypeVariable(yawnContext.sourceTypeVariable)
-        .superclass(yawnContext.superClassName)
-        .run { additionalClassBuilder(yawnContext, this) }
 
-    for (propertyDeclaration in yawnContext.classDeclaration.getAllProperties()) {
-      val property = generateProperty(yawnContext, propertyDeclaration)
-          ?: continue
-
-      classBuilder.addProperty(property)
+        fileSpec.writeTo(PrintStream(outputFile))
     }
-    return classBuilder.build()
-  }
 
-  protected open fun additionalClassBuilder(
-      yawnContext: YawnContext,
-      classBuilder: TypeSpec.Builder,
-  ): TypeSpec.Builder {
-    return classBuilder
-  }
+    private fun buildYawnContext(
+        classDeclaration: KSClassDeclaration,
+        newClassName: String,
+    ): YawnContext {
+        val sourceTypeVariable = TypeVariableName("SOURCE", Any::class.asTypeName())
+        val superClassName = yawnDefClass.asClassName()
+            .parameterizedBy(sourceTypeVariable, classDeclaration.toClassName())
+        return YawnContext(
+            classDeclaration = classDeclaration,
+            superClassName = superClassName,
+            sourceTypeVariable = sourceTypeVariable,
+            newClassName = ClassName(classDeclaration.packageName.asString(), newClassName),
+        )
+    }
 
-  protected abstract fun generateProperty(
-      yawnContext: YawnContext,
-      property: KSPropertyDeclaration,
-  ): PropertySpec?
+    private fun generateClassDefinition(
+        yawnContext: YawnContext,
+    ): TypeSpec {
+        val classBuilder = TypeSpec.classBuilder(yawnContext.newClassName)
+            .addGeneratedAnnotation(BaseYawnProcessor::class)
+            .addModifiers(KModifier.OPEN)
+            .addModifiers(yawnContext.classDeclaration.getEffectiveVisibility())
+            .primaryConstructor(
+                FunSpec.constructorBuilder()
+                    .addParameter(nullableParentParameter)
+                    .build(),
+            )
+            .addTypeVariable(yawnContext.sourceTypeVariable)
+            .superclass(yawnContext.superClassName)
+            .run { additionalClassBuilder(yawnContext, this) }
 
-  protected abstract fun generateYawnDefClassName(originalClassName: ClassName): String
+        for (propertyDeclaration in yawnContext.classDeclaration.getAllProperties()) {
+            val property = generateProperty(yawnContext, propertyDeclaration)
+                ?: continue
 
-  companion object {
-    const val PARENT_PARAMETER_NAME = "parent"
-    val parentType = YawnTableDefParent::class.asTypeName()
+            classBuilder.addProperty(property)
+        }
+        return classBuilder.build()
+    }
 
-    private val nullableParentParameter = ParameterSpec.Companion.builder(
-        PARENT_PARAMETER_NAME,
-        parentType,
-    ).build()
-  }
+    protected open fun additionalClassBuilder(
+        yawnContext: YawnContext,
+        classBuilder: TypeSpec.Builder,
+    ): TypeSpec.Builder {
+        return classBuilder
+    }
+
+    protected abstract fun generateProperty(
+        yawnContext: YawnContext,
+        property: KSPropertyDeclaration,
+    ): PropertySpec?
+
+    protected abstract fun generateYawnDefClassName(originalClassName: ClassName): String
+
+    companion object {
+        const val PARENT_PARAMETER_NAME = "parent"
+        val parentType = YawnTableDefParent::class.asTypeName()
+
+        private val nullableParentParameter = ParameterSpec.Companion.builder(
+            PARENT_PARAMETER_NAME,
+            parentType,
+        ).build()
+    }
 }
