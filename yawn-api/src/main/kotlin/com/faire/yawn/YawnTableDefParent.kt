@@ -33,7 +33,7 @@ interface YawnTableDefParent {
      * To be used to generate aliases for sub queries
      */
     class SubqueryTableDefParent(val tableName: String) : YawnTableDefParent {
-        override fun getAliasBaseString(context: YawnCompilationContext): String? = tableName
+        override fun getAliasBaseString(context: YawnCompilationContext): String = tableName
     }
 
     /**
@@ -42,7 +42,7 @@ interface YawnTableDefParent {
     class AssociationTableDefParent(
         val parentColumnDef: YawnTableDef<*, *>.JoinColumnDef<*, *>,
     ) : YawnTableDefParent {
-        override fun getAliasBaseString(context: YawnCompilationContext): String? {
+        override fun getAliasBaseString(context: YawnCompilationContext): String {
             return parentColumnDef.path(context)
         }
     }

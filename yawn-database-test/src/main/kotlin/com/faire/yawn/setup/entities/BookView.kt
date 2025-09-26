@@ -19,10 +19,10 @@ import javax.persistence.Table
 internal class BookView : BaseEntity<BookView> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    final override lateinit var id: YawnId<BookView>
+    override lateinit var id: YawnId<BookView>
         private set
 
     @Column
-    final lateinit var name: String
+    lateinit var name: String
         private set
 }

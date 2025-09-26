@@ -48,7 +48,7 @@ internal class JsonMessageType(
         return if (rs.wasNull() || jsonData == null) {
             null
         } else {
-            gson.fromJson<Any>(jsonData, columnTypeLiteral.type)
+            gson.fromJson(jsonData, columnTypeLiteral.type)
         }
     }
 

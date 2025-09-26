@@ -59,7 +59,7 @@ data class YawnQuery<SOURCE : Any, T : Any>(
             }
         }
 
-        JoinTypeSafeCriteriaQuery.applyLambda<SOURCE, F, D>(subQuery, def, lambda)
+        JoinTypeSafeCriteriaQuery.applyLambda(subQuery, def, lambda)
 
         return criteria
     }

@@ -20,7 +20,7 @@ import com.faire.yawn.query.YawnQueryOrder
  *
  * @param T the type of the entity being queried.
  * @param DEF the table definition of the entity being queried.
- * @param RETURNS the return type to be used for the finalizer methods (list, uniqueResult, etc).
+ * @param RETURNS the return type to be used for the finalizer methods (list, uniqueResult, etc.).
  *                This will either be T for TypeSafeCriteriaBuilder, or the type of the projection for
  *                ProjectedTypeSafeCriteriaBuilder.
  * @param CRITERIA is the concrete type of the criteria being used;

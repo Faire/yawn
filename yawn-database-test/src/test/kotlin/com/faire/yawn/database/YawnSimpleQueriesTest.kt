@@ -210,9 +210,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
 
             val applyOrders = session.query(BookTable)
                 .applyOrders(
-                    listOf(
-                        { YawnQueryOrder.asc(name) },
-                    ),
+                    listOf { YawnQueryOrder.asc(name) },
                 )
                 .list()
             assertOrderedBooks(applyOrders)
