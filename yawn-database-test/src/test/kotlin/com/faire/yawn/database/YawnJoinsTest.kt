@@ -293,8 +293,8 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
     fun `yawn deeply-nested join structure - people who's favorite books are not their own writing`() {
         transactor.open { session ->
             val results = session.query(PersonTable) { people ->
-                val favouriteBooks = join(people.favoriteBook)
-                val authors = join(favouriteBooks.author)
+                val favoriteBooks = join(people.favoriteBook)
+                val authors = join(favoriteBooks.author)
                 addNotEq(people.name, authors.name)
             }.list()
             assertThat(results.map { it.name }).containsExactlyInAnyOrder(
@@ -316,10 +316,10 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
 
         val results = transactor.open { session ->
             session.query(PersonTable) { people ->
-                val favouriteBooks = join(people.favoriteBook)
-                val favouriteBooksAuthors = join(favouriteBooks.author)
+                val favoriteBooks = join(people.favoriteBook)
+                val favoriteBooksAuthors = join(favoriteBooks.author)
                 addIn(people.name, authors)
-                addNotEq(people.name, favouriteBooksAuthors.name)
+                addNotEq(people.name, favoriteBooksAuthors.name)
             }.list()
         }
         assertThat(results.map { it.name }).containsExactlyInAnyOrder(
@@ -329,7 +329,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
     }
 
     @Test
-    fun `joins to the same table - book's authors favourite books`() {
+    fun `joins to the same table - book's authors favorite books`() {
         transactor.open { session ->
             val results = session.project(BookTable) { books ->
                 val authors = join(books.author)
@@ -353,7 +353,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
     }
 
     @Test
-    fun `multiple joins to the same table - book's authors favourite authors`() {
+    fun `multiple joins to the same table - book's authors favorite authors`() {
         transactor.open { session ->
             val results = session.project(BookTable) { books ->
                 val authors = join(books.author)
@@ -400,7 +400,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
     }
 
     @Test
-    fun `multiple joins to the same table using join references - book's authors favourite authors`() {
+    fun `multiple joins to the same table using join references - book's authors favorite authors`() {
         transactor.open { session ->
             val criteria = session.query(BookTable)
 

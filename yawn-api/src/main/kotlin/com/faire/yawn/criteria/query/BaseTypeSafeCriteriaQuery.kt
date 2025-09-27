@@ -26,11 +26,11 @@ abstract class BaseTypeSafeCriteriaQuery<SOURCE : Any, T : Any, DEF : YawnDef<SO
     /**
      * Creates a correlatable projected subquery that can be used on the parent query in criteria.
      *
-     * @param ST the type of the entity being subqueried.
-     * @param DEF the table definition of the entity being subqueried.
+     * @param ST the type of the entity being sub-queried.
+     * @param DEF the table definition of the entity being sub-queried.
      * @param PROJECTION the type of the projection being returned by the subquery.
      *
-     * @param tableDef the table definition of the entity being subqueried.
+     * @param tableDef the table definition of the entity being sub-queried.
      * @param lambda to be used to add criteria to the subquery.
      */
     inline fun <reified ST : Any, DEF : YawnTableDef<SOURCE, ST>, PROJECTION : Any?> createProjectedSubQuery(

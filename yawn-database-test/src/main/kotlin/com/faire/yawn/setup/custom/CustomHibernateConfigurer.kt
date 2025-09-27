@@ -39,7 +39,7 @@ internal object CustomHibernateConfigurer {
 
         // In-memory H2 database URL
         properties["hibernate.connection.driver_class"] = "org.h2.Driver"
-        properties["hibernate.connection.url"] = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false"
+        properties["hibernate.connection.url"] = "jdbc:h2:mem:test_db;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false"
         properties["hibernate.connection.username"] = "sa"
         properties["hibernate.connection.password"] = ""
 

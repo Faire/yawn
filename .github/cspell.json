@@ -1,0 +1,44 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "flagWords": [
+        "teh",
+        "hte"
+    ],
+    "ignorePaths": [
+        "**/build/**",
+        "**/gradle/**",
+        "**/gradlew",
+        "**/gradlew.bat"
+    ],
+    "dictionaries": [
+        "en_US",
+        "softwareTerms",
+        "dev_dictionary",
+        "library_dictionary",
+        "people_dictionary",
+        "words_dictionary"
+    ],
+    "dictionaryDefinitions": [
+        {
+            "name": "dev_dictionary",
+            "path": "./.cspell/dev.dictionary.txt",
+            "addWords": true
+        },
+        {
+            "name": "library_dictionary",
+            "path": "./.cspell/library.dictionary.txt",
+            "addWords": true
+        },
+        {
+            "name": "people_dictionary",
+            "path": "./.cspell/people.dictionary.txt",
+            "addWords": true
+        },
+        {
+            "name": "words_dictionary",
+            "path": "./.cspell/words.dictionary.txt",
+            "addWords": true
+        }
+    ]
+}

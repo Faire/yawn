@@ -364,7 +364,7 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
             val existsZero = session.query(BookTable) { books ->
                 val authors = join(books.author)
                 addEq(authors.name, "J.R.R. Tolkien")
-                addEq(books.name, "The Hobbit 2 - Electric Boogaloo")
+                addEq(books.name, "The Hobbit 2 - Reloaded")
             }.exists()
             assertThat(existsZero).isFalse()
         }

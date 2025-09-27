@@ -10,7 +10,7 @@ internal class YawnEntityPathTest {
     val context = YawnCompilationContext(withSubQuery = false)
 
     @Test
-    fun `can generate path with an unaliased root`() {
+    fun `can generate path with an un-aliased root`() {
         val noParentAlias = EntityWithoutRelationsTable.create(parent = RootTableDefParent)
         assertThat(noParentAlias.token.generatePath(context)).isEqualTo("token")
     }
@@ -41,6 +41,7 @@ internal class YawnEntityPathTest {
         assertThat(asField.path(subQueryCompilationContext)).isEqualTo("r.nonNullOneToOneYawn")
 
         val asJoinWithAlias = withParent.nonNullOneToOneYawn.joinTableDef(AssociationTableDefParent(asField))
+        // cSpell:ignore nnotoy - this is the alias given with the initials of "nonUllOneToOneYawn"
         assertThat(asJoinWithAlias.randomField.generatePath(subQueryCompilationContext)).isEqualTo("nnotoy.randomField")
     }
 }

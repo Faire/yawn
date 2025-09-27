@@ -428,9 +428,9 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
                 addEq(books.sales, theHobbitSales)
             }.uniqueResult()!!
             assertThat(theHobbit.name).isEqualTo("The Hobbit")
-            val lotrSales = byPaperbacksSold.single { it.name == "Lord of the Rings" }.sales
+            val lordOfTheRingsSales = byPaperbacksSold.single { it.name == "Lord of the Rings" }.sales
             val inQuery = session.query(BookTable) { books ->
-                addIn(books.sales, listOf(theHobbitSales, lotrSales))
+                addIn(books.sales, listOf(theHobbitSales, lordOfTheRingsSales))
             }.list().map { it.name }
             assertThat(inQuery).containsExactlyInAnyOrder("Lord of the Rings", "The Hobbit")
 
@@ -591,12 +591,12 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
     @Test
     fun `@ElementCollection of ids`() {
         transactor.open { session ->
-            val lotrId = session.query(BookTable) { books ->
+            val lordOfTheRingsId = session.query(BookTable) { books ->
                 addEq(books.name, "Lord of the Rings")
             }.uniqueResult()!!.id
             val publishers = session.query(PublisherTable) { publishers ->
                 val publishedBooks = join(publishers.publishedBookIds)
-                addEq(publishedBooks.elements, lotrId)
+                addEq(publishedBooks.elements, lordOfTheRingsId)
             }.list()
             assertThat(publishers).hasSize(1)
             assertThat(publishers.single().name).isEqualTo("HarperCollins")
@@ -622,7 +622,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
     fun `yawn equal or is null`() {
         transactor.open { session ->
             val result = session.query(BookTable) { books ->
-                addEqOrIsNull(books.notes, "Note for LoTR")
+                addEqOrIsNull(books.notes, "Note for Lord of the Rings")
             }.uniqueResult()!!
 
             assertThat(result.name).isEqualTo("Lord of the Rings")
@@ -671,7 +671,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
                 order(YawnQueryOrder(books.notes, ASC, nullPrecedence = LAST))
             }.list()
             assertThat(booksNullNotesLast.map { it.notes }).containsExactly(
-                "Note for LoTR",
+                "Note for Lord of the Rings",
                 "Note for The Hobbit and Harry Potter",
                 "Note for The Hobbit and Harry Potter",
                 null,
@@ -685,7 +685,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
                 null,
                 null,
                 null,
-                "Note for LoTR",
+                "Note for Lord of the Rings",
                 "Note for The Hobbit and Harry Potter",
                 "Note for The Hobbit and Harry Potter",
             )
@@ -693,7 +693,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
     }
 
     // notes about nullability:
-    // addEq(<anything>, null) - will never compile, because it is a footgun
+    // addEq(<anything>, null) - will never compile, because it is a foot-gun
     // addIsNull/addIsNotNull(<anything>) - will always compile, because we don't have
     //                                      advanced nullability checks on Yawn yet
     // please check our docs for more details:
