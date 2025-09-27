@@ -1,8 +1,8 @@
 package com.faire.yawn.processors
 
 import com.faire.yawn.YawnDef
-import com.faire.yawn.generators.`object`.YawnProjectionRefObjectGenerator
-import com.faire.yawn.generators.property.ProjectionColumnDefGenerator
+import com.faire.yawn.generators.objects.YawnProjectionRefObjectGenerator
+import com.faire.yawn.generators.properties.ProjectionColumnDefGenerator
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjectionDef
 import com.faire.yawn.util.YawnContext

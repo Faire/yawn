@@ -26,7 +26,7 @@ private constructor(
 
     private fun ensureUniqueProjection() {
         if (projectionCalled) {
-            throw IllegalStateException("Projection already called")
+            error("Projection already called")
         } else {
             projectionCalled = true
         }

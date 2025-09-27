@@ -1,4 +1,4 @@
-package com.faire.yawn.generators.type
+package com.faire.yawn.generators.types
 
 import com.faire.yawn.util.YawnContext
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration

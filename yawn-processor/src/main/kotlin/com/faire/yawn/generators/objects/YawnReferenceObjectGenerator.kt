@@ -1,4 +1,4 @@
-package com.faire.yawn.generators.`object`
+package com.faire.yawn.generators.objects
 
 import com.faire.yawn.util.YawnContext
 import com.squareup.kotlinpoet.TypeSpec

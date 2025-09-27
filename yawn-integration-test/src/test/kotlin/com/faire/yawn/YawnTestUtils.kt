@@ -111,7 +111,9 @@ internal object YawnTestUtils {
         inline fun <reified C> hasField(columnName: String) {
             val properties = generatedClass.memberProperties
             val expectedTypeAsString = getTypeStringWithSourceReplaced<C>(sourcePlaceholderName)
-            assertThat(properties).anyMatch { it.name == columnName && it.returnType.toString() == expectedTypeAsString }
+            assertThat(
+                properties,
+            ).anyMatch { it.name == columnName && it.returnType.toString() == expectedTypeAsString }
         }
 
         fun hasNoField(columnName: String) {

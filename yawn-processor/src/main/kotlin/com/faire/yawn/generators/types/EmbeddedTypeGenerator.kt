@@ -1,8 +1,8 @@
-package com.faire.yawn.generators.type
+package com.faire.yawn.generators.types
 
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.generators.addGeneratedAnnotation
-import com.faire.yawn.generators.property.ColumnDefGenerator
+import com.faire.yawn.generators.properties.ColumnDefGenerator
 import com.faire.yawn.util.YawnContext
 import com.faire.yawn.util.YawnNamesGenerator.generateEmbeddedDefClassName
 import com.faire.yawn.util.YawnNamesGenerator.generateInternalPathName
@@ -54,7 +54,7 @@ import com.squareup.kotlinpoet.ksp.toClassName
  * this class, but rather to allow for queries to the object with the embedded property to be able to access
  * the columns on the embedded def properly.
  *
- * A column definition will be generated using [com.faire.yawn.generators.property.EmbeddedDefGenerator] using this
+ * A column definition will be generated using [com.faire.yawn.generators.properties.EmbeddedDefGenerator] using this
  * type.
  */
 internal object EmbeddedTypeGenerator : YawnEmbeddableTypeGenerator {

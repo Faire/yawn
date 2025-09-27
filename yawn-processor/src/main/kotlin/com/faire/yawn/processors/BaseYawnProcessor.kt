@@ -4,7 +4,7 @@ import com.faire.ksp.getEffectiveVisibility
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnTableDefParent
 import com.faire.yawn.generators.addGeneratedAnnotation
-import com.faire.yawn.generators.`object`.YawnReferenceObjectGenerator
+import com.faire.yawn.generators.objects.YawnReferenceObjectGenerator
 import com.faire.yawn.util.YawnContext
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies

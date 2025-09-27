@@ -2,7 +2,7 @@ package com.faire.yawn.util
 
 /**
  * This is an abstraction to simplify passing parameters as a list of arguments to Kotlin Poet.
- * See [com.faire.yawn.generators.property.YawnPropertyGenerator.generatePropertySpec] for more details.
+ * See [com.faire.yawn.generators.properties.YawnPropertyGenerator.generatePropertySpec] for more details.
  */
 internal data class YawnParameter(
     val format: String, // %N, %S, %T, etc., or combinations thereof

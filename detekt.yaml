@@ -23,35 +23,20 @@ complexity:
         excludes:
     LongParameterList:
         active: false
-        ignoreDefaultParameters: false
     MethodOverloading:
         active: false
-        threshold: 6
     NestedBlockDepth:
         active: false
-        threshold: 4
     StringLiteralDuplication:
         active: false
-        threshold: 3
-        ignoreAnnotation: true
-        excludeStringsWithLessThan5Characters: true
-        ignoreStringsRegex: $^
     TooManyFunctions:
         active: false
-        thresholdInFiles: 11
-        thresholdInClasses: 11
-        thresholdInInterfaces: 11
-        thresholdInObjects: 11
-        thresholdInEnums: 11
-        ignoreDeprecated: false
-        ignorePrivate: false
 
 empty-blocks:
     EmptyTryBlock:
         active: true
     EmptyCatchBlock:
         active: true
-        allowedExceptionNameRegex: ^(_|(ignore|expected).*)
     EmptyClassBlock:
         active: true
     EmptyDefaultConstructor:
@@ -158,20 +143,19 @@ formatting:
     android: false
     autoCorrect: true
     AnnotationOnSeparateLine:
-        active: false
+        active: true
     AnnotationSpacing:
-        active: false
+        active: true
     ArgumentListWrapping:
-        active: false
+        active: true
     ChainWrapping:
-        active: false
+        active: true
         autoCorrect: true
     CommentSpacing:
         active: true
         autoCorrect: true
     EnumEntryNameCase:
         active: true
-        ignoreAnnotated: [kotlin.Deprecated]
     # Use MatchingDeclarationName instead.
     Filename:
         active: false
@@ -188,7 +172,6 @@ formatting:
     # Use MaxLineLength instead.
     MaximumLineLength:
         active: false
-        maxLineLength: 160
     ModifierOrdering:
         active: true
         autoCorrect: true
@@ -235,7 +218,7 @@ formatting:
         active: true
         autoCorrect: true
     PackageName:
-        active: false
+        active: true
         autoCorrect: true
     ParameterListWrapping:
         active: true
@@ -283,8 +266,6 @@ formatting:
         active: true
     PropertyWrapping:
         active: true
-        excludes:
-            - "**/*Test.kt"
     FunctionReturnTypeSpacing:
         active: true
     BlockCommentInitialStarAlignment:
@@ -298,27 +279,25 @@ naming:
         active: true
         classPattern: "[A-Z$][a-zA-Z0-9$]*"
     ConstructorParameterNaming:
-        active: false
+        active: true
         parameterPattern: "[a-z][A-Za-z0-9]*"
         privateParameterPattern: "[a-z][A-Za-z0-9]*"
         excludeClassPattern: $^
     EnumNaming:
-        active: false
+        active: true
         enumEntryPattern: ^[A-Z][_a-zA-Z0-9]*
     ForbiddenClassName:
         active: false
     FunctionMaxLength:
         active: false
-        maximumFunctionNameLength: 30
     FunctionMinLength:
         active: false
-        minimumFunctionNameLength: 3
     FunctionNaming:
-        active: false
+        active: true
         functionPattern: ^([a-z$][a-zA-Z$0-9]*)|(`.*`)$
         excludeClassPattern: $^
     FunctionParameterNaming:
-        active: false
+        active: true
         parameterPattern: "[a-z][A-Za-z0-9]*"
         excludeClassPattern: $^
     InvalidPackageDeclaration:
@@ -326,7 +305,7 @@ naming:
     MatchingDeclarationName:
         active: true
     MemberNameEqualsClassName:
-        active: false
+        active: true
         ignoreOverridden: true
     NoNameShadowing:
         active: true
@@ -339,18 +318,16 @@ naming:
         active: true
         packagePattern: ^[a-z]+(\.[a-z][a-zA-Z0-9_]*)*$
     TopLevelPropertyNaming:
-        active: false
+        active: true
         constantPattern: "[A-Z][_A-Z0-9]*"
         propertyPattern: "[A-Za-z][_A-Za-z0-9]*"
         privatePropertyPattern: (_)?[A-Za-z][A-Za-z0-9]*
     VariableMaxLength:
         active: false
-        maximumVariableNameLength: 64
     VariableMinLength:
         active: false
-        minimumVariableNameLength: 1
     VariableNaming:
-        active: false
+        active: true
         variablePattern: "[a-z][A-Za-z0-9]*"
         privateVariablePattern: (_)?[a-z][A-Za-z0-9]*
         excludeClassPattern: $^
@@ -374,36 +351,33 @@ potential-bugs:
     CastToNullableType:
         active: false
     DoubleMutabilityForCollection:
-        active: false
+        active: true
     EqualsAlwaysReturnsTrueOrFalse:
         active: true
     EqualsWithHashCodeExist:
-        active: false
+        active: true
     ExplicitGarbageCollectionCall:
         active: true
     HasPlatformType:
         active: true
-        excludes: ["**/*Test.kt"]
     IgnoredReturnValue:
         active: true
     ImplicitDefaultLocale:
-        active: false
+        active: true
     InvalidRange:
         active: true
     IteratorHasNextCallsNextMethod:
-        active: false
+        active: true
     IteratorNotThrowingNoSuchElementException:
-        active: false
+        active: true
     LateinitUsage:
         active: false
-        ignoreAnnotated: [""]
-        ignoreOnClassesPattern: ""
     MapGetWithNotNullAssertionOperator:
         active: true
     MissingPackageDeclaration:
         active: true
     UnconditionalJumpStatementInLoop:
-        active: false
+        active: true
     UnnecessaryNotNullOperator:
         active: true
     UnnecessarySafeCall:
@@ -411,9 +385,9 @@ potential-bugs:
     UnreachableCode:
         active: true
     UnsafeCallOnNullableType:
-        active: false
+        active: true
     UnsafeCast:
-        active: false
+        active: true
     UselessPostfixExpression:
         active: true
     WrongEqualsTypeParameter:
@@ -427,7 +401,6 @@ style:
         active: false
     DataClassContainsFunctions:
         active: false
-        conversionFunctionPrefix: [to]
     DataClassShouldBeImmutable:
         active: false
     DestructuringDeclarationWithTooManyEntries:
@@ -440,44 +413,24 @@ style:
         active: true
     ExpressionBodySyntax:
         active: false
-        includeLineWrapping: false
     ForbiddenComment:
         active: false
-        comments:
-            -   reason: ""
-                value: "TODO:"
-            -   reason: ""
-                value: "FIXME:"
-            -   reason: ""
-                value: "STOPSHIP:"
     # We use PreventBannedImports instead which has autocorrect.
     ForbiddenImport:
         active: false
-        imports: []
     ForbiddenMethodCall:
         active: false
     ForbiddenVoid:
         active: false
     FunctionOnlyReturningConstant:
         active: false
-        ignoreOverridableFunction: true
-        excludedFunctions: [describeContents]
     LoopWithTooManyJumpStatements:
         active: false
-        maxJumpCount: 1
     MagicNumber:
         active: false
-        ignoreNumbers: ["-1", "0", "1", "2"]
-        ignoreHashCodeFunction: true
-        ignorePropertyDeclaration: false
-        ignoreConstantDeclaration: true
-        ignoreCompanionObjectPropertyDeclaration: true
-        ignoreAnnotation: false
-        ignoreNamedArgument: true
-        ignoreEnums: false
     BracesOnIfStatements:
-        active: false
-        singleLine: always
+        active: true
+        singleLine: consistent
         multiLine: always
     MaxLineLength:
         active: true
@@ -486,7 +439,7 @@ style:
         excludeImportStatements: true
         excludeCommentStatements: false
     MayBeConst:
-        active: false
+        active: true
     ModifierOrder:
         active: true
     MultilineLambdaItParameter:
@@ -497,7 +450,7 @@ style:
     NewLineAtEndOfFile:
         active: false
     NoTabs:
-        active: false
+        active: true
     ObjectLiteralToLambda:
         active: true
     OptionalAbstractKeyword:
@@ -512,10 +465,6 @@ style:
         active: true
     ReturnCount:
         active: false
-        max: 2
-        excludedFunctions: [equals]
-        excludeLabeled: false
-        excludeReturnFromLambda: true
     SafeCast:
         active: true
     SerialVersionUIDInSerializableClass:
@@ -524,7 +473,6 @@ style:
         active: false
     ThrowsCount:
         active: false
-        max: 2
     TrailingWhitespace:
         active: true
     UnnecessaryFilter:
@@ -533,37 +481,34 @@ style:
         active: false
     UnnecessaryAbstractClass:
         active: false
-        ignoreAnnotated: [dagger.Module]
     UnnecessaryApply:
         active: false
     UnnecessaryInheritance:
         active: false
     UnnecessaryAnnotationUseSiteTarget:
-        active: false
+        active: true
     UnnecessaryLet:
         active: true
     UnnecessaryParentheses:
-        active: false
+        active: true
     UntilInsteadOfRangeTo:
         active: false
     UnusedImports:
         # Has false positives with type resolution enabled. Redundant with NoUnusedImports rule.
         active: false
     UnusedPrivateClass:
-        active: false
+        active: true
     UnusedPrivateMember:
         active: true
-        allowedNames: (_|i|ignored|expected|serialVersionUID|session|module)
     # Replaced by UseFirstOrNullInsteadOfFind
     UseAnyOrNoneInsteadOfFind:
-        active: false
+        active: true
     UseCheckNotNull:
         active: true
     UseCheckOrError:
-        active: false
+        active: true
     UseDataClass:
         active: false
-        ignoreAnnotated: [""]
     UseIfInsteadOfWhen:
         active: false
     UseIsNullOrEmpty:
@@ -583,13 +528,10 @@ style:
         ignoreAnnotated: [Column, Inject, JoinColumn, OneToMany, Parameter]
     WildcardImport:
         active: true
-        excludeImports: [java.util.*, kotlinx.android.synthetic.*]
     UnusedPrivateProperty:
         active: true
-        allowedNames: _|ignored|expected|serialVersionUID|module|i|gson|env
     UnusedParameter:
         active: true
-        allowedNames: session|witness
 
 coroutines:
     active: false
