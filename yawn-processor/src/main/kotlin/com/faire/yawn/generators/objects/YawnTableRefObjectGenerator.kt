@@ -23,7 +23,7 @@ import javax.persistence.Table
 
 internal object YawnTableRefObjectGenerator : YawnReferenceObjectGenerator {
     /**
-     * Generate a [com.faire.yawn.YawnTableRef] object for the generated [com.faire.yawn.YawnTableRef].
+     * Generate a [com.faire.yawn.YawnTableRef] objetc for the generated [com.faire.yawn.YawnTableRef].
      * This acts as a singleton for the top level (non-aliased) table and is referenced by the user to perform queries.
      *
      * The output code will look like:
