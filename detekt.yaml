@@ -415,7 +415,7 @@ style:
         active: false
     ForbiddenComment:
         active: false
-    # We use PreventBannedImports instead which has autocorrect.
+    # We use PreventBannedImports instead which has auto-correct.
     ForbiddenImport:
         active: false
     ForbiddenMethodCall:

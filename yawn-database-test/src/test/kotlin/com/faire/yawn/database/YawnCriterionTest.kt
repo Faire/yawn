@@ -393,7 +393,7 @@ internal class YawnCriterionTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             val results = session.query(BookTable) { books ->
                 add(
-                    eqOrIsNull(books.notes, "Note for LoTR"),
+                    eqOrIsNull(books.notes, "Note for Lord of the Rings"),
                 )
             }.list()
 

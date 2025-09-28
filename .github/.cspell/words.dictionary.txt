@@ -1,0 +1,5 @@
+# actual english words that are not present on cspell's standard dictionary
+configurer # a person, or thing who configures something
+finalizer # a person, thing, or event which finalizes a situation or process
+metamodel # a model that describes other models
+superinterface # an interface that is extended by another interface

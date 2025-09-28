@@ -1,0 +1,22 @@
+name: spell_checker
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm -g install cspell@9.2.1
+      # spell check
+      - run: ./scripts/cspell-run.sh
+      # verify dictionary words are sorted and not orphan
+      - run: ./scripts/cspell-verify.sh

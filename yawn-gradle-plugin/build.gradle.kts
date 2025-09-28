@@ -35,7 +35,7 @@ val dumpPluginTestClasspathEntries by tasks.registering(Task::class) {
     outputs.file(pluginTestPluginClasspathEntriesFile)
 
     // Create a file collection, otherwise the task fails configuration-cache checks because we can't serialize
-    // configuration references. :sadge:
+    // configuration references.
     val configurationFiles = files(project.configurations.named("testProjectPluginClasspath"))
 
     doLast {

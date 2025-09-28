@@ -34,7 +34,7 @@ internal class BookFixtures(
             val randomHouse = createPublisher { name = "Random House" }
             val coOwned = createPublisher { name = "Co-Owned" }
 
-            val lotr = createBook(tolkien) {
+            val lordOfTheRings = createBook(tolkien) {
                 name = "Lord of the Rings"
                 genres = setOf(FANTASY, ADVENTURE)
                 originalLanguage = ENGLISH
@@ -53,7 +53,7 @@ internal class BookFixtures(
                     isbn = "978-3-16-148410-0",
                 )
 
-                notes = "Note for LoTR"
+                notes = "Note for Lord of the Rings"
             }
             createBook(tolkien) {
                 name = "The Hobbit"
@@ -138,7 +138,7 @@ internal class BookFixtures(
             createPerson {
                 name = "Paul Duchesne"
                 email = EmailAddress("paul.duchesne@faire.com")
-                favoriteBook = lotr
+                favoriteBook = lordOfTheRings
                 favoriteAuthor = andersen
             }
             createPerson {
@@ -148,7 +148,7 @@ internal class BookFixtures(
                 favoriteAuthor = tolkien
             }
             update(rowling) {
-                favoriteBook = lotr
+                favoriteBook = lordOfTheRings
                 favoriteAuthor = tolkien
             }
             update(tolkien) {

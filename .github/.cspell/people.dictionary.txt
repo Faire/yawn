@@ -1,0 +1,9 @@
+# usernames, handles and names of users mentioned in the codebase
+arturbosch # github.com/arturbosch
+budan # github.com/QuinnB73
+duchesne # github.com/PJDuchesne
+luan # github.com/luanpotter
+navatwo # github.com/nava2
+nico # github.com/luanpotter
+vanniktech # github.com/vanniktech
+zacsweers # github.com/zacsweers
