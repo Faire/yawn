@@ -1,17 +1,17 @@
-name: spell_checker
+name: spell-check
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  test:
+  spell-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
