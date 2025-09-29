@@ -27,6 +27,7 @@ kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 
 vanniktech-maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "vanniktech" }
 jetbrains-dokka = { module = "org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin", version.ref = "dokka" }
+gradle-plugin-publish = { module = "com.gradle.publish:plugin-publish-plugin", version = "1.2.1" }
 
 # Hibernate
 # KSP
@@ -68,3 +69,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+
