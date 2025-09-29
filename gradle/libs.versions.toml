@@ -69,4 +69,3 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-
