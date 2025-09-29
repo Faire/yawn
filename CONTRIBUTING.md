@@ -27,7 +27,7 @@
 - If you'd like to add a feature to the library that doesn't already exist, feel free to describe the feature in a new
   [GitHub issue](https://github.com/faire/yawn/issues).
 - If you'd like to implement the new feature, please wait for feedback from the project maintainers before spending too much time writing the code.
-  In some cases, enhancements may not align well with the project future development direction.
+  In some cases, enhancements may not align well with the project's future development direction.
 - Implement the code for the new feature and please read the [How To](#how-to-contribute).
 
 
