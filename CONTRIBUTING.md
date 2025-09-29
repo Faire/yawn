@@ -139,5 +139,5 @@ Allowed types are:
 
 If you introduce a **breaking change** the conventional commit type MUST end with an exclamation mark (e.g. `feat!: Remove method XXX`).
 
-The sentence of the commit (after the `:`) should start with a verb in the present tense; as an example, think that the commit message will complete the
+The sentence of the commit (after the `:`) should start with a verb in the present tense; as a rule of thumb, think that the commit message will complete the
 sentence "This commit will ...". For example, "Add support for ..." or "Fix bug with ...".
