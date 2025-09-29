@@ -1,6 +1,7 @@
 # terms related to programming or keywords on specific languages
 allprojects # part of the gradle DSL
 autodetection # a feature in junit to automatically detect tests
+gradlew # the gradle wrapper script
 ilike # sql term meaning "case-insensitive like"
 jvmargs # a gradle property to set jvm arguments
 lateinit # keyword in Kotlin
