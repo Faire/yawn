@@ -63,3 +63,16 @@ tasks.test {
 
     dependsOn(dumpPluginTestClasspathEntries)
 }
+
+gradlePlugin {
+    website = "https://github.com/Faire/yawn"
+    vcsUrl = "https://github.com/Faire/yawn.git"
+
+    plugins {
+        named("com.faire.yawn") {
+            displayName = "yawn"
+            description = "Automatically configures Yawn's KSP processor to generate Yawn models."
+            tags = listOf("yawn", "ksp", "model", "orm", "database", "faire")
+        }
+    }
+}
