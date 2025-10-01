@@ -101,6 +101,25 @@ you can use other tools to circumvent this. For example, the extension [Rewrap](
 [configured with](https://stkb.github.io/Rewrap/configuration/) `rewrap.wrappingColumn=160`, will do the trick for you.
 
 
+#### YAML Lint
+
+We use [prettier](https://prettier.io/) for YAML formatting and [actionlint](https://github.com/rhysd/actionlint) for GitHub Actions workflow validation.
+
+To run YAML linting locally:
+
+```bash
+# Check YAML files
+scripts/yaml-lint-run.sh
+
+# Check and auto-fix YAML formatting issues
+scripts/yaml-lint-run.sh --fix
+```
+
+The script will automatically check for and install the required tools (prettier and actionlint) if they're not already available.
+
+The prettier configuration is defined in `.github/yaml-lint/.prettierrc.yml`.
+
+
 ### Performing changes
 
 - Create a new local branch from `main` (e.g. `git checkout -b my-new-feature`)

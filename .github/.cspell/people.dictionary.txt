@@ -5,5 +5,6 @@ duchesne # github.com/PJDuchesne
 luan # github.com/luanpotter
 navatwo # github.com/nava2
 nico # github.com/luanpotter
+rhysd # github.com/rhysd
 vanniktech # github.com/vanniktech
 zacsweers # github.com/zacsweers

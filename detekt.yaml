@@ -1,537 +1,537 @@
 complexity:
+  active: true
+  ComplexCondition:
     active: true
-    ComplexCondition:
-        active: true
-        threshold: 9
-    ComplexInterface:
-        active: true
-        threshold: 64
-        includeStaticDeclarations: false
-    CyclomaticComplexMethod:
-        active: true
-        threshold: 180
-        ignoreSingleWhenExpression: false
-        ignoreSimpleWhenEntries: false
-    LabeledExpression:
-        active: false
-    LargeClass:
-        active: true
-        threshold: 1280
-    LongMethod:
-        active: true
-        threshold: 320
-        excludes:
-    LongParameterList:
-        active: false
-    MethodOverloading:
-        active: false
-    NestedBlockDepth:
-        active: false
-    StringLiteralDuplication:
-        active: false
-    TooManyFunctions:
-        active: false
+    threshold: 9
+  ComplexInterface:
+    active: true
+    threshold: 64
+    includeStaticDeclarations: false
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 180
+    ignoreSingleWhenExpression: false
+    ignoreSimpleWhenEntries: false
+  LabeledExpression:
+    active: false
+  LargeClass:
+    active: true
+    threshold: 1280
+  LongMethod:
+    active: true
+    threshold: 320
+    excludes:
+  LongParameterList:
+    active: false
+  MethodOverloading:
+    active: false
+  NestedBlockDepth:
+    active: false
+  StringLiteralDuplication:
+    active: false
+  TooManyFunctions:
+    active: false
 
 empty-blocks:
-    EmptyTryBlock:
-        active: true
-    EmptyCatchBlock:
-        active: true
-    EmptyClassBlock:
-        active: true
-    EmptyDefaultConstructor:
-        active: true
-    EmptyDoWhileBlock:
-        active: true
-    EmptyElseBlock:
-        active: true
-    EmptyFinallyBlock:
-        active: true
-    EmptyForBlock:
-        active: true
-    EmptyFunctionBlock:
-        active: true
-        ignoreOverridden: true
-    EmptyIfBlock:
-        active: true
-    EmptyInitBlock:
-        active: true
-    EmptyKtFile:
-        active: true
-        excludes: ["**/build.gradle.kts"]
-    EmptySecondaryConstructor:
-        active: true
-    EmptyWhenBlock:
-        active: true
-    EmptyWhileBlock:
-        active: true
+  EmptyTryBlock:
+    active: true
+  EmptyCatchBlock:
+    active: true
+  EmptyClassBlock:
+    active: true
+  EmptyDefaultConstructor:
+    active: true
+  EmptyDoWhileBlock:
+    active: true
+  EmptyElseBlock:
+    active: true
+  EmptyFinallyBlock:
+    active: true
+  EmptyForBlock:
+    active: true
+  EmptyFunctionBlock:
+    active: true
+    ignoreOverridden: true
+  EmptyIfBlock:
+    active: true
+  EmptyInitBlock:
+    active: true
+  EmptyKtFile:
+    active: true
+    excludes: ["**/build.gradle.kts"]
+  EmptySecondaryConstructor:
+    active: true
+  EmptyWhenBlock:
+    active: true
+  EmptyWhileBlock:
+    active: true
 
 exceptions:
-    active: false
+  active: false
 
 FaireRuleSet:
+  active: true
+  AlwaysUseIsTrueOrIsFalse:
     active: true
-    AlwaysUseIsTrueOrIsFalse:
-        active: true
-        autoCorrect: true
-    DoNotAccessVisibleForTesting:
-        active: true
-        excludes: ["**/*Test.kt"]
-    DoNotSplitByRegex:
-        active: true
-    DoNotUseDirectReceiverReferenceInsideWith:
-        active: true
-    DoNotUseHasSizeForEmptyListInAssert:
-        active: true
-        autoCorrect: true
-    DoNotUseIsEqualToWhenArgumentIsOne:
-        active: false # we use DoNotUseIsOneAssertions instead
-    DoNotUseIsOneAssertions:
-        active: true
-        autoCorrect: true
-    DoNotUseIsEqualToWhenArgumentIsZero:
-        active: false # we use DoNotUseIsZeroAssertions instead
-    DoNotUseIsZeroAssertions:
-        active: true
-        autoCorrect: true
-    DoNotUsePropertyAccessInAssert:
-        active: true
-        autoCorrect: true
-    DoNotUseSingleOnFilter:
-        active: true
-        autoCorrect: true
-    DoNotUseSizePropertyInAssert:
-        active: true
-    GetOrDefaultShouldBeReplacedWithGetOrElse:
-        active: true
-    NoDuplicateKeysInMapOf:
-        active: true
-    NoExtensionFunctionOnNullableReceiver:
-        active: true
-    NoNonPrivateGlobalVariables:
-        active: true
-    NoNullableLambdaWithDefaultNull:
-        active: true
-    NoPairWithAmbiguousTypes:
-        active: true
-    PreferIgnoreCase:
-        active: true
-        autoCorrect: true
-    PreventBannedImports:
-        # until we have an import to prevent, just disable this rule
-        active: false
-        autoCorrect: true
-    ReturnValueOfLetMustBeUsed:
-        active: true
-    UseEntriesInsteadOfValuesOnEnum:
-        active: true
-    UseFirstOrNullInsteadOfFind:
-        active: true
-        autoCorrect: true
-    UseMapNotNullInsteadOfFilterNotNull:
-        active: true
-        autoCorrect: true
-    UseOfCollectionInsteadOfEmptyCollection:
-        active: true
-        autoCorrect: true
-    UseSetInsteadOfListToSet:
-        active: true
-        autoCorrect: true
+    autoCorrect: true
+  DoNotAccessVisibleForTesting:
+    active: true
+    excludes: ["**/*Test.kt"]
+  DoNotSplitByRegex:
+    active: true
+  DoNotUseDirectReceiverReferenceInsideWith:
+    active: true
+  DoNotUseHasSizeForEmptyListInAssert:
+    active: true
+    autoCorrect: true
+  DoNotUseIsEqualToWhenArgumentIsOne:
+    active: false # we use DoNotUseIsOneAssertions instead
+  DoNotUseIsOneAssertions:
+    active: true
+    autoCorrect: true
+  DoNotUseIsEqualToWhenArgumentIsZero:
+    active: false # we use DoNotUseIsZeroAssertions instead
+  DoNotUseIsZeroAssertions:
+    active: true
+    autoCorrect: true
+  DoNotUsePropertyAccessInAssert:
+    active: true
+    autoCorrect: true
+  DoNotUseSingleOnFilter:
+    active: true
+    autoCorrect: true
+  DoNotUseSizePropertyInAssert:
+    active: true
+  GetOrDefaultShouldBeReplacedWithGetOrElse:
+    active: true
+  NoDuplicateKeysInMapOf:
+    active: true
+  NoExtensionFunctionOnNullableReceiver:
+    active: true
+  NoNonPrivateGlobalVariables:
+    active: true
+  NoNullableLambdaWithDefaultNull:
+    active: true
+  NoPairWithAmbiguousTypes:
+    active: true
+  PreferIgnoreCase:
+    active: true
+    autoCorrect: true
+  PreventBannedImports:
+    # until we have an import to prevent, just disable this rule
+    active: false
+    autoCorrect: true
+  ReturnValueOfLetMustBeUsed:
+    active: true
+  UseEntriesInsteadOfValuesOnEnum:
+    active: true
+  UseFirstOrNullInsteadOfFind:
+    active: true
+    autoCorrect: true
+  UseMapNotNullInsteadOfFilterNotNull:
+    active: true
+    autoCorrect: true
+  UseOfCollectionInsteadOfEmptyCollection:
+    active: true
+    autoCorrect: true
+  UseSetInsteadOfListToSet:
+    active: true
+    autoCorrect: true
 
 formatting:
+  active: true
+  android: false
+  autoCorrect: true
+  AnnotationOnSeparateLine:
     active: true
-    android: false
+  AnnotationSpacing:
+    active: true
+  ArgumentListWrapping:
+    active: true
+  ChainWrapping:
+    active: true
     autoCorrect: true
-    AnnotationOnSeparateLine:
-        active: true
-    AnnotationSpacing:
-        active: true
-    ArgumentListWrapping:
-        active: true
-    ChainWrapping:
-        active: true
-        autoCorrect: true
-    CommentSpacing:
-        active: true
-        autoCorrect: true
-    EnumEntryNameCase:
-        active: true
-    # Use MatchingDeclarationName instead.
-    Filename:
-        active: false
-    FinalNewline:
-        active: true
-        autoCorrect: true
-    ImportOrdering:
-        active: true
-        autoCorrect: true
-    Indentation:
-        active: true
-        autoCorrect: true
-        indentSize: 4
-    # Use MaxLineLength instead.
-    MaximumLineLength:
-        active: false
-    ModifierOrdering:
-        active: true
-        autoCorrect: true
-    MultiLineIfElse:
-        active: true
-        autoCorrect: true
-    NoAnonymousArgumentAfterNamedArguments:
-        active: true
-    NoBlankLineBeforeRbrace:
-        active: true
-        autoCorrect: true
-    NoConsecutiveBlankLines:
-        active: true
-        autoCorrect: true
-    NoCreateWithPrefix:
-        active: true
-    NoEmptyClassBody:
-        active: true
-        autoCorrect: true
-    NoEmptyFirstLineInMethodBlock:
-        active: true
-    NoLineBreakAfterElse:
-        active: true
-        autoCorrect: true
-    NoLineBreakBeforeAssignment:
-        active: true
-        autoCorrect: true
-    NoMultipleSpaces:
-        active: true
-        autoCorrect: true
-    NoSemicolons:
-        active: true
-        autoCorrect: true
-    NoTrailingSpaces:
-        active: true
-        autoCorrect: true
-    NoUnitReturn:
-        active: true
-        autoCorrect: true
-    NoUnusedImports:
-        active: true
-        autoCorrect: true
-    NoWildcardImports:
-        active: true
-        autoCorrect: true
-    PackageName:
-        active: true
-        autoCorrect: true
-    ParameterListWrapping:
-        active: true
-        autoCorrect: true
-    SpacingAroundAngleBrackets:
-        active: true
-        autoCorrect: true
-    SpacingAroundColon:
-        active: true
-        autoCorrect: true
-    SpacingAroundComma:
-        active: true
-        autoCorrect: true
-    SpacingAroundCurly:
-        active: true
-        autoCorrect: true
-    SpacingAroundKeyword:
-        active: true
-        autoCorrect: true
-    SpacingAroundOperators:
-        active: true
-        autoCorrect: true
-    SpacingAroundParens:
-        active: true
-        autoCorrect: true
-    SpacingAroundRangeOperator:
-        active: true
-        autoCorrect: true
-    SpacingBetweenDeclarationsWithAnnotations:
-        active: false
-    SpacingBetweenDeclarationsWithComments:
-        active: false
-    StringTemplate:
-        active: true
-        autoCorrect: true
-    TrailingCommaOnCallSite:
-        active: true
-        autoCorrect: true
-    TrailingCommaOnDeclarationSite:
-        active: true
-        autoCorrect: true
-    Wrapping:
-        active: true
-    UnnecessaryParenthesesBeforeTrailingLambda:
-        active: true
-    PropertyWrapping:
-        active: true
-    FunctionReturnTypeSpacing:
-        active: true
-    BlockCommentInitialStarAlignment:
-        active: true
-    CommentWrapping:
-        active: true
+  CommentSpacing:
+    active: true
+    autoCorrect: true
+  EnumEntryNameCase:
+    active: true
+  # Use MatchingDeclarationName instead.
+  Filename:
+    active: false
+  FinalNewline:
+    active: true
+    autoCorrect: true
+  ImportOrdering:
+    active: true
+    autoCorrect: true
+  Indentation:
+    active: true
+    autoCorrect: true
+    indentSize: 4
+  # Use MaxLineLength instead.
+  MaximumLineLength:
+    active: false
+  ModifierOrdering:
+    active: true
+    autoCorrect: true
+  MultiLineIfElse:
+    active: true
+    autoCorrect: true
+  NoAnonymousArgumentAfterNamedArguments:
+    active: true
+  NoBlankLineBeforeRbrace:
+    active: true
+    autoCorrect: true
+  NoConsecutiveBlankLines:
+    active: true
+    autoCorrect: true
+  NoCreateWithPrefix:
+    active: true
+  NoEmptyClassBody:
+    active: true
+    autoCorrect: true
+  NoEmptyFirstLineInMethodBlock:
+    active: true
+  NoLineBreakAfterElse:
+    active: true
+    autoCorrect: true
+  NoLineBreakBeforeAssignment:
+    active: true
+    autoCorrect: true
+  NoMultipleSpaces:
+    active: true
+    autoCorrect: true
+  NoSemicolons:
+    active: true
+    autoCorrect: true
+  NoTrailingSpaces:
+    active: true
+    autoCorrect: true
+  NoUnitReturn:
+    active: true
+    autoCorrect: true
+  NoUnusedImports:
+    active: true
+    autoCorrect: true
+  NoWildcardImports:
+    active: true
+    autoCorrect: true
+  PackageName:
+    active: true
+    autoCorrect: true
+  ParameterListWrapping:
+    active: true
+    autoCorrect: true
+  SpacingAroundAngleBrackets:
+    active: true
+    autoCorrect: true
+  SpacingAroundColon:
+    active: true
+    autoCorrect: true
+  SpacingAroundComma:
+    active: true
+    autoCorrect: true
+  SpacingAroundCurly:
+    active: true
+    autoCorrect: true
+  SpacingAroundKeyword:
+    active: true
+    autoCorrect: true
+  SpacingAroundOperators:
+    active: true
+    autoCorrect: true
+  SpacingAroundParens:
+    active: true
+    autoCorrect: true
+  SpacingAroundRangeOperator:
+    active: true
+    autoCorrect: true
+  SpacingBetweenDeclarationsWithAnnotations:
+    active: false
+  SpacingBetweenDeclarationsWithComments:
+    active: false
+  StringTemplate:
+    active: true
+    autoCorrect: true
+  TrailingCommaOnCallSite:
+    active: true
+    autoCorrect: true
+  TrailingCommaOnDeclarationSite:
+    active: true
+    autoCorrect: true
+  Wrapping:
+    active: true
+  UnnecessaryParenthesesBeforeTrailingLambda:
+    active: true
+  PropertyWrapping:
+    active: true
+  FunctionReturnTypeSpacing:
+    active: true
+  BlockCommentInitialStarAlignment:
+    active: true
+  CommentWrapping:
+    active: true
 
 naming:
+  active: true
+  ClassNaming:
     active: true
-    ClassNaming:
-        active: true
-        classPattern: "[A-Z$][a-zA-Z0-9$]*"
-    ConstructorParameterNaming:
-        active: true
-        parameterPattern: "[a-z][A-Za-z0-9]*"
-        privateParameterPattern: "[a-z][A-Za-z0-9]*"
-        excludeClassPattern: $^
-    EnumNaming:
-        active: true
-        enumEntryPattern: ^[A-Z][_a-zA-Z0-9]*
-    ForbiddenClassName:
-        active: false
-    FunctionMaxLength:
-        active: false
-    FunctionMinLength:
-        active: false
-    FunctionNaming:
-        active: true
-        functionPattern: ^([a-z$][a-zA-Z$0-9]*)|(`.*`)$
-        excludeClassPattern: $^
-    FunctionParameterNaming:
-        active: true
-        parameterPattern: "[a-z][A-Za-z0-9]*"
-        excludeClassPattern: $^
-    InvalidPackageDeclaration:
-        active: true
-    MatchingDeclarationName:
-        active: true
-    MemberNameEqualsClassName:
-        active: true
-        ignoreOverridden: true
-    NoNameShadowing:
-        active: true
-    ObjectPropertyNaming:
-        active: true
-        constantPattern: "[A-Za-z][_A-Za-z0-9]*"
-        propertyPattern: "[A-Za-z][_A-Za-z0-9]*"
-        privatePropertyPattern: (_)?[A-Za-z][_A-Za-z0-9]*
-    PackageNaming:
-        active: true
-        packagePattern: ^[a-z]+(\.[a-z][a-zA-Z0-9_]*)*$
-    TopLevelPropertyNaming:
-        active: true
-        constantPattern: "[A-Z][_A-Z0-9]*"
-        propertyPattern: "[A-Za-z][_A-Za-z0-9]*"
-        privatePropertyPattern: (_)?[A-Za-z][A-Za-z0-9]*
-    VariableMaxLength:
-        active: false
-    VariableMinLength:
-        active: false
-    VariableNaming:
-        active: true
-        variablePattern: "[a-z][A-Za-z0-9]*"
-        privateVariablePattern: (_)?[a-z][A-Za-z0-9]*
-        excludeClassPattern: $^
+    classPattern: "[A-Z$][a-zA-Z0-9$]*"
+  ConstructorParameterNaming:
+    active: true
+    parameterPattern: "[a-z][A-Za-z0-9]*"
+    privateParameterPattern: "[a-z][A-Za-z0-9]*"
+    excludeClassPattern: $^
+  EnumNaming:
+    active: true
+    enumEntryPattern: ^[A-Z][_a-zA-Z0-9]*
+  ForbiddenClassName:
+    active: false
+  FunctionMaxLength:
+    active: false
+  FunctionMinLength:
+    active: false
+  FunctionNaming:
+    active: true
+    functionPattern: ^([a-z$][a-zA-Z$0-9]*)|(`.*`)$
+    excludeClassPattern: $^
+  FunctionParameterNaming:
+    active: true
+    parameterPattern: "[a-z][A-Za-z0-9]*"
+    excludeClassPattern: $^
+  InvalidPackageDeclaration:
+    active: true
+  MatchingDeclarationName:
+    active: true
+  MemberNameEqualsClassName:
+    active: true
+    ignoreOverridden: true
+  NoNameShadowing:
+    active: true
+  ObjectPropertyNaming:
+    active: true
+    constantPattern: "[A-Za-z][_A-Za-z0-9]*"
+    propertyPattern: "[A-Za-z][_A-Za-z0-9]*"
+    privatePropertyPattern: (_)?[A-Za-z][_A-Za-z0-9]*
+  PackageNaming:
+    active: true
+    packagePattern: ^[a-z]+(\.[a-z][a-zA-Z0-9_]*)*$
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: "[A-Z][_A-Z0-9]*"
+    propertyPattern: "[A-Za-z][_A-Za-z0-9]*"
+    privatePropertyPattern: (_)?[A-Za-z][A-Za-z0-9]*
+  VariableMaxLength:
+    active: false
+  VariableMinLength:
+    active: false
+  VariableNaming:
+    active: true
+    variablePattern: "[a-z][A-Za-z0-9]*"
+    privateVariablePattern: (_)?[a-z][A-Za-z0-9]*
+    excludeClassPattern: $^
 
 performance:
-    ArrayPrimitive:
-        active: true
-    CouldBeSequence:
-        active: true
-    ForEachOnRange:
-        active: true
-    SpreadOperator:
-        active: false
-    UnnecessaryTemporaryInstantiation:
-        active: true
+  ArrayPrimitive:
+    active: true
+  CouldBeSequence:
+    active: true
+  ForEachOnRange:
+    active: true
+  SpreadOperator:
+    active: false
+  UnnecessaryTemporaryInstantiation:
+    active: true
 
 potential-bugs:
+  active: true
+  AvoidReferentialEquality:
     active: true
-    AvoidReferentialEquality:
-        active: true
-    CastToNullableType:
-        active: false
-    DoubleMutabilityForCollection:
-        active: true
-    EqualsAlwaysReturnsTrueOrFalse:
-        active: true
-    EqualsWithHashCodeExist:
-        active: true
-    ExplicitGarbageCollectionCall:
-        active: true
-    HasPlatformType:
-        active: true
-    IgnoredReturnValue:
-        active: true
-    ImplicitDefaultLocale:
-        active: true
-    InvalidRange:
-        active: true
-    IteratorHasNextCallsNextMethod:
-        active: true
-    IteratorNotThrowingNoSuchElementException:
-        active: true
-    LateinitUsage:
-        active: false
-    MapGetWithNotNullAssertionOperator:
-        active: true
-    MissingPackageDeclaration:
-        active: true
-    UnconditionalJumpStatementInLoop:
-        active: true
-    UnnecessaryNotNullOperator:
-        active: true
-    UnnecessarySafeCall:
-        active: true
-    UnreachableCode:
-        active: true
-    UnsafeCallOnNullableType:
-        active: true
-    UnsafeCast:
-        active: true
-    UselessPostfixExpression:
-        active: true
-    WrongEqualsTypeParameter:
-        active: true
+  CastToNullableType:
+    active: false
+  DoubleMutabilityForCollection:
+    active: true
+  EqualsAlwaysReturnsTrueOrFalse:
+    active: true
+  EqualsWithHashCodeExist:
+    active: true
+  ExplicitGarbageCollectionCall:
+    active: true
+  HasPlatformType:
+    active: true
+  IgnoredReturnValue:
+    active: true
+  ImplicitDefaultLocale:
+    active: true
+  InvalidRange:
+    active: true
+  IteratorHasNextCallsNextMethod:
+    active: true
+  IteratorNotThrowingNoSuchElementException:
+    active: true
+  LateinitUsage:
+    active: false
+  MapGetWithNotNullAssertionOperator:
+    active: true
+  MissingPackageDeclaration:
+    active: true
+  UnconditionalJumpStatementInLoop:
+    active: true
+  UnnecessaryNotNullOperator:
+    active: true
+  UnnecessarySafeCall:
+    active: true
+  UnreachableCode:
+    active: true
+  UnsafeCallOnNullableType:
+    active: true
+  UnsafeCast:
+    active: true
+  UselessPostfixExpression:
+    active: true
+  WrongEqualsTypeParameter:
+    active: true
 
 style:
+  active: true
+  ClassOrdering:
+    active: false
+  CollapsibleIfStatements:
+    active: false
+  DataClassContainsFunctions:
+    active: false
+  DataClassShouldBeImmutable:
+    active: false
+  DestructuringDeclarationWithTooManyEntries:
+    active: false
+  EqualsNullCall:
     active: true
-    ClassOrdering:
-        active: false
-    CollapsibleIfStatements:
-        active: false
-    DataClassContainsFunctions:
-        active: false
-    DataClassShouldBeImmutable:
-        active: false
-    DestructuringDeclarationWithTooManyEntries:
-        active: false
-    EqualsNullCall:
-        active: true
-    EqualsOnSignatureLine:
-        active: false
-    ExplicitItLambdaParameter:
-        active: true
-    ExpressionBodySyntax:
-        active: false
-    ForbiddenComment:
-        active: false
-    # We use PreventBannedImports instead which has auto-correct.
-    ForbiddenImport:
-        active: false
-    ForbiddenMethodCall:
-        active: false
-    ForbiddenVoid:
-        active: false
-    FunctionOnlyReturningConstant:
-        active: false
-    LoopWithTooManyJumpStatements:
-        active: false
-    MagicNumber:
-        active: false
-    BracesOnIfStatements:
-        active: true
-        singleLine: consistent
-        multiLine: always
-    MaxLineLength:
-        active: true
-        maxLineLength: 160
-        excludePackageStatements: true
-        excludeImportStatements: true
-        excludeCommentStatements: false
-    MayBeConst:
-        active: true
-    ModifierOrder:
-        active: true
-    MultilineLambdaItParameter:
-        active: true
-    NestedClassesVisibility:
-        active: false
-    # Use FinalNewLine instead.
-    NewLineAtEndOfFile:
-        active: false
-    NoTabs:
-        active: true
-    ObjectLiteralToLambda:
-        active: true
-    OptionalAbstractKeyword:
-        active: true
-    OptionalUnit:
-        active: false
-    PreferToOverPairSyntax:
-        active: false
-    ProtectedMemberInFinalClass:
-        active: false
-    RedundantVisibilityModifierRule:
-        active: true
-    ReturnCount:
-        active: false
-    SafeCast:
-        active: true
-    SerialVersionUIDInSerializableClass:
-        active: false
-    SpacingBetweenPackageAndImports:
-        active: false
-    ThrowsCount:
-        active: false
-    TrailingWhitespace:
-        active: true
-    UnnecessaryFilter:
-        active: true
-    UnderscoresInNumericLiterals:
-        active: false
-    UnnecessaryAbstractClass:
-        active: false
-    UnnecessaryApply:
-        active: false
-    UnnecessaryInheritance:
-        active: false
-    UnnecessaryAnnotationUseSiteTarget:
-        active: true
-    UnnecessaryLet:
-        active: true
-    UnnecessaryParentheses:
-        active: true
-    UntilInsteadOfRangeTo:
-        active: false
-    UnusedImports:
-        # Has false positives with type resolution enabled. Redundant with NoUnusedImports rule.
-        active: false
-    UnusedPrivateClass:
-        active: true
-    UnusedPrivateMember:
-        active: true
-    # Replaced by UseFirstOrNullInsteadOfFind
-    UseAnyOrNoneInsteadOfFind:
-        active: true
-    UseCheckNotNull:
-        active: true
-    UseCheckOrError:
-        active: true
-    UseDataClass:
-        active: false
-    UseIfInsteadOfWhen:
-        active: false
-    UseIsNullOrEmpty:
-        active: true
-    UseOrEmpty:
-        active: true
-    UseRequire:
-        active: true
-    UseRequireNotNull:
-        active: true
-    UselessCallOnNotNull:
-        active: true
-    UtilityClassWithPublicConstructor:
-        active: false
-    VarCouldBeVal:
-        active: true
-        ignoreAnnotated: [Column, Inject, JoinColumn, OneToMany, Parameter]
-    WildcardImport:
-        active: true
-    UnusedPrivateProperty:
-        active: true
-    UnusedParameter:
-        active: true
+  EqualsOnSignatureLine:
+    active: false
+  ExplicitItLambdaParameter:
+    active: true
+  ExpressionBodySyntax:
+    active: false
+  ForbiddenComment:
+    active: false
+  # We use PreventBannedImports instead which has auto-correct.
+  ForbiddenImport:
+    active: false
+  ForbiddenMethodCall:
+    active: false
+  ForbiddenVoid:
+    active: false
+  FunctionOnlyReturningConstant:
+    active: false
+  LoopWithTooManyJumpStatements:
+    active: false
+  MagicNumber:
+    active: false
+  BracesOnIfStatements:
+    active: true
+    singleLine: consistent
+    multiLine: always
+  MaxLineLength:
+    active: true
+    maxLineLength: 160
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: false
+  MayBeConst:
+    active: true
+  ModifierOrder:
+    active: true
+  MultilineLambdaItParameter:
+    active: true
+  NestedClassesVisibility:
+    active: false
+  # Use FinalNewLine instead.
+  NewLineAtEndOfFile:
+    active: false
+  NoTabs:
+    active: true
+  ObjectLiteralToLambda:
+    active: true
+  OptionalAbstractKeyword:
+    active: true
+  OptionalUnit:
+    active: false
+  PreferToOverPairSyntax:
+    active: false
+  ProtectedMemberInFinalClass:
+    active: false
+  RedundantVisibilityModifierRule:
+    active: true
+  ReturnCount:
+    active: false
+  SafeCast:
+    active: true
+  SerialVersionUIDInSerializableClass:
+    active: false
+  SpacingBetweenPackageAndImports:
+    active: false
+  ThrowsCount:
+    active: false
+  TrailingWhitespace:
+    active: true
+  UnnecessaryFilter:
+    active: true
+  UnderscoresInNumericLiterals:
+    active: false
+  UnnecessaryAbstractClass:
+    active: false
+  UnnecessaryApply:
+    active: false
+  UnnecessaryInheritance:
+    active: false
+  UnnecessaryAnnotationUseSiteTarget:
+    active: true
+  UnnecessaryLet:
+    active: true
+  UnnecessaryParentheses:
+    active: true
+  UntilInsteadOfRangeTo:
+    active: false
+  UnusedImports:
+    # Has false positives with type resolution enabled. Redundant with NoUnusedImports rule.
+    active: false
+  UnusedPrivateClass:
+    active: true
+  UnusedPrivateMember:
+    active: true
+  # Replaced by UseFirstOrNullInsteadOfFind
+  UseAnyOrNoneInsteadOfFind:
+    active: true
+  UseCheckNotNull:
+    active: true
+  UseCheckOrError:
+    active: true
+  UseDataClass:
+    active: false
+  UseIfInsteadOfWhen:
+    active: false
+  UseIsNullOrEmpty:
+    active: true
+  UseOrEmpty:
+    active: true
+  UseRequire:
+    active: true
+  UseRequireNotNull:
+    active: true
+  UselessCallOnNotNull:
+    active: true
+  UtilityClassWithPublicConstructor:
+    active: false
+  VarCouldBeVal:
+    active: true
+    ignoreAnnotated: [Column, Inject, JoinColumn, OneToMany, Parameter]
+  WildcardImport:
+    active: true
+  UnusedPrivateProperty:
+    active: true
+  UnusedParameter:
+    active: true
 
 coroutines:
-    active: false
+  active: false
