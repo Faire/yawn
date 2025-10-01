@@ -1,49 +1,49 @@
 name: publish
 
 on:
-    workflow_dispatch:
-    release:
-        types: [published]
+  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
-    publish:
-        runs-on: ubuntu-latest
+  publish:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Set up JDK
-              uses: actions/setup-java@v4
-              with:
-                  java-version: 21
-                  distribution: "temurin"
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: "temurin"
 
-            - name: Setup Gradle
-              uses: gradle/actions/setup-gradle@v4
-              with:
-                  gradle-home-cache-cleanup: true
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-home-cache-cleanup: true
 
-            - name: Verify build
-              run: ./gradlew check
+      - name: Verify build
+        run: ./gradlew check
 
-            - name: Extract version from tag
-              id: extract_version
-              run: |
-                  echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-#            - name: Publish to Maven Central
-#              env:
-#                  ORG_GRADLE_PROJECT_version: ${{ steps.extract_version.outputs.VERSION }}
-#                  ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-#                  ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-#                  ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
-#                  ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY_PASSWORD }}
-#              run: |
-#                  ./gradlew publishAndReleaseToMavenCentral --no-parallel --no-configuration-cache
-#
-            - name: Publish to Gradle Plugin Portal
-              run: ./gradlew publishPlugins --no-configuration-cache --validate-only
-              env:
-                GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
-                GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
+      #            - name: Publish to Maven Central
+      #              env:
+      #                  ORG_GRADLE_PROJECT_version: ${{ steps.extract_version.outputs.VERSION }}
+      #                  ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+      #                  ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+      #                  ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
+      #                  ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY_PASSWORD }}
+      #              run: |
+      #                  ./gradlew publishAndReleaseToMavenCentral --no-parallel --no-configuration-cache
+      #
+      - name: Publish to Gradle Plugin Portal
+        run: ./gradlew publishPlugins --no-configuration-cache --validate-only
+        env:
+          GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
