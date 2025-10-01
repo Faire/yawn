@@ -117,20 +117,7 @@ scripts/yaml-lint-run.sh --fix
 
 The script will automatically check for and install the required tools (prettier and actionlint) if they're not already available.
 
-You can also run the tools individually:
-
-```bash
-# Check YAML formatting
-prettier --check "**/*.{yml,yaml}"
-
-# Fix YAML formatting
-prettier --write "**/*.{yml,yaml}"
-
-# Validate GitHub Actions workflows
-actionlint
-```
-
-The prettier configuration is defined in `.prettierrc.yml` in the project root.
+The prettier configuration is defined in `.github/yaml-lint/.prettierrc.yml`.
 
 
 ### Performing changes

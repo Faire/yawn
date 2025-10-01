@@ -27,10 +27,10 @@ fi
 # Run YAML formatting check or fix
 if [[ "$FIX_MODE" == "true" ]]; then
     echo "Fixing YAML formatting with prettier..."
-    prettier --write "**/*.{yml,yaml}"
+    prettier --config .github/yaml-lint/.prettierrc.yml --write "**/*.{yml,yaml}"
 else
     echo "Checking YAML formatting with prettier..."
-    prettier --check "**/*.{yml,yaml}"
+    prettier --config .github/yaml-lint/.prettierrc.yml --check "**/*.{yml,yaml}"
 fi
 
 # Run GitHub Actions workflow validation
