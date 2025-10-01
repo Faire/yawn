@@ -40,11 +40,10 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
-          # ./gradlew publishAndReleaseToMavenCentral --no-parallel --no-configuration-cache
-          echo "Skip maven publishing"
+          ./gradlew publishAndReleaseToMavenCentral --no-parallel --no-configuration-cache
 
       - name: Publish to Gradle Plugin Portal
-        run: ./gradlew publishPlugins --no-configuration-cache --validate-only
+        run: ./gradlew publishPlugins --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_version: ${{ steps.extract_version.outputs.VERSION }}
           GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
