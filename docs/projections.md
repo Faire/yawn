@@ -64,7 +64,7 @@ projection functions on [the `YawnProjections` file][yawn-projections-file].
 
 > [!NOTE]
 > 🥱 If something isn’t support by **Yawn**, you can also create your own custom `YawnQueryProjection` by implementing the interface. However, in that case you
-will need to guarantee the type-safety of your implementation!
+> will need to guarantee the type-safety of your implementation!
 
 ### Project to Data Class
 
@@ -104,7 +104,7 @@ Just like magic! No more manual mapping and unsafe queries!
 
 > [!NOTE]
 > 🥱 One important thing to note is that **Yawn** currently only support `internal` (or `public`) types. So your data class cannot be `private` nor defined
-inside the scope of a function definition.
+> inside the scope of a function definition.
 
 Note that the projected fields can be functions as well! For example, if you want to `GROUP BY`:
 
