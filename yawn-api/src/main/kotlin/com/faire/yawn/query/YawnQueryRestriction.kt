@@ -7,6 +7,10 @@ import org.hibernate.criterion.MatchMode
 import org.hibernate.criterion.Restrictions
 
 interface YawnQueryRestriction<SOURCE : Any> {
+    interface YawnQueryRestrictionWithNestedRestriction<SOURCE : Any> : YawnQueryRestriction<SOURCE> {
+        val criteria: List<YawnQueryCriterion<SOURCE>>
+    }
+
     fun compile(context: YawnCompilationContext): Criterion
 
     class Equals<SOURCE : Any, F>(
@@ -129,15 +133,17 @@ interface YawnQueryRestriction<SOURCE : Any> {
 
     class Not<SOURCE : Any>(
         private val criterion: YawnQueryCriterion<SOURCE>,
-    ) : YawnQueryRestriction<SOURCE> {
+    ) : YawnQueryRestrictionWithNestedRestriction<SOURCE> {
+        override val criteria: List<YawnQueryCriterion<SOURCE>> = listOf(criterion)
+
         override fun compile(
             context: YawnCompilationContext,
         ): Criterion = Restrictions.not(criterion.yawnRestriction.compile(context))
     }
 
     class Or<SOURCE : Any>(
-        private val criteria: List<YawnQueryCriterion<SOURCE>>,
-    ) : YawnQueryRestriction<SOURCE> {
+        override val criteria: List<YawnQueryCriterion<SOURCE>>,
+    ) : YawnQueryRestrictionWithNestedRestriction<SOURCE> {
         internal constructor(vararg criteria: YawnQueryCriterion<SOURCE>) : this(criteria.toList())
 
         override fun compile(context: YawnCompilationContext): Criterion = Restrictions.or(
@@ -148,8 +154,8 @@ interface YawnQueryRestriction<SOURCE : Any> {
     }
 
     class And<SOURCE : Any>(
-        private val criteria: List<YawnQueryCriterion<SOURCE>>,
-    ) : YawnQueryRestriction<SOURCE> {
+        override val criteria: List<YawnQueryCriterion<SOURCE>>,
+    ) : YawnQueryRestrictionWithNestedRestriction<SOURCE> {
         constructor(vararg criteria: YawnQueryCriterion<SOURCE>) : this(criteria.toList())
 
         override fun compile(context: YawnCompilationContext): Criterion = Restrictions.and(

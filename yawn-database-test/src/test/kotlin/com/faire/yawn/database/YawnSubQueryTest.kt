@@ -2,6 +2,7 @@ package com.faire.yawn.database
 
 import com.faire.yawn.Yawn.Companion.createProjectedDetachedCriteria
 import com.faire.yawn.project.YawnProjections
+import com.faire.yawn.query.YawnSubQueryRestrictions
 import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PersonTable
 import org.assertj.core.api.Assertions.assertThat
@@ -135,6 +136,33 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
             }.list()
 
             assertThat(people.single().name).isEqualTo("J.R.R. Tolkien")
+        }
+    }
+
+    @Test
+    fun `can use subquery restrictions within another restriction`() {
+        transactor.open { session ->
+            // Authors who have written a 500+ page book or who have written a book < 100 pages
+            val people = session.query(PersonTable) { people ->
+                val greaterThan500Pages = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
+                    addEq(books.author.foreignKey, people.id)
+                    addGt(books.numberOfPages, 500)
+                    project(books.author.foreignKey)
+                }
+
+                val lessThan100Pages = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
+                    addEq(books.author.foreignKey, people.id)
+                    addLe(books.numberOfPages, 100)
+                    project(books.author.foreignKey)
+                }
+
+                addOr(
+                    YawnSubQueryRestrictions.exists(greaterThan500Pages),
+                    YawnSubQueryRestrictions.exists(lessThan100Pages),
+                )
+            }.list()
+
+            assertThat(people.map { it.name }).containsExactlyInAnyOrder("J.R.R. Tolkien", "Hans Christian Andersen")
         }
     }
 }
