@@ -4,6 +4,7 @@ import com.faire.yawn.YawnTableDef
 import com.faire.yawn.YawnTableDefParent.AssociationTableDefParent
 import com.faire.yawn.criteria.query.JoinTypeSafeCriteriaQuery
 import com.faire.yawn.project.YawnQueryProjection
+import com.faire.yawn.query.YawnQueryRestriction.YawnQueryRestrictionWithNestedRestriction
 import org.hibernate.sql.JoinType
 
 /**
@@ -74,6 +75,20 @@ data class YawnQuery<SOURCE : Any, T : Any>(
     }
 
     fun hasSubQuery(): Boolean {
-        return criteria.any { it.yawnRestriction is YawnDetachedQueryRestriction<*, *> }
+        @Suppress("UNCHECKED_CAST")
+        val criteriaStack = ArrayDeque(criteria) as ArrayDeque<YawnQueryCriterion<*>>
+
+        while (criteriaStack.isNotEmpty()) {
+            val criterion = criteriaStack.removeLast()
+            when (criterion.yawnRestriction) {
+                is YawnQueryRestrictionWithNestedRestriction<*> -> criteriaStack.addAll(
+                    criterion.yawnRestriction.criteria,
+                )
+                is YawnDetachedQueryRestriction<*, *> -> return true
+                else -> continue
+            }
+        }
+
+        return false
     }
 }
