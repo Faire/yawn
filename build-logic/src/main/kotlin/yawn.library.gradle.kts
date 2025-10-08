@@ -20,7 +20,12 @@ extensions.configure<MavenPublishBaseExtension> {
 
     pom {
         name.set("${project.group}:${project.name}")
-        description.set("Yawn - Hibernate ORM type-safe wrapper")
+        description.set(
+            """
+            Yawn is a Kotlin ORM-wrapper that provides a type-safe, expressive, Criteria-style query 
+            syntax using custom KSP-generated entity metadata.
+            """.trimIndent()
+        )
         url.set("https://github.com/faire/yawn")
 
         licenses {
