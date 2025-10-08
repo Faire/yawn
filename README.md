@@ -4,6 +4,32 @@
 
 It leverages [KSP](https://kotlinlang.org/docs/ksp-overview.html) to generate **type-safe definitions** used to power **Yawn Queries**.
 
+## Getting Started
+
+1. Add the Gradle dependencies to your build
+
+```kotlin
+plugins {
+  id("com.faire.yawn")
+}
+
+dependencies {
+  implementation("com.faire.yawn:yawn-api")
+}
+```
+
+1. Write a query!
+
+```kotlin
+  val yawn = Yawn(queryFactory = YourQueryFactory(...))
+  val tolkienBooks = yawn.query(BookTable) { books ->
+    val authors = join(books.author)
+    addEq(authors.name, "J. R. R. Tolkien")
+  }.list()
+```
+
+For more advanced details, read through our [docs](/docs/README.md)!
+
 ## Why Yawn?
 
 ### Full type safety
