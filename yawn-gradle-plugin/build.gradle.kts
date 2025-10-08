@@ -71,7 +71,11 @@ gradlePlugin {
     plugins {
         named("com.faire.yawn") {
             displayName = "yawn"
-            description = "Automatically configures Yawn's KSP processor to generate Yawn models."
+            description = """
+                Yawn is a Kotlin ORM-wrapper that provides a type-safe, expressive, Criteria-style query 
+                syntax using KSP-generated entity metadata. This plugin automatically configures Yawn's 
+                KSP processor to generate Yawn models.
+            """.trimIndent()
             tags = listOf("yawn", "ksp", "model", "orm", "database", "faire")
         }
     }
