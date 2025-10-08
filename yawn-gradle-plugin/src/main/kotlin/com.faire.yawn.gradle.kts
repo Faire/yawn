@@ -3,8 +3,8 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val kspProject: Provider<String> = providers.gradleProperty("yawn.ksp.project")
+val version = providers.gradleProperty("com.faire.yawn.version").get()
 dependencies {
-    compileOnly(project(kspProject.get()))
-    ksp(project(kspProject.get()))
+    compileOnly("com.faire.yawn:yawn-processor:$version")
+    ksp("com.faire.yawn:yawn-processor:$version")
 }

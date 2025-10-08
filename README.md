@@ -6,7 +6,13 @@ It leverages [KSP](https://kotlinlang.org/docs/ksp-overview.html) to generate **
 
 ## Getting Started
 
-1. Add the Gradle dependencies to your build
+1. Add the `com.faire.yawn.version` property to your Gradle properties (with the actual version in place of `<VERSION>`)
+
+```properties
+com.faire.yawn.version=<VERSION>
+```
+
+1. Add the Gradle dependencies to your build (with the actual version in place of `<VERSION>`)
 
 ```kotlin
 plugins {
@@ -14,7 +20,7 @@ plugins {
 }
 
 dependencies {
-  implementation("com.faire.yawn:yawn-api")
+  implementation("com.faire.yawn:yawn-api:<VERSION>")
 }
 ```
 
@@ -66,3 +72,12 @@ table and column related to a Hibernate entity annotated with `@YawnEntity`; so 
 The generation is powered by [KSP](https://kotlinlang.org/docs/ksp-overview.html), and is composed by a set of `TableDef` (table definitions) that contain a set
 of `ColumnDef` (column definitions). The generate code contains the type information as generics that is necessary to make the queries safe. For example, it
 forces you to query columns that belong (or were joined from) to the table being queried; and it enforces the type of the values provided for comparison.
+
+## Contributing
+
+If you like Yawn, give us a star to help the project!
+
+Have you found a bug or have a suggestion? Open an [issue](https://github.com/Faire/yawn/issues) and we will take a
+look at it as soon as possible.
+
+Do you want to contribute with a PR? Make sure to read our [Contributing Guide](/CONTRIBUTING.md)!
