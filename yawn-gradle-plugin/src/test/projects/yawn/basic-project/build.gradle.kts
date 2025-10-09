@@ -6,6 +6,7 @@ repositories {
     mavenCentral()
 }
 
+val version = providers.gradleProperty("com.faire.yawn.version").get()
 dependencies {
-    implementation(project(":ksp-annotation"))
+    implementation("com.faire.yawn:yawn-api:$version")
 }

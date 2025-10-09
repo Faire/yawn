@@ -6,13 +6,24 @@ Getting started with **Yawn** is **as simple as 3 steps**!
 
 The **Yawn** APIs require the code it generates to provide all the type-safety benefits.
 
-For each gradle project that needs to use **Yawn**, make sure you have the `"com.faire.yawn"` gradle plugin installed in the build file. Basically, the head of
-the file should look like the following:
+For each gradle project that needs to use **Yawn**, make sure you have the `"com.faire.yawn"` gradle plugin installed in the build file
+along with and a dependency on the API. Also ensure that in your root project you have the `com.faire.yawn.version` Gradle property set.
+
+1. Add the `com.faire.yawn.version` property to your Gradle properties (with the actual version in place of `<VERSION>`)
+
+```properties
+com.faire.yawn.version=<VERSION>
+```
+
+1. Add the Gradle dependencies to your build (with the actual version in place of `<VERSION>`)
 
 ```kotlin
 plugins {
-  // ...
   id("com.faire.yawn")
+}
+
+dependencies {
+  implementation("com.faire.yawn:yawn-api:<VERSION>")
 }
 ```
 

@@ -1,6 +1,1 @@
-rootProject.name = "test-project"
-
-include(
-    ":ksp-project",
-    ":ksp-annotation",
-)
+rootProject.name = "basic-project"

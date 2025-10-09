@@ -36,30 +36,22 @@ internal class FaireYawnTest {
         val classContent = """
       package com.faire.ksp
 
-      @Flag
+      @com.faire.yawn.YawnEntity
       class Foo
         """.trimIndent()
         sourceFooClassFile.writeText(classContent)
         val result1 = runner.withArguments("build").build()
 
-        val expectedGeneratedContent = """
-      package com.faire.ksp
-      
-      class FooBar
-        """.trimIndent()
-
-        val builtFooBarFile = getBuiltFileFromQualifiedClassName(root, "com.faire.ksp.FooBar")
-        assertThat(builtFooBarFile).hasContent(expectedGeneratedContent)
+        assertThat(getBuiltFileFromQualifiedClassName(root, "com.faire.ksp.FooTableDef")).exists()
 
         // test update the Foo file, and make sure the generated file is updated
-        val expectedUpdatedGeneratedContent = expectedGeneratedContent.replace("FooBar", "Foo2Bar")
         sourceFooClassFile.writeText(classContent.replace("Foo", "Foo2"))
 
         val result2 = runner.withArguments("build").build()
 
-        val builtFoo2BarFile = getBuiltFileFromQualifiedClassName(root, "com.faire.ksp.Foo2Bar")
-        assertThat(builtFoo2BarFile).hasContent(expectedUpdatedGeneratedContent)
-        assertThat(root.resolve("build/generated/ksp/main/kotlin/com/faire/ksp/FooBar.kt")).doesNotExist()
+        assertThat(getBuiltFileFromQualifiedClassName(root, "com.faire.ksp.Foo2TableDef")).exists()
+        assertThat(getBuiltFileFromQualifiedClassName(root, "com.faire.ksp.FooTableDef"))
+            .doesNotExist()
 
         assertThat(result1).task(":build").isSuccess()
         assertThat(result2).task(":build").isSuccess()
