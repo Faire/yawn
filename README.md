@@ -1,18 +1,18 @@
 # yawn
 
-**Yawn** is thin encapsulation of the *Hibernate Criteria Query API* in a **Kotlin-friendly**, **type-safe** and **intuitive** interface.
+**Yawn** is a thin encapsulation of the *Hibernate Criteria Query API* into a **Kotlin-friendly**, **type-safe** and **intuitive** interface.
 
 It leverages [KSP](https://kotlinlang.org/docs/ksp-overview.html) to generate **type-safe definitions** used to power **Yawn Queries**.
 
 ## Getting Started
 
-1. Add the `com.faire.yawn.version` property to your Gradle properties (with the actual version in place of `<VERSION>`)
+1. Add the `com.faire.yawn.version` property to your Gradle properties (with the latest version in place of `<VERSION>`)
 
 ```properties
 com.faire.yawn.version=<VERSION>
 ```
 
-1. Add the Gradle dependencies to your build (with the actual version in place of `<VERSION>`)
+1. Add the Gradle dependencies to your build (with the latest version in place of `<VERSION>`)
 
 ```kotlin
 plugins {
