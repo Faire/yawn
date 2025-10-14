@@ -21,7 +21,7 @@ if ! command -v actionlint &> /dev/null; then
         echo "Error: Go is required to install actionlint. Please install Go first."
         exit 1
     fi
-    go install github.com/rhysd/actionlint/cmd/actionlint@latest
+    go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
 fi
 
 # Run YAML formatting check or fix
