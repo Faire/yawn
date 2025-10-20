@@ -1,97 +1,56 @@
 package com.faire.ksp
 
+import com.google.devtools.ksp.getVisibility
+import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSDeclaration
-import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.KModifier
-import kotlin.reflect.KClass
+import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toKModifier
 
-/**
- * Extension functions for KSP symbols to provide compatibility with Faire's internal KSP utilities.
- * These functions replicate the functionality that was previously available in Faire's build system.
- */
+inline fun <reified T : Annotation> KSAnnotation.isExactlyType(): Boolean {
+    return annotationType.resolve().toClassName().toString() == T::class.qualifiedName
+}
 
-/**
- * Gets the effective visibility modifier for a KS declaration.
- */
-fun KSDeclaration.getEffectiveVisibility(): KModifier {
-    return when {
-        modifiers.contains(Modifier.PUBLIC) -> KModifier.PUBLIC
-        modifiers.contains(Modifier.PRIVATE) -> KModifier.PRIVATE
-        modifiers.contains(Modifier.PROTECTED) -> KModifier.PROTECTED
-        modifiers.contains(Modifier.INTERNAL) -> KModifier.INTERNAL
-        else -> {
-            // For classes without explicit visibility, check if they're in a test context
-            // or nested in an internal class, and make them internal to avoid exposure issues
-            val isInTestContext = qualifiedName?.asString()?.contains("Test") == true
-            val parentDeclaration = parentDeclaration
-            val isNestedInInternal = parentDeclaration?.modifiers?.contains(Modifier.INTERNAL) == true
+inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): Boolean {
+    return annotations.any { it.isExactlyType<T>() }
+}
 
-            if (isInTestContext || isNestedInInternal) {
-                KModifier.INTERNAL
-            } else {
-                KModifier.PUBLIC // Default Kotlin visibility
+inline fun <reified T : Annotation> KSAnnotated.getAnnotationsByType(): Sequence<KSAnnotation> {
+    return annotations.filter { it.isExactlyType<T>() }
+}
+
+fun KSClassDeclaration.getVisibilityModifier(): KModifier {
+    return getVisibility().toKModifier() ?: error("Unknown visibility for $this")
+}
+
+fun KSClassDeclaration.getEffectiveVisibility(): KModifier {
+    return getClassDeclarationNestedChain()
+        .map { it.getVisibilityModifier() }
+        .minBy { modifier ->
+            @Suppress("ElseCaseInsteadOfExhaustiveWhen") // Too many non-visibility modifiers to enumerate
+            when (modifier) {
+                KModifier.PUBLIC -> 3
+                KModifier.PROTECTED -> 2
+                KModifier.INTERNAL -> 1
+                KModifier.PRIVATE -> 0
+                else -> error("Unknown visibility $modifier")
             }
         }
-    }
+}
+
+private fun KSClassDeclaration.getClassDeclarationNestedChain(): Sequence<KSClassDeclaration> {
+    return generateSequence(this) { it.parentDeclaration as? KSClassDeclaration }
 }
 
 /**
- * Checks if a KS declaration has a specific annotation.
- */
-inline fun <reified T : Annotation> KSDeclaration.isAnnotationPresent(): Boolean {
-    return isAnnotationPresent(T::class)
-}
-
-/**
- * Checks if a KS declaration has a specific annotation by class.
- */
-fun KSDeclaration.isAnnotationPresent(annotationClass: KClass<out Annotation>): Boolean {
-    val annotationName = annotationClass.qualifiedName ?: return false
-    return annotations.any { annotation ->
-        annotation.annotationType.resolve().declaration.qualifiedName?.asString() == annotationName
-    }
-}
-
-/**
- * Gets annotations of a specific type from a KS declaration.
- */
-inline fun <reified T : Annotation> KSDeclaration.getAnnotationsByType(): Sequence<KSAnnotation> {
-    return getAnnotationsByType(T::class)
-}
-
-/**
- * Gets annotations of a specific type from a KS declaration by class.
- */
-fun KSDeclaration.getAnnotationsByType(annotationClass: KClass<out Annotation>): Sequence<KSAnnotation> {
-    val annotationName = annotationClass.qualifiedName ?: return emptySequence()
-    return annotations.filter { annotation ->
-        annotation.annotationType.resolve().declaration.qualifiedName?.asString() == annotationName
-    }
-}
-
-/**
- * Gets a unique simple name for a KS class declaration, handling potential conflicts.
- */
-fun KSClassDeclaration.getUniqueSimpleName(): String {
-    // For now, just return the simple name. In a more complex scenario,
-    // this might need to handle name conflicts by adding suffixes.
-    return simpleName.asString()
-}
-
-/**
- * Gets a unique simple name for a KotlinPoet ClassName, handling potential conflicts.
- * For nested classes, this creates a flattened name using underscores.
- * For example: YawnProjectionTest.SimpleBook -> YawnProjectionTest_SimpleBook
+ * Extension function to get a unique simple name for each class under the same package.
+ * This is useful when processing multiple inner classes with the same name.
+ *
+ * @return A standardized unique simple name combined by joining the simple names of the nested class chain,
+ *  always using `_` as a separator.
  */
 fun ClassName.getUniqueSimpleName(): String {
-    // If this is a nested class, flatten the names with underscores
-    return if (enclosingClassName() != null) {
-        val enclosingName = enclosingClassName()!!.getUniqueSimpleName()
-        "${enclosingName}_$simpleName"
-    } else {
-        simpleName
-    }
+    return simpleNames.joinToString("_")
 }
