@@ -16,6 +16,7 @@ junit-platform = "1.11.3"
 vanniktech = "0.34.0"
 faire-detekt-rules = "0.5.3"
 detekt = "1.23.8"
+kotlinpoet = "1.18.1"
 
 [libraries]
 # Kotlin
@@ -32,6 +33,12 @@ gradle-plugin-publish = { module = "com.gradle.publish:plugin-publish-plugin", v
 # Hibernate
 # KSP
 ksp-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+ksp-common-deps = { module = "com.google.devtools.ksp:symbol-processing-common-deps", version.ref = "ksp" }
+
+# kotlinpoet
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
 
 hibernate-core = { module = "org.hibernate:hibernate-core", version.ref = "hibernate" }
 
