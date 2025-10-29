@@ -9,23 +9,23 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toKModifier
 
-inline fun <reified T : Annotation> KSAnnotation.isExactlyType(): Boolean {
+internal inline fun <reified T : Annotation> KSAnnotation.isExactlyType(): Boolean {
     return annotationType.resolve().toClassName().toString() == T::class.qualifiedName
 }
 
-inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): Boolean {
+internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): Boolean {
     return annotations.any { it.isExactlyType<T>() }
 }
 
-inline fun <reified T : Annotation> KSAnnotated.getAnnotationsByType(): Sequence<KSAnnotation> {
+internal inline fun <reified T : Annotation> KSAnnotated.getAnnotationsByType(): Sequence<KSAnnotation> {
     return annotations.filter { it.isExactlyType<T>() }
 }
 
-fun KSClassDeclaration.getVisibilityModifier(): KModifier {
+internal fun KSClassDeclaration.getVisibilityModifier(): KModifier {
     return getVisibility().toKModifier() ?: error("Unknown visibility for $this")
 }
 
-fun KSClassDeclaration.getEffectiveVisibility(): KModifier {
+internal fun KSClassDeclaration.getEffectiveVisibility(): KModifier {
     return getClassDeclarationNestedChain()
         .map { it.getVisibilityModifier() }
         .minBy { modifier ->
@@ -51,6 +51,6 @@ private fun KSClassDeclaration.getClassDeclarationNestedChain(): Sequence<KSClas
  * @return A standardized unique simple name combined by joining the simple names of the nested class chain,
  *  always using `_` as a separator.
  */
-fun ClassName.getUniqueSimpleName(): String {
+internal fun ClassName.getUniqueSimpleName(): String {
     return simpleNames.joinToString("_")
 }
