@@ -49,7 +49,7 @@ For a contribution to be accepted:
 - Compile, test, format, and lint code using `./gradlew build` (or your IDE of choice);
 - Documentation should always be updated or added (if applicable);
 - Tests should always be updated or added (if applicable) -- check the [Test writing guide] for more details;
-- The PR title should start with a [conventional commit] prefix (`feat:`, `fix:` etc).
+- The PR title should start with a [conventional commit][conventional commit] prefix (`feat:`, `fix:`, etc).
 
 If the contribution doesn't meet these criteria, a maintainer will discuss it with you on the issue or PR. You can still continue to add more commits to the
 branch you have sent the Pull Request from and it will be automatically reflected in the PR.
@@ -133,7 +133,7 @@ The prettier configuration is defined in `.github/yaml-lint/.prettierrc.yml`.
 When doing breaking changes, a deprecation tag should be added first containing a message that conveys to what method should be used instead to perform the
 task.
 
-Also don't forget to the include the `!` as part of your conventional commit prefix when actually removing old code.
+Also don't forget to include the `!` as part of your conventional commit prefix when actually removing old code.
 
 
 ### Open a pull request
@@ -141,7 +141,7 @@ Also don't forget to the include the `!` as part of your conventional commit pre
 Go to the [pull request page of Yawn](https://github.com/faire/yawn/pulls) and in the top of the page it will ask you if you want to open a pull request from
 your newly created branch.
 
-The title of the pull request should start with a [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) type.
+The title of the pull request should start with a [conventional commit][conventional commit] type.
 
 Allowed types are:
 
@@ -160,3 +160,5 @@ If you introduce a **breaking change** the conventional commit type MUST end wit
 
 The sentence of the commit (after the `:`) should start with a verb in the present tense; as a rule of thumb, think that the commit message will complete the
 sentence "This commit will ...". For example, "Add support for ..." or "Fix bug with ...".
+
+[conventional commit]: https://www.conventionalcommits.org/en/v1.0.0/
