@@ -1,220 +1,151 @@
 # Joins
 
-## Example Data Model
-
-This is a simple data model of a University to facilitate the understanding of the next examples:
-
-```kotlin
-class DbStudent {
- name: String
- 
- @ManyToMany
- courses: List<DbCourse>
- 
- @ManyToOne
- major: DbMajor
- 
- @OneToOne
- address: DbAddress
-}
-
-class DbStudentAddress {
- streetNumber: number
- streetName: string
- 
- @OneToOne
- student: DbStudent
-}
-
-class DbCourse {
-  name : String
-  
-  @ManyToMany
-  students: List<DbStudent>
-  
-  @ManyToOne
-  professor: DbProfessor
-}
-
-class DbProfessor {
- name: String
-
- @OneToMany
- courses: List<DbCourse>
-}
-
-class DbMajor {
- name: String
- 
- @OneToMany
- students: List<DbStudent>
-}
-```
-
 ## Joining a Table
 
 In order to join to another table, you can use the `join` function provided within the Query DSL. Provide as a parameter the column you want to use to join, and
-you will get in return an object representing the joined table, from which you can access the new columns (and do more `join`).
+you will get in return an object representing the joined table, from which you can access the new columns (and do more joins!).
 
-Supposed we want to get all the students for a major Biology:
+Supposed we want to get all the books from a publisher HarperCollins:
 
 ```kotlin
-val results = yawn.query(StudentTable) { students ->
-  val majors = join(students.major)
-  addEq(majors.name, "Biology")
+val results = yawn.query(BookTable) { books ->
+    val publishers = join(books.publisher)
+    addEq(publishers.name, "HarperCollins")
 }.list()
 ```
 
-1. Since we want to fetch a list of students, we start a criteria against the `Student` table
-2. We join major table with students
-3. Then we add a select for majors with the name Biology
+1. Since we want to fetch a list of books, we start a criteria against the `Book` table
+2. We join publisher table with books
+3. Then we add a select for publishers with the name HarperCollins
 
 ## Nested/Multiple Joins
 
-Get all the majors for all the students attending the course “CS 456”
+Get all the publishers for all the books written by J.R.R. Tolkien:
 
 ```kotlin
-val results = yawn.query(MajorTable) { majors ->
-  val students = join(majors.students)
-  val courses = join(students.courses)
-  addEq(courses.name, "CS 456")
+val results = yawn.query(PublisherTable) { publishers ->
+    val books = join(publishers.books)
+    val authors = join(books.author)
+    addEq(authors.name, "J.R.R. Tolkien")
 }.list()
 ```
 
-1. Since we want to fetch all the majors, we start a criteria against the `Major` table
-2. Then we join major with students
-3. Then we join students with courses
-4. At this point, we have this relation major ↔ students ↔ courses and now we can select against the course name.
+1. Since we want to fetch all the publishers, we start a criteria against the `Publisher` table
+2. Then we join publisher with books
+3. Then we join books with authors
+4. At this point, we have this relation publisher ↔ books ↔ authors; now we can select against the author name.
 
 ## Relationship Types
 
 ### OneToOne
 
-Suppose a student has only one address and one student can live per address. To fetch a student living in an address, you can do a join against the OneToOne
-relationship and filter against the address.
+One Book has one BookRanking, and one BookRanking has one Book.
+
+To fetch the BookRanking for "The Hobbit", you can do a join against the `@OneToOne` relationship and filter against the Book.
 
 ```kotlin
-val student = yawn.query(StudentTable) {
- val addresses = join(it.address)
- addEq(addresses.number, 150)
- addEq(addresses.streetName, "Caroline Street")
+val bookRanking = yawn.query(BookRankingTable) { bookRankings ->
+    val books = join(bookRankings.book)
+    addEq(books.name, "The Hobbit")
 }.uniqueResult()
 ```
 
-### ManyToOne
+### ManyToOne and OneToMany
+
+One book has one publisher, but a publisher can publish many books.
+
+If you want to get all books by a given publisher:
 
 ```kotlin
-val results = yawn.query(StudentTable) { students ->
-  val majors = join(students.major)
-  addEq(majors.name, "Biology")
+val results = yawn.query(BookTable) { books ->
+    val publishers = join(books.publisher)
+    addEq(publishers.name, "HarperCollins")
 }.list()
 ```
 
-### OneToMany
-
-Suppose you want to get the professor that teaches Biology while a professor can teach many courses.
+Or if you want to get the publisher for a book:
 
 ```kotlin
-val result = yawn.query(ProfessorTable) { students ->
-  val majors = join(students.major)
-  addEq(majors.name, "Biology")
+val result = yawn.query(PublisherTable) { publishers -> 
+    val books = join(publishers.books)
+    addEq(books.name, "The Hobbit")
 }.uniqueResult()
 ```
 
 ### ManyToMany
 
-Given these students, give me all their courses:
+One person can own many publishers, and a publisher can be owned by many people.
+
+If you want to get all the publishers owned by a person:
 
 ```kotlin
-val results = yawn.query(CourseTable) { courses ->
-  val students = join(courses)
-  addIn(courses.name, listOf("Biology", "Math", "Astronomy")
+val results = yawn.query(PublisherTable) { publishers ->
+    val owners = join(publishers.owners)
+    addEq(owners.name, "Jane Doe")
 }.list()
 ```
 
 ## Advanced
 
-### Multiple joins to the same table
+### Further refining
 
-Say you want the intersection of courses attended by Luan and Adriel:
+Alongside the foreign key constraint, you can provide additional criteria to be applied to the `ON` clause of your join:
 
 ```kotlin
-val results = yawn.query(CourseTable) { courses ->
-  val students1 = join(courses.students)
-  val students2 = join(courses.students)
-  addEq(students1.name, "Luan")
-  addEq(students2.name, "Adriel")
+val publishers = join(publishers.books) { books ->
+    addEq(books.genres, Genre.FANTASY)
+}
+```
+
+### Multiple joins to the same table
+
+Each time you call the `.join` function, a new join is added to the query.
+
+For example, say you want the intersection of publishers owned by John and Jane Doe:
+
+> [!NOTE]
+> ⚠️ This is NOT supported by the Hibernate Criteria API, so it will fail at runtime if you are using that
+> as your backing implementation for Yawn.
+
+```kotlin
+val results = session.query(PublisherTable) { publishers ->
+    val owners1 = join(publishers.owners)
+    val owners2 = join(publishers.owners)
+    addEq(owners1.name, "John Doe")
+    addEq(owners2.name, "Jane Doe")
 }.list()
 ```
 
 ### Join references
 
-> [!NOTE]
-> 🚸 Join references are still a WIP implementation-wise. This is our proposed API but it is subject to change.
-
-In order to re-use a join in a different block, you can save a reference to it using the `.reference()` method:
+In order to re-use a join in a different block, you can save a reference to it using the `.joinRef()` method:
 
 ```kotlin
-val criteria = yawn.query(CourseTable)
+val criteria = session.query(BookTable)
+val authorsRef = criteria.joinRef { author }
 
-var studentsRef: JoinReference<CourseTable, ...>
-val criteria = criteria.applyFilter { courses ->
-  val students1 = join(courses.students) // new join, will be generated as `_a`
- val students2 = join(courses.students, alias = "a") // new join, called `a`
- val students3 = join(courses.students, alias = "b") // new join, called `b`
- // join(courses.students, alias = "a") -> error: alias already used
- // join(courses.professor, alias = "a") -> error: alias already used
-
- studentsRef = students2.reference()
-
- // ...
+criteria.applyFilter { books ->
+    val authors = authorsRef.get(books)
+    addLike(authors.name, "J.%")
 }
 
-// later
-criteria.applyFilter { courses ->
- val students = join(courses.students, ref = studentsRef)
- // same join ^
+criteria.applyFilter { books ->
+    val authors = authorsRef.get(books)
+    addLike(authors.name, "%n")
 }
+
+val results = criteria.list() // The Hobbit, Lord of the Rings
 ```
 
-Alternatively, a simpler way to get a join reference is using the `join` function outside the lambda (note: this is an optional API we are not sure yet we want
-to provide):
+Note that join references are for rare cases in which you want to pass a query around to be build piecemeal.
+Ideally, you can put all your query within a single lambda.
+
+### Join Types
+
+You can specify the `joinType` if you want anything other than `INNER_JOIN`:
 
 ```kotlin
-val criteria = yawn.query(CourseTable)
-val joinRef = criteria.join { courses -> courses.students }
-
-// later:
-criteria.applyFilter { courses ->
- val students = join(courses.students, ref = joinRef)
-}
-```
-
-Note that join references are a very rare edge case that should likely not need to be used for the vast majority of scenarios.
-
-## Other Options
-
-You can provide a custom alias if you wish; otherwise one will be generated for you.
-
-```kotlin
-join(majors.students, alias = "s")
-```
-
-Generated aliases will **always** be the first letter of the table name followed by an incrementing number. You cannot provide the same alias twice, as that
-could easily lead to mistakes. If you want to get a reference to the same join again, you **must** provide a `ref`:
-
-```kotlin
-val students1 = join(major.students)
-// later...
-val students2 = join(majors.students, ref = students1.reference())
-// students2 is the same join as students1!
-```
-
-You can also specify the `joinType` if you want anything other than `INNER_JOIN`:
-
-```kotlin
-
-join(majors.students, joinType = LEFT_OUTER_JOIN)
+val publishers = join(books.publisher, joinType = LEFT_OUTER_JOIN)
 ```
 
 The complete options for `JoinType` are: `INNER_JOIN`, `LEFT_OUTER_JOIN`, `RIGHT_OUTER_JOIN`, `FULL_JOIN`.

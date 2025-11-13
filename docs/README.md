@@ -31,7 +31,7 @@ This is what it looks like:
 - [Joins](joins.md)
 - [Projections](projections.md)
 - [Sub-queries](sub_queries.md)
-- [Nullability & Yawn](nullability_and_yawn.md)
+- [Nullability](nullability.md)
 
 ## Contributing
 

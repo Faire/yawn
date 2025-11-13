@@ -1,6 +1,6 @@
 package com.faire.yawn.database
 
-import com.faire.yawn.Yawn.Companion.createProjectedDetachedCriteria
+import com.faire.yawn.Yawn
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.query.YawnSubQueryRestrictions
 import com.faire.yawn.setup.entities.BookTable
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
     @Test
     fun `yawn query with a sub query using detached criteria`() {
-        val detachedCriteria = createProjectedDetachedCriteria(PersonTable) { person ->
+        val detachedCriteria = Yawn.createProjectedDetachedCriteria(PersonTable) { person ->
             addEq(person.name, "J.R.R. Tolkien")
 
             project(person.name)
@@ -35,7 +35,7 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn query with a sub query using detached criteria with join`() {
-        val detachedCriteria = createProjectedDetachedCriteria(PersonTable) { person ->
+        val detachedCriteria = Yawn.createProjectedDetachedCriteria(PersonTable) { person ->
             addEq(person.name, "J.R.R. Tolkien")
             project(person.id)
         }
@@ -55,7 +55,7 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn query with a sub query using detached criteria projected to a collection`() {
-        val detachedCriteria = createProjectedDetachedCriteria(PersonTable) { person ->
+        val detachedCriteria = Yawn.createProjectedDetachedCriteria(PersonTable) { person ->
             addLike(person.name, "J.%")
             project(YawnProjections.distinct(person.name))
         }
@@ -77,7 +77,7 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn query with a sub query using detached criteria with left join`() {
-        val detachedCriteria = createProjectedDetachedCriteria(BookTable) { books ->
+        val detachedCriteria = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
             val publishers = join(books.publisher, joinType = JoinType.LEFT_OUTER_JOIN)
             addIsNull(publishers.id)
             project(books.author.foreignKey)
@@ -95,7 +95,7 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn query with a sub query using detached criteria with join criteria`() {
-        val detachedCriteria = createProjectedDetachedCriteria(BookTable) { books ->
+        val detachedCriteria = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
             val publishers = join(books.publisher, joinType = JoinType.LEFT_OUTER_JOIN) { publisher ->
                 addNotLike(publisher.name, "%-%")
                 addNotLike(publisher.name, "% %")
