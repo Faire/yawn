@@ -35,8 +35,7 @@ abstract class BaseTypeSafeCriteriaQuery<SOURCE : Any, T : Any, DEF : YawnDef<SO
      */
     inline fun <reified ST : Any, DEF : YawnTableDef<SOURCE, ST>, PROJECTION : Any?> createProjectedSubQuery(
         tableDef: DEF,
-        noinline lambda:
-        ProjectedTypeSafeCriteriaQuery<SOURCE, ST, DEF, PROJECTION>.(
+        noinline lambda: ProjectedTypeSafeCriteriaQuery<SOURCE, ST, DEF, PROJECTION>.(
             tableDef: DEF,
         ) -> YawnQueryProjection<SOURCE, PROJECTION>,
     ): DetachedProjectedTypeSafeCriteriaBuilder<SOURCE, ST, DEF, PROJECTION> {

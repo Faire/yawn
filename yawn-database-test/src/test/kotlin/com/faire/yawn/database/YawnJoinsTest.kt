@@ -1,6 +1,6 @@
 package com.faire.yawn.database
 
-import com.faire.yawn.Yawn.Companion.createProjectedDetachedCriteria
+import com.faire.yawn.Yawn
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.setup.entities.BookRankingTable
@@ -309,7 +309,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn deeply-nested join structure - authors who's favorite books are not their own writing'`() {
-        val authors = createProjectedDetachedCriteria(BookTable) { books ->
+        val authors = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
             val author = join(books.author)
             project(author.name)
         }
@@ -388,7 +388,12 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
 
             criteria.applyFilter { books ->
                 val authors = authorsRef.get(books)
-                addEq(authors.name, "J.R.R. Tolkien")
+                addLike(authors.name, "J.%")
+            }
+
+            criteria.applyFilter { books ->
+                val authors = authorsRef.get(books)
+                addLike(authors.name, "%n")
             }
 
             val results = criteria.list()

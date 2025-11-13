@@ -33,7 +33,7 @@ Then, annotate each `DbEntity` class with `@YawnEntity`.
 
 ```kotlin
 @Entity
-@YawnEntity <-- add this
+@YawnEntity // <-- add this
 class Book {
   // ...
 }
@@ -48,7 +48,7 @@ automatically by the compiler.
 
 Alternatively, if you want to re-build on the terminal, just run:
 
-```kotlin
+```bash
 ./gradlew :your:project:assemble
 ```
 

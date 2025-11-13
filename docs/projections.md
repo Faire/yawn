@@ -18,8 +18,8 @@ This is what it looks like:
 yawn.project(BookTable) { books ->
     // ... (normal query stuff)
 
-  // we must return a projection!
-  project(...)
+    // we must return a projection!
+    project(...)
 }
 ```
 
@@ -40,7 +40,7 @@ To do that, just provide the column you wish to project to to the `project` meth
 project(books.author)
 ```
 
-Note that this is fully type safe! The query now returns `String` instead of `DbBook` because **Yawn** knows that `author` is a String.
+Note that this is fully type-safe! The query now returns `String` instead of `Book` because **Yawn** knows that `author` is a String.
 
 ### Project to Function
 
@@ -130,7 +130,7 @@ yawn.project(BookTable) {
 
 > [!NOTE]
 > 🚸 Currently we don’t support further refining a projection, for example, by using `HAVING`.
-> Adding support for this is on our roadmap.
+> This section is documenting a potentially future feature; adding support for this is on our roadmap but might not work well with Hibernate.
 
 In order to further refine a projection, i.e. add conditions on top of projected values, the `project` function takes an optional block that gives you the
 **Yawn** querying DSL but anchored to the projected type. This is yet to be implemented, but would look something like this:
@@ -152,7 +152,7 @@ This would be equivalent of a SQL `HAVING`, but might not be fully supported by 
 
 `applyProjection` can come in handy when you are refactoring code where multiple callers share the same base criteria but apply different projections to it.
 
-```sql
+```kotlin
 val authors = createBaseBookTableCriteria(yawn)
   .applyProjection { ... }
   .list()
@@ -166,17 +166,8 @@ fun createBaseBookTableCriteria(
 }
 ```
 
-```kotlin
-val authors = yawn.project(BookTable) { books ->
-  addEq(books.name, "The Hobbit")
-  project(books.author)
-}.list()
-
-// authors = ["Tolkien"]
-```
-
-You can see even more complex examples [on this test
-file](https://github.com/Faire/yawn/blob/main/yawn-database-test/src/test/kotlin/com/faire/yawn/database/YawnProjectionTest.kt).
+You can see even more complex examples [on this test file][yawn-projections-test].
 
 
 [yawn-projections-file]: https://github.com/Faire/yawn/blob/main/yawn-api/src/main/kotlin/com/faire/yawn/project/YawnProjections.kt#L13
+[yawn-projections-test]: https://github.com/Faire/yawn/blob/main/yawn-database-test/src/test/kotlin/com/faire/yawn/database/YawnProjectionTest.kt
