@@ -11,9 +11,9 @@ dependencies {
     // kotlinpoet
     implementation(libs.kotlinpoet)
     implementation(libs.kotlinpoet.ksp)
-    // ksp
-    implementation(libs.ksp.api)
-    implementation(libs.ksp.common.deps)
+    // ksp - use compileOnly to avoid forcing a specific KSP version on consumers
+    compileOnly(libs.ksp.api)
+    compileOnly(libs.ksp.common.deps)
 
     implementation(project(":yawn-api"))
 }

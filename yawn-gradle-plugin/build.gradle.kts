@@ -12,9 +12,11 @@ dependencies {
     testImplementation(libs.navatwo.gradle.better.testing.asserts)
     testImplementation(libs.assertj)
     testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.params)
 
     testRuntimeOnly(libs.junit.platform.launcher)
     testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(kotlin("test"))
 }
 
 /**
@@ -62,6 +64,10 @@ tasks.test {
     inputs.files(fileTree("src/test/projects").exclude("**/build/**"))
 
     dependsOn(dumpPluginTestClasspathEntries)
+    // Ensure the processor and its dependencies are published to mavenLocal before running tests
+    // so that the buildsWithMatrix test uses the current version
+    dependsOn(":yawn-api:publishToMavenLocal")
+    dependsOn(":yawn-processor:publishToMavenLocal")
 }
 
 gradlePlugin {

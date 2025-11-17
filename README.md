@@ -24,6 +24,9 @@ dependencies {
 }
 ```
 
+> **Note:** Yawn requires KSP 2.0.0 or later. The library is designed to be compatible with any KSP 2.x version, so you can use the KSP
+> version that matches your project's Kotlin version without version mismatch errors.
+
 1. Write a query!
 
 ```kotlin

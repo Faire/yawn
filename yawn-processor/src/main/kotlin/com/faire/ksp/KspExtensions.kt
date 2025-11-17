@@ -1,13 +1,12 @@
 package com.faire.ksp
 
-import com.google.devtools.ksp.getVisibility
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ksp.toClassName
-import com.squareup.kotlinpoet.ksp.toKModifier
 
 internal inline fun <reified T : Annotation> KSAnnotation.isExactlyType(): Boolean {
     return annotationType.resolve().toClassName().toString() == T::class.qualifiedName
@@ -22,7 +21,17 @@ internal inline fun <reified T : Annotation> KSAnnotated.getAnnotationsByType():
 }
 
 internal fun KSClassDeclaration.getVisibilityModifier(): KModifier {
-    return getVisibility().toKModifier() ?: error("Unknown visibility for $this")
+    val visibilityModifier = modifiers.firstOrNull {
+        it in setOf(Modifier.PUBLIC, Modifier.PRIVATE, Modifier.INTERNAL, Modifier.PROTECTED)
+    } ?: Modifier.PUBLIC // Default to public if no explicit visibility modifier
+
+    return when (visibilityModifier) {
+        Modifier.PUBLIC -> KModifier.PUBLIC
+        Modifier.PRIVATE -> KModifier.PRIVATE
+        Modifier.INTERNAL -> KModifier.INTERNAL
+        Modifier.PROTECTED -> KModifier.PROTECTED
+        else -> error("Unknown visibility modifier: $visibilityModifier for $this")
+    }
 }
 
 internal fun KSClassDeclaration.getEffectiveVisibility(): KModifier {
