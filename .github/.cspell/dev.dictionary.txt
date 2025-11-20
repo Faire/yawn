@@ -3,6 +3,7 @@ allprojects # part of the gradle DSL
 autodetection # a feature in junit to automatically detect tests
 gradlew # the gradle wrapper script
 ilike # sql term meaning "case-insensitive like"
+insertable # a hibernate flag on Columns/JoinColumns
 jvmargs # a gradle property to set jvm arguments
 lateinit # keyword in Kotlin
 metaspace # a memory space in the JVM

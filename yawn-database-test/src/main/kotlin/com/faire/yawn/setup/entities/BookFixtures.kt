@@ -36,6 +36,7 @@ internal class BookFixtures(
 
             val lordOfTheRings = createBook(tolkien) {
                 name = "Lord of the Rings"
+                callNumber = "PR6039 .O32 L67"
                 genres = setOf(FANTASY, ADVENTURE)
                 originalLanguage = ENGLISH
 
@@ -57,6 +58,7 @@ internal class BookFixtures(
             }
             createBook(tolkien) {
                 name = "The Hobbit"
+                callNumber = "PR6039.O32 H6 1937"
                 genres = setOf(FANTASY, ADVENTURE)
                 originalLanguage = ENGLISH
 
@@ -79,6 +81,7 @@ internal class BookFixtures(
 
             val hp = createBook(rowling) {
                 name = "Harry Potter"
+                callNumber = "PZ7.R79835 Har 1998"
                 genres = setOf(FANTASY)
                 originalLanguage = ENGLISH
 
@@ -96,6 +99,7 @@ internal class BookFixtures(
 
             val littleMermaid = createBook(andersen) {
                 name = "The Little Mermaid"
+                callNumber = "PZ8.A542 Lit 1993"
                 genres = setOf(FAIRY_TALE)
                 originalLanguage = DANISH
 
@@ -135,13 +139,14 @@ internal class BookFixtures(
                 )
             }
 
-            createPerson {
+            val paul = createPerson {
                 name = "Paul Duchesne"
                 email = EmailAddress("paul.duchesne@faire.com")
                 favoriteBook = lordOfTheRings
                 favoriteAuthor = andersen
             }
-            createPerson {
+
+            val luan = createPerson {
                 name = "Luan Nico"
                 email = EmailAddress("luan@faire.com")
                 favoriteBook = hp
@@ -173,6 +178,38 @@ internal class BookFixtures(
                 ratingMonth = 1
                 bestSeller = hp
             }
+
+            createBookRanking {
+                ratingYear = 1966
+                ratingMonth = 12
+                bestSeller = lordOfTheRings
+            }
+
+            createBookReview {
+                reviewer = john
+                reviewText = "Frodo was pretty cool."
+                book = lordOfTheRings
+            }
+
+            val lordOfTheRingsBookCover = createBookCover(lordOfTheRings, paul) {
+                material = BookCover.Material.CLOTH
+                inscription = "The Fellowship of the Ring"
+            }
+            val hpBookCover = createBookCover(hp, luan) {
+                material = BookCover.Material.PAPER_BAG
+                inscription = "Harry Potter and the Sorcerer's Stone"
+            }
+            createBookCoverRanking {
+                bookCover = lordOfTheRingsBookCover
+                ranking = 1
+                judgesComments = "No notes"
+            }
+
+            createBookCoverRanking {
+                bookCover = hpBookCover
+                ranking = 2
+                judgesComments = "Good construction and solid line work"
+            }
         }
     }
 
@@ -193,6 +230,25 @@ internal class BookFixtures(
 
         fun createBookRanking(setup: BookRanking.() -> Unit): BookRanking {
             return update(BookRanking(), setup)
+        }
+
+        fun createBookCover(
+            book: Book,
+            owner: Person,
+            setup: BookCover.() -> Unit,
+        ): BookCover {
+            return update(BookCover()) {
+                this.cid = BookCoverCompositeId(book.id, owner.id)
+                setup()
+            }
+        }
+
+        fun createBookCoverRanking(setup: BookCoverRanking.() -> Unit): BookCoverRanking {
+            return update(BookCoverRanking(), setup)
+        }
+
+        fun createBookReview(setup: BookReview.() -> Unit): BookReview {
+            return update(BookReview(), setup)
         }
 
         fun createBook(
@@ -241,6 +297,9 @@ internal class BookFixtures(
             BookView::class,
             Person::class,
             Publisher::class,
+            BookCover::class,
+            BookCoverRanking::class,
+            BookReview::class,
         )
     }
 }
