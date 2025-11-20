@@ -3,6 +3,7 @@ allprojects # part of the gradle DSL
 autodetection # a feature in junit to automatically detect tests
 gradlew # the gradle wrapper script
 ilike # sql term meaning "case-insensitive like"
+insertable # a hibernate flag on Columns/JoinColumns
 jvmargs # a gradle property to set jvm arguments
 lateinit # keyword in Kotlin
 metaspace # a memory space in the JVM
@@ -10,4 +11,3 @@ mkdirs # gradle API to create directories
 sarif # a standard for test results (https://gcc.gnu.org/wiki/SARIF)
 usertype # in Hibernate, a type with a custom adapter defined by the user
 Xjsr # a jvm flag to enable JSR 305 annotations
-insertable # a hibernate flag on Columns/JoinColumns
