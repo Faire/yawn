@@ -3,6 +3,8 @@ package com.faire.yawn.setup.entities
 import com.faire.yawn.YawnEntity
 import com.faire.yawn.setup.custom.SerializeAsJson
 import org.hibernate.annotations.Formula
+import org.hibernate.annotations.NaturalId
+import java.io.Serializable
 import javax.persistence.CollectionTable
 import javax.persistence.Column
 import javax.persistence.ElementCollection
@@ -25,10 +27,12 @@ import javax.persistence.Version
     name = "books",
     indexes = [
         Index(name = "idx_name", columnList = "name"),
+        Index(name = "idx_call_number", columnList = "call_number"),
     ],
 )
 @YawnEntity
-internal class Book : TimestampedEntity<Book>() {
+// Only need Serializable until Hibernate is upgraded to 6+ due to https://hibernate.atlassian.net/browse/HHH-7668
+internal class Book : TimestampedEntity<Book>(), Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     override lateinit var id: YawnId<Book>
@@ -40,6 +44,10 @@ internal class Book : TimestampedEntity<Book>() {
 
     @Column
     lateinit var name: String
+
+    @NaturalId
+    @Column(name = "call_number")
+    var callNumber: String? = null
 
     @ElementCollection(targetClass = Genre::class)
     @CollectionTable(name = "book_genres", joinColumns = [JoinColumn(name = "book_id")])
