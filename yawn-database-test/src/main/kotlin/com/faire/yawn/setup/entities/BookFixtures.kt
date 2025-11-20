@@ -191,16 +191,16 @@ internal class BookFixtures(
                 book = lordOfTheRings
             }
 
-            val lotrBookCover = createBookCover(lordOfTheRings, paul) {
+            val lordOfTheRingsBookCover = createBookCover(lordOfTheRings, paul) {
                 material = BookCover.Material.CLOTH
-                inscription = "LOTR"
+                inscription = "The Fellowship of the Ring"
             }
             val hpBookCover = createBookCover(hp, luan) {
                 material = BookCover.Material.PAPER_BAG
                 inscription = "Harry Potter and the Sorcerer's Stone"
             }
             createBookCoverRanking {
-                bookCover = lotrBookCover
+                bookCover = lordOfTheRingsBookCover
                 ranking = 1
                 judgesComments = "No notes"
             }

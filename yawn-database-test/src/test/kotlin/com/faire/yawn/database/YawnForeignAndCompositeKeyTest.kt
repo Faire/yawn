@@ -47,13 +47,13 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
             assertThat(hpRanking.ratingMonth).isEqualTo(1)
             assertThat(hpRanking.bestSeller.id).isEqualTo(hpBookId)
 
-            val lotrRanking = session.query(BookRankingTable) { bookRanking ->
+            val lordOfTheRingsRanking = session.query(BookRankingTable) { bookRanking ->
                 addNotEq(bookRanking.bestSeller, hpBookId)
             }.uniqueResult()!!
 
-            assertThat(lotrRanking.ratingYear).isEqualTo(1966)
-            assertThat(lotrRanking.ratingMonth).isEqualTo(12)
-            assertThat(lotrRanking.bestSeller.id).isNotEqualTo(hpBookId)
+            assertThat(lordOfTheRingsRanking.ratingYear).isEqualTo(1966)
+            assertThat(lordOfTheRingsRanking.ratingMonth).isEqualTo(12)
+            assertThat(lordOfTheRingsRanking.bestSeller.id).isNotEqualTo(hpBookId)
         }
     }
 
@@ -65,20 +65,20 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
                 project(book.id)
             }.uniqueResult()!!
 
-            val lotrBookId = session.project(BookTable) { book ->
+            val lordOfTheRingsBookId = session.project(BookTable) { book ->
                 addEq(book.name, "Lord of the Rings")
                 project(book.id)
             }.uniqueResult()!!
 
             val singleInResult = session.query(BookRankingTable) { bookRanking ->
-                addIn(bookRanking.bestSeller, setOf(lotrBookId))
+                addIn(bookRanking.bestSeller, setOf(lordOfTheRingsBookId))
             }.list()
 
             assertThat(singleInResult.map { Pair(it.ratingYear, it.bestSeller.name) })
                 .containsExactly(Pair(1966, "Lord of the Rings"))
 
             val multipleInResult = session.query(BookRankingTable) { bookRanking ->
-                addIn(bookRanking.bestSeller, setOf(hpBookId, lotrBookId))
+                addIn(bookRanking.bestSeller, setOf(hpBookId, lordOfTheRingsBookId))
             }.list()
 
             assertThat(multipleInResult.map { Pair(it.ratingYear, it.bestSeller.name) })
@@ -163,7 +163,7 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
             }.list()
 
             assertThat(inQueryResult.map { it.inscription }).containsExactlyInAnyOrder(
-                "LOTR",
+                "The Fellowship of the Ring",
                 "Harry Potter and the Sorcerer's Stone",
             )
         }

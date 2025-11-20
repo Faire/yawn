@@ -10,3 +10,4 @@ mkdirs # gradle API to create directories
 sarif # a standard for test results (https://gcc.gnu.org/wiki/SARIF)
 usertype # in Hibernate, a type with a custom adapter defined by the user
 Xjsr # a jvm flag to enable JSR 305 annotations
+insertable # a hibernate flag on Columns/JoinColumns
