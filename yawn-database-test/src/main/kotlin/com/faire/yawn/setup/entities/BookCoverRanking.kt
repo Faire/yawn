@@ -19,13 +19,13 @@ internal class BookCoverRanking : TimestampedEntity<BookCoverRanking>() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     override lateinit var id: YawnId<BookCoverRanking>
-    
+
     @Column
     var ranking: Int = 0
 
     @Column
     var judgesComments: String? = null
-    
+
     @OneToOne
     @JoinColumn(name = "owner_id")
     @JoinColumn(name = "book_id")

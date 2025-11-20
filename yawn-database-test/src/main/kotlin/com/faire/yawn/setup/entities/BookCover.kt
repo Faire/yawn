@@ -19,7 +19,7 @@ internal data class BookCoverCompositeId(
 
     @Column(updatable = false, nullable = false, name = "owner_id")
     var ownerId: YawnId<Person> = YawnId(0), // Default value since Hibernate needs a no-arg constructor
-): Serializable
+) : Serializable
 
 @Immutable
 @Entity

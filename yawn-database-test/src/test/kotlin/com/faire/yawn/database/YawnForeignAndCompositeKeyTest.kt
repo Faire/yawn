@@ -16,7 +16,7 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
     @Test
     fun `generate using the Id when foreign key not specified`() {
         transactor.open { session ->
-            val bookId = session.project(BookTable) { book->
+            val bookId = session.project(BookTable) { book ->
                 addEq(book.name, "Harry Potter")
                 project(book.id)
             }.uniqueResult()!!
@@ -34,7 +34,7 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
     @Test
     fun `simplified foreign key equals syntax`() {
         transactor.open { session ->
-            val hpBookId = session.project(BookTable) { book->
+            val hpBookId = session.project(BookTable) { book ->
                 addEq(book.name, "Harry Potter")
                 project(book.id)
             }.uniqueResult()!!
@@ -60,12 +60,12 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
     @Test
     fun `simplified foreign key in clause syntax`() {
         transactor.open { session ->
-            val hpBookId = session.project(BookTable) { book->
+            val hpBookId = session.project(BookTable) { book ->
                 addEq(book.name, "Harry Potter")
                 project(book.id)
             }.uniqueResult()!!
 
-            val lotrBookId = session.project(BookTable) { book->
+            val lotrBookId = session.project(BookTable) { book ->
                 addEq(book.name, "Lord of the Rings")
                 project(book.id)
             }.uniqueResult()!!
@@ -124,7 +124,7 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
     @Test
     fun `queries work with partial or whole composite IDs`() {
         transactor.open { session ->
-            val hpBookId = session.project(BookTable) { book->
+            val hpBookId = session.project(BookTable) { book ->
                 addEq(book.name, "Harry Potter")
                 project(book.id)
             }.uniqueResult()!!
@@ -164,7 +164,7 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
 
             assertThat(inQueryResult.map { it.inscription }).containsExactlyInAnyOrder(
                 "LOTR",
-                "Harry Potter and the Sorcerer's Stone"
+                "Harry Potter and the Sorcerer's Stone",
             )
         }
     }
@@ -172,7 +172,7 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
     @Test
     fun `foreign key queries work with composite foreign keys`() {
         transactor.open { session ->
-            val hpBookId = session.project(BookTable) { book->
+            val hpBookId = session.project(BookTable) { book ->
                 addEq(book.name, "Harry Potter")
                 project(book.id)
             }.uniqueResult()!!

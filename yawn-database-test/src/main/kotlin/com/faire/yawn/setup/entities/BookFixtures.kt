@@ -210,7 +210,6 @@ internal class BookFixtures(
                 ranking = 2
                 judgesComments = "Good construction and solid line work"
             }
-
         }
     }
 
