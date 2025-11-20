@@ -6,25 +6,51 @@ It leverages [KSP](https://kotlinlang.org/docs/ksp-overview.html) to generate **
 
 ## Getting Started
 
-1. Add the `com.faire.yawn.version` property to your Gradle properties (with the latest version in place of `<VERSION>`)
+### Adding the Dependencies
 
-```properties
-com.faire.yawn.version=<VERSION>
-```
+There are two sets of dependencies you must add to your project to use Yawn.
 
-1. Add the Gradle dependencies to your build (with the latest version in place of `<VERSION>`)
+1. The `yawn-processor` dependency is what generates the definitions for your entities annotated with `@YawnEntity`.
+
+That needs to be added as a `compileOnly` and also `ksp` dependency:
 
 ```kotlin
-plugins {
-  id("com.faire.yawn")
-}
+    compileOnly("com.faire.yawn:yawn-processor:$version")
+    ksp("com.faire.yawn:yawn-processor:$version")
+```
 
-dependencies {
-  implementation("com.faire.yawn:yawn-api:<VERSION>")
+As an alternative, you can use the Yawn Gradle plugin to automatically add the processor for you - see the
+[Yawn Gradle Plugin readme][yawn-gradle-plugin-readme] for more details. This is recommended for multi-module Gradle projects.
+
+1. The `yawn-api` as a regular dependency in order to actually make queries:
+
+```kotlin
+    implementation("com.faire.yawn:yawn-api:$version")
+```
+
+### Annotate your Entities
+
+Annotate your Hibernate entities with `@YawnEntity` in order to have the necessary table and column definitions generated for them.
+
+```kotlin
+@Entity
+@Table(name = "books")
+@YawnEntity // <-- add this
+class Book {
+  // ...
 }
 ```
 
-1. Write a query!
+### Wire your QueryFactory
+
+In order to hook Yawn into your Hibernate setup, you need to provide a `QueryFactory` implementation that knows how map the Yawn models into a Hibernate query.
+For inspiration, you can check out the [`YawnTestQueryFactory`][yawn-test-query-factory] implementation.
+
+Tip: wrap the Yawn class creation within your transaction management code to make it easier to use throughout your codebase!
+
+### Write your queries
+
+Finally, you are ready! Now you can write your type-safe queries using the power of Yawn:
 
 ```kotlin
   val yawn = Yawn(queryFactory = YourQueryFactory(...))
@@ -81,3 +107,7 @@ Have you found a bug or have a suggestion? Open an [issue](https://github.com/Fa
 look at it as soon as possible.
 
 Do you want to contribute with a PR? Make sure to read our [Contributing Guide](/CONTRIBUTING.md)!
+
+
+[yawn-gradle-plugin-readme]: /yawn-gradle-plugin/README.md
+[yawn-test-query-factory]: /yawn-database-test/src/main/kotlin/com/faire/yawn/setup/hibernate/YawnTestQueryFactory.kt
