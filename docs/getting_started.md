@@ -1,38 +1,35 @@
 # Getting Started
 
-Getting started with **Yawn** is **as simple as 3 steps**!
+Getting started with **Yawn** is **as simple as 4 steps**!
 
-## Step 1: Add the plugin
+## Adding the Dependencies
 
-The **Yawn** APIs require the code it generates to provide all the type-safety benefits.
+There are two sets of dependencies you must add to your project to use Yawn; the `yawn-processor` dependency is what generates the definitions for your entities
+annotated with `@YawnEntity`.
 
-For each gradle project that needs to use **Yawn**, make sure you have the `"com.faire.yawn"` gradle plugin installed in the build file
-along with and a dependency on the API. Also ensure that in your root project you have the `com.faire.yawn.version` Gradle property set.
-
-1. Add the `com.faire.yawn.version` property to your Gradle properties (with the actual version in place of `<VERSION>`)
-
-```properties
-com.faire.yawn.version=<VERSION>
-```
-
-1. Add the Gradle dependencies to your build (with the actual version in place of `<VERSION>`)
+That needs to be added as a `compileOnly` and also `ksp` dependency:
 
 ```kotlin
-plugins {
-  id("com.faire.yawn")
-}
-
-dependencies {
-  implementation("com.faire.yawn:yawn-api:<VERSION>")
-}
+    compileOnly("com.faire.yawn:yawn-processor:$version")
+    ksp("com.faire.yawn:yawn-processor:$version")
 ```
 
-## Step 2: Annotate your Entity
+As an alternative, you can use the Yawn Gradle plugin to automatically add the processor for you - see the
+[Yawn Gradle Plugin readme][yawn-gradle-plugin-readme] for more details. This is recommended for multi-module Gradle projects.
 
-Then, annotate each `DbEntity` class with `@YawnEntity`.
+Then, you need to add `yawn-api` as a regular dependency in order to actually make queries:
+
+```kotlin
+    implementation("com.faire.yawn:yawn-api:$version")
+```
+
+## Annotate your Entities
+
+Annotate your Hibernate entities with `@YawnEntity` in order to have the necessary table and column definitions generated for them.
 
 ```kotlin
 @Entity
+@Table(name = "books")
 @YawnEntity // <-- add this
 class Book {
   // ...
@@ -52,15 +49,28 @@ Alternatively, if you want to re-build on the terminal, just run:
 ./gradlew :your:project:assemble
 ```
 
-## Step 3: Write your queries
+## Wire your QueryFactory
 
-Enjoy the bliss of type-safety and write your queries using `query`:
+In order to hook Yawn into your Hibernate setup, you need to provide a `QueryFactory` implementation that knows how map the Yawn models into a Hibernate query.
+For inspiration, you can check out the [`YawnTestQueryFactory`][yawn-test-query-factory] implementation.
+
+Tip: wrap the Yawn class creation within your transaction management code to make it easier to use throughout your codebase!
+
+## Write your queries
+
+Finally, you are ready! Now you can write your type-safe queries using the power of Yawn:
 
 ```kotlin
-yawn.query(BookTable) { books ->
-  addEq(books.name, "The Hobbit")
-}.uniqueResult()
+  val yawn = Yawn(queryFactory = YourQueryFactory(...))
+
+  val tolkienBooks = yawn.query(BookTable) { books ->
+    val authors = join(books.author)
+    addEq(authors.name, "J. R. R. Tolkien")
+  }.list()
 ```
 
-Simple as that!
+Next: read about [Basic Queries](/docs/basic_queries.md) to learn how to write queries with Yawn!
 
+
+[yawn-gradle-plugin-readme]: /yawn-gradle-plugin/README.md
+[yawn-test-query-factory]: /yawn-database-test/src/main/kotlin/com/faire/yawn/setup/hibernate/YawnTestQueryFactory.kt
