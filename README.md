@@ -6,6 +6,10 @@ It leverages [KSP](https://kotlinlang.org/docs/ksp-overview.html) to generate **
 
 ## Getting Started
 
+> [!NOTE]
+> 💡 Want to take a peek at a complete example we made of using Yawn in a multi-module Gradle project?
+> [Check our example repo](https://github.com/faire/yawn-example).
+
 ### Adding the Dependencies
 
 There are two sets of dependencies you must add to your project to use Yawn.

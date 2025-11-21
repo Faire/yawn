@@ -1,5 +1,9 @@
 # Getting Started
 
+> [!NOTE]
+> 💡 Want to take a peek at a complete example we made of using Yawn in a multi-module Gradle project?
+> [Check our example repo](https://github.com/faire/yawn-example).
+
 Getting started with **Yawn** is **as simple as 4 steps**!
 
 ## Adding the Dependencies
