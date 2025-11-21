@@ -8,24 +8,27 @@ Getting started with **Yawn** is **as simple as 4 steps**!
 
 ## Adding the Dependencies
 
-There are two sets of dependencies you must add to your project to use Yawn; the `yawn-processor` dependency is what generates the definitions for your entities
-annotated with `@YawnEntity`.
+There are two sets of dependencies you must add to your project to use Yawn.
 
-That needs to be added as a `compileOnly` and also `ksp` dependency:
+1. The `yawn-processor` dependency generates the definitions for your entities annotated with `@YawnEntity`.
 
-```kotlin
+    That needs to be added as a `compileOnly` and also `ksp` dependency:
+
+    ```kotlin
     compileOnly("com.faire.yawn:yawn-processor:$version")
     ksp("com.faire.yawn:yawn-processor:$version")
-```
+    ```
 
-As an alternative, you can use the Yawn Gradle plugin to automatically add the processor for you - see the
-[Yawn Gradle Plugin readme][yawn-gradle-plugin-readme] for more details. This is recommended for multi-module Gradle projects.
+    As an alternative, you can use the Yawn Gradle plugin to automatically add the processor for you - see the
+    [Yawn Gradle Plugin readme][yawn-gradle-plugin-readme] for more details. This is recommended for multi-module Gradle projects.
 
-Then, you need to add `yawn-api` as a regular dependency in order to actually make queries:
+1. And the `yawn-api` allows you access to Yawn classes to actually perform queries.
 
-```kotlin
+   That is added as a regular dependency:
+
+    ```kotlin
     implementation("com.faire.yawn:yawn-api:$version")
-```
+    ```
 
 ## Annotate your Entities
 
