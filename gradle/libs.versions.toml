@@ -16,7 +16,7 @@ junit-platform = "1.11.3"
 vanniktech = "0.34.0"
 faire-detekt-rules = "0.5.3"
 detekt = "1.23.8"
-kotlinpoet = "1.18.1"
+kotlinpoet = "2.2.0"
 
 [libraries]
 # Kotlin

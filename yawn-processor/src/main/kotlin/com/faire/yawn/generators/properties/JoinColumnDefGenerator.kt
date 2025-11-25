@@ -1,6 +1,7 @@
 package com.faire.yawn.generators.properties
 
 import com.faire.yawn.YawnTableDef
+import com.faire.yawn.generators.makeNonNullable
 import com.faire.yawn.processors.BaseYawnProcessor.Companion.PARENT_PARAMETER_NAME
 import com.faire.yawn.util.ForeignKeyReference
 import com.faire.yawn.util.YawnContext
@@ -51,7 +52,11 @@ internal object JoinColumnDefGenerator : YawnPropertyGenerator() {
     ): PropertySpec {
         check(foreignKeyRef == null)
 
-        val fieldTypeClassName = fieldType.toClassName() // reference to YawnEntityInAnotherPackage
+        val fieldTypeClassName = fieldType
+            .toClassName() // reference to YawnEntityInAnotherPackage
+            // TODO(yawn): we should make JoinColumnDefGenerator null-aware;
+            //             check https://github.com/faire/yawn/blob/main/docs/nullability.md for more details.
+            .makeNonNullable()
 
         // reference to YawnEntityInAnotherPackageTableDef
         val fieldYawnTableDef = tableDefForType(fieldTypeClassName)
