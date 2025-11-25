@@ -150,7 +150,21 @@ abstract class BaseTypeSafeCriteriaBuilder<
         batchSize: Int,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
     ): List<RETURNS> {
-        val results = mutableListOf<RETURNS>()
+        return collectionBatched(batchSize, orders, results = mutableListOf())
+    }
+
+    fun setBatched(
+        batchSize: Int,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+    ): Set<RETURNS> {
+        return collectionBatched(batchSize, orders, results = mutableSetOf())
+    }
+
+    private fun <C : MutableCollection<RETURNS>> collectionBatched(
+        batchSize: Int,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+        results: C,
+    ): C {
         doPaginated(
             pageSize = batchSize,
             orders = orders,

@@ -205,6 +205,25 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `set batched`() {
+        transactor.open { session ->
+            val results = session.project(BookTable) { books ->
+                val authors = join(books.author)
+                project(authors.name)
+            }.setBatched(
+                batchSize = 2,
+                orders = listOf { YawnQueryOrder.asc(name) },
+            )
+
+            assertThat(results).containsExactly(
+                "J.K. Rowling",
+                "J.R.R. Tolkien",
+                "Hans Christian Andersen",
+            )
+        }
+    }
+
+    @Test
     fun `paginate with projection`() {
         transactor.open { session ->
             val bookNames = session.project(BookTable) { books ->
