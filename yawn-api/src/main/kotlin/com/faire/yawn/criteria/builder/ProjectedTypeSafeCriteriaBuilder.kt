@@ -6,7 +6,6 @@ import com.faire.yawn.criteria.query.ProjectedTypeSafeCriteriaQuery
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnQuery
 import com.faire.yawn.query.YawnQueryFactory
-import com.faire.yawn.query.YawnQueryOrder
 
 /**
  * A type-safe builder for Yawn queries with projections.
@@ -47,21 +46,6 @@ class ProjectedTypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>, RETURN
             query.projection = projection
             mapper = { projection.project(it) }
         }
-    }
-
-    inline fun doPaginated(
-        pageSize: Int,
-        orders: List<DEF.() -> YawnQueryOrder<T>>,
-        action: (List<RETURNS>) -> Unit,
-    ) {
-        // only apply the orders once
-        applyOrders(orders)
-
-        var pageNumber = 0
-        do {
-            val results = paginateZeroIndexed(pageNumber++, pageSize, orders = listOf()).list()
-            action(results)
-        } while (results.size == pageSize)
     }
 
     companion object {
