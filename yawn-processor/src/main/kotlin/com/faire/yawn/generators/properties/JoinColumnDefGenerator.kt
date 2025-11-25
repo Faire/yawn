@@ -54,8 +54,8 @@ internal object JoinColumnDefGenerator : YawnPropertyGenerator() {
 
         val fieldTypeClassName = fieldType
             .toClassName() // reference to YawnEntityInAnotherPackage
-            // TODO(yawn): we should make JoinColumnDefWithCompositeKey null-aware;
-            //             check github.com/faire/yawn/blob/main/docs/nullability.md for more details.
+            // TODO(yawn): we should make JoinColumnDefGenerator null-aware;
+            //             check https://github.com/faire/yawn/blob/main/docs/nullability.md for more details.
             .makeNonNullable()
 
         // reference to YawnEntityInAnotherPackageTableDef
