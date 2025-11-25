@@ -123,6 +123,29 @@ abstract class BaseTypeSafeCriteriaBuilder<
             .maxResults(pageSize)
     }
 
+    fun listPaginatedZeroIndexed(
+        pageNumber: Int,
+        pageSize: Int,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+    ): List<RETURNS> {
+        return paginateZeroIndexed(pageNumber, pageSize, orders).list()
+    }
+
+    inline fun doPaginated(
+        pageSize: Int,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+        action: (List<RETURNS>) -> Unit,
+    ) {
+        // only apply the orders once
+        applyOrders(orders)
+
+        var pageNumber = 0
+        do {
+            val results = listPaginatedZeroIndexed(pageNumber++, pageSize, listOf())
+            action(results)
+        } while (results.size == pageSize)
+    }
+
     fun applyOrders(orders: List<DEF.() -> YawnQueryOrder<T>>): CRITERIA {
         query.orders.addAll(orders.map { it(tableDef) })
         return builderReturn()

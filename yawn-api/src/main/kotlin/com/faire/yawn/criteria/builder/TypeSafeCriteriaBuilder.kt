@@ -75,20 +75,6 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         return results
     }
 
-    fun listPaginatedZeroIndexed(
-        pageNumber: Int,
-        pageSize: Int,
-        orders: List<DEF.() -> YawnQueryOrder<T>>,
-    ): List<T> {
-        check(pageSize >= 1) { "$pageSize is not a valid page size" }
-        check(pageNumber >= 0) { "$pageNumber is not a valid page number" }
-
-        return applyOrders(orders)
-            .offset(pageNumber * pageSize)
-            .maxResults(pageSize)
-            .list()
-    }
-
     fun countDistinct(
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<*>,
     ): Long {
@@ -115,21 +101,6 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         )
 
         return Pair(totalResults, entities)
-    }
-
-    inline fun doPaginated(
-        pageSize: Int,
-        orders: List<DEF.() -> YawnQueryOrder<T>>,
-        action: (List<T>) -> Unit,
-    ) {
-        // only apply the orders once
-        applyOrders(orders)
-
-        var pageNumber = 0
-        do {
-            val results = listPaginatedZeroIndexed(pageNumber++, pageSize, listOf())
-            action(results)
-        } while (results.size == pageSize)
     }
 
     fun rowCount(): Long {
