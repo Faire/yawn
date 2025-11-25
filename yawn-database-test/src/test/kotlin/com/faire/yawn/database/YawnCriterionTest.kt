@@ -155,6 +155,120 @@ internal class YawnCriterionTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `all and and or overloads - two operands versions`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                val authors = join(books.author)
+                val publishers = join(books.publisher)
+                addAnd(
+                    or(
+                        eq(authors.name, "J.R.R. Tolkien"),
+                        eq(authors.name, "J.K. Rowling"),
+                    ),
+                    and(
+                        eq(books.name, "Harry Potter"),
+                        eq(publishers.name, "Penguin"),
+                    ),
+                )
+                addOr(
+                    and(
+                        eq(books.name, "Lord of the Rings"),
+                        eq(authors.name, "J.R.R. Tolkien"),
+                    ),
+                    and(
+                        eq(books.name, "Harry Potter"),
+                        eq(authors.name, "J.K. Rowling"),
+                    ),
+                )
+            }.list()
+
+            assertThat(results.single().name).isEqualTo("Harry Potter")
+        }
+    }
+
+    @Test
+    fun `all and and or overloads - list versions`() {
+        val allowedAuthors = listOf(
+            "J.R.R. Tolkien",
+            "J.K. Rowling",
+        )
+        val allowedBookNames = listOf(
+            "Harry Potter",
+            "The Ugly Duckling",
+            "The Emperor's New Clothes",
+        )
+
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                val authors = join(books.author)
+                val publishers = join(books.publisher)
+                addAnd(
+                    listOf(
+                        or(allowedAuthors.map { eq(authors.name, it) }),
+                        or(allowedBookNames.map { eq(books.name, it) }),
+                    ),
+                )
+                addOr(
+                    listOf(
+                        and(allowedAuthors.map { eq(authors.name, it) }),
+                        and(allowedBookNames.map { eq(books.name, it) }),
+                        isNotEmpty(publishers.owners),
+                    ),
+                )
+            }.list()
+
+            assertThat(results.single().name).isEqualTo("Harry Potter")
+        }
+    }
+
+    @Test
+    fun `all and and or overloads - varargs versions`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                val authors = join(books.author)
+                val publishers = join(books.publisher)
+                val owners = join(publishers.owners)
+                addAnd(
+                    or(
+                        eq(authors.name, "J.R.R. Tolkien"),
+                        eq(authors.name, "J.K. Rowling"),
+                        eq(authors.name, "Hans Christian Andersen"),
+                    ),
+                    or(
+                        eq(books.name, "Harry Potter"),
+                        eq(books.name, "The Little Mermaid"),
+                        eq(books.name, "Lord of the Rings"),
+                    ),
+                    and(
+                        eq(publishers.name, "HarperCollins"),
+                        eq(publishers.nameLetterCount, 13),
+                        eq(owners.name, "Jane Doe"),
+                    ),
+                )
+                addOr(
+                    and(
+                        eq(books.name, "The Ugly Duckling"),
+                        eq(authors.name, "J.R.R. Tolkien"),
+                        eq(publishers.name, "Penguin"),
+                    ),
+                    and(
+                        eq(books.name, "Harry Potter"),
+                        eq(authors.name, "Hans Christian Andersen"),
+                        eq(publishers.name, "Penguin"),
+                    ),
+                    and(
+                        eq(books.name, "Lord of the Rings"),
+                        eq(authors.name, "J.R.R. Tolkien"),
+                        eq(publishers.name, "HarperCollins"),
+                    ),
+                )
+            }.list()
+
+            assertThat(results.single().name).isEqualTo("Lord of the Rings")
+        }
+    }
+
+    @Test
     fun `ne column against String`() {
         transactor.open { session ->
             val results = session.query(BookTable) { books ->
