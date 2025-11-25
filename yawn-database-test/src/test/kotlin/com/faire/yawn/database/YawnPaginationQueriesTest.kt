@@ -165,7 +165,7 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
     }
 
     @Test
-    fun `listing with batched`() {
+    fun `list batched`() {
         transactor.open { session ->
             val results = session.query(BookTable).listBatched(
                 batchSize = 2,
@@ -173,6 +173,27 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
             )
 
             assertThat(results.map { it.name }).containsExactly(
+                "Harry Potter",
+                "Lord of the Rings",
+                "The Emperor's New Clothes",
+                "The Hobbit",
+                "The Little Mermaid",
+                "The Ugly Duckling",
+            )
+        }
+    }
+
+    @Test
+    fun `list batched - projection`() {
+        transactor.open { session ->
+            val results = session.project(BookTable) { books ->
+                project(books.name)
+            }.listBatched(
+                batchSize = 2,
+                orders = listOf { YawnQueryOrder.asc(name) },
+            )
+
+            assertThat(results).containsExactly(
                 "Harry Potter",
                 "Lord of the Rings",
                 "The Emperor's New Clothes",

@@ -146,6 +146,19 @@ abstract class BaseTypeSafeCriteriaBuilder<
         } while (results.size == pageSize)
     }
 
+    fun listBatched(
+        batchSize: Int,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+    ): List<RETURNS> {
+        val results = mutableListOf<RETURNS>()
+        doPaginated(
+            pageSize = batchSize,
+            orders = orders,
+            action = { results.addAll(it) },
+        )
+        return results
+    }
+
     fun applyOrders(orders: List<DEF.() -> YawnQueryOrder<T>>): CRITERIA {
         query.orders.addAll(orders.map { it(tableDef) })
         return builderReturn()
