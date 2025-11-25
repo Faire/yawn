@@ -53,7 +53,7 @@ internal object JoinColumnDefWithCompositeKeyGenerator : YawnPropertyGenerator()
         val fieldTypeClassName = fieldType
             .toClassName() // reference to DbFooComposite
             // TODO(yawn): we should make JoinColumnDefWithCompositeKey null-aware;
-            //             check faire.link/yawn-nullability for more details.
+            //             check github.com/faire/yawn/blob/main/docs/nullability.md for more details.
             .makeNonNullable()
 
         // reference to FooCompositeTableDef
