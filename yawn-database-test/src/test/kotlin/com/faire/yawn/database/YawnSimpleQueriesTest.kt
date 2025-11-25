@@ -203,17 +203,34 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
                 .list()
             assertOrderedBooks(orderAsc)
 
-            val applyOrder = session.query(BookTable)
+            val orderDesc = session.query(BookTable)
+                .orderDesc { name }
+                .list()
+            assertOrderedBooks(orderDesc.reversed())
+
+            val applyOrderAsc = session.query(BookTable)
                 .applyOrder { YawnQueryOrder.asc(name) }
                 .list()
-            assertOrderedBooks(applyOrder)
+            assertOrderedBooks(applyOrderAsc)
 
-            val applyOrders = session.query(BookTable)
+            val applyOrderDesc = session.query(BookTable)
+                .applyOrder { YawnQueryOrder.desc(name) }
+                .list()
+            assertOrderedBooks(applyOrderDesc.reversed())
+
+            val applyOrdersAsc = session.query(BookTable)
                 .applyOrders(
                     listOf { YawnQueryOrder.asc(name) },
                 )
                 .list()
-            assertOrderedBooks(applyOrders)
+            assertOrderedBooks(applyOrdersAsc)
+
+            val applyOrdersDesc = session.query(BookTable)
+                .applyOrders(
+                    listOf { YawnQueryOrder.desc(name) },
+                )
+                .list()
+            assertOrderedBooks(applyOrdersDesc.reversed())
         }
     }
 
