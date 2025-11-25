@@ -62,19 +62,6 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         return ProjectedTypeSafeCriteriaBuilder.create(tableDef, queryFactory, query, lambda)
     }
 
-    fun listBatched(
-        batchSize: Int,
-        orders: List<DEF.() -> YawnQueryOrder<T>>,
-    ): List<T> {
-        val results = mutableListOf<T>()
-        doPaginated(
-            pageSize = batchSize,
-            orders = orders,
-            action = { results.addAll(it) },
-        )
-        return results
-    }
-
     fun countDistinct(
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<*>,
     ): Long {
