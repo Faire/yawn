@@ -141,8 +141,16 @@ object YawnRestrictions {
         return YawnQueryCriterion(Or(*criterion))
     }
 
+    fun <SOURCE : Any> or(criteria: List<YawnQueryCriterion<SOURCE>>): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(Or(criteria))
+    }
+
     fun <SOURCE : Any> and(vararg criterion: YawnQueryCriterion<SOURCE>): YawnQueryCriterion<SOURCE> {
         return YawnQueryCriterion(And(*criterion))
+    }
+
+    fun <SOURCE : Any> and(criteria: List<YawnQueryCriterion<SOURCE>>): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(And(criteria))
     }
 
     fun <SOURCE : Any, F : String?> like(

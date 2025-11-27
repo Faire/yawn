@@ -175,8 +175,20 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
         add(YawnRestrictions.or(*predicates))
     }
 
+    fun addOr(predicates: List<YawnQueryCriterion<SOURCE>>) {
+        add(YawnRestrictions.or(predicates))
+    }
+
+    fun addAnd(lhs: YawnQueryCriterion<SOURCE>, rhs: YawnQueryCriterion<SOURCE>) {
+        add(YawnRestrictions.and(lhs, rhs))
+    }
+
     fun addAnd(vararg predicates: YawnQueryCriterion<SOURCE>) {
         add(YawnRestrictions.and(*predicates))
+    }
+
+    fun addAnd(predicates: List<YawnQueryCriterion<SOURCE>>) {
+        add(YawnRestrictions.and(predicates))
     }
 
     fun <F> addNotEq(
