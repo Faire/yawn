@@ -1,5 +1,8 @@
 package com.faire.yawn.database
 
+import com.faire.yawn.pagination.Page
+import com.faire.yawn.pagination.PageNumber
+import com.faire.yawn.pagination.PaginationResult
 import com.faire.yawn.query.YawnQueryOrder
 import com.faire.yawn.setup.entities.BookTable
 import org.assertj.core.api.Assertions.assertThat
@@ -18,11 +21,10 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
     @Test
     fun `list paginated`() {
         transactor.open { session ->
-            fun paginate(pageNumber: Int, pageSize: Int = 2): List<String> {
+            fun paginate(page: Page): List<String> {
                 return session.query(BookTable)
-                    .listPaginatedZeroIndexed(
-                        pageNumber = pageNumber,
-                        pageSize = pageSize,
+                    .listPaginated(
+                        page = page,
                         orders = listOf(
                             { YawnQueryOrder.asc(originalLanguage) },
                             { YawnQueryOrder.desc(name) },
@@ -31,19 +33,19 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
                     .map { it.name }
             }
 
-            val books1 = paginate(pageNumber = 0)
+            val books1 = paginate(PageNumber.zeroIndexed(0) / 2)
             assertThat(books1).containsExactly("The Ugly Duckling", "The Little Mermaid")
 
-            val books2 = paginate(pageNumber = 1)
+            val books2 = paginate(PageNumber.zeroIndexed(1) / 2)
             assertThat(books2).containsExactly("The Emperor's New Clothes", "The Hobbit")
 
-            val books3 = paginate(pageNumber = 2)
+            val books3 = paginate(PageNumber.zeroIndexed(2) / 2)
             assertThat(books3).containsExactly("Lord of the Rings", "Harry Potter")
 
-            val book4 = paginate(pageNumber = 3)
+            val book4 = paginate(PageNumber.zeroIndexed(3) / 2)
             assertThat(book4).isEmpty()
 
-            val bigPage1 = paginate(pageNumber = 0, pageSize = 4)
+            val bigPage1 = paginate(PageNumber.zeroIndexed(0) / 4)
             assertThat(bigPage1).containsExactly(
                 "The Ugly Duckling",
                 "The Little Mermaid",
@@ -51,51 +53,70 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
                 "The Hobbit",
             )
 
-            val bigPage2 = paginate(pageNumber = 1, pageSize = 4)
+            val bigPage2 = paginate(PageNumber.zeroIndexed(1) / 4)
             assertThat(bigPage2).containsExactly(
                 "Lord of the Rings",
                 "Harry Potter",
             )
 
-            val hugePage = paginate(pageNumber = 2, pageSize = 100)
+            val hugePage = paginate(PageNumber.zeroIndexed(2) / 100)
             assertThat(hugePage).isEmpty()
+        }
+    }
+
+    @Test
+    fun `set paginated`() {
+        transactor.open { session ->
+            fun paginate(page: Page): Set<String> {
+                return session.query(BookTable)
+                    .applyProjection { books ->
+                        val authors = join(books.author)
+                        project(authors.name)
+                    }
+                    .setPaginated(
+                        page = page,
+                        orders = listOf { YawnQueryOrder.asc(name) },
+                    )
+            }
+
+            val authors = paginate(PageNumber.zeroIndexed(0) / 2) + paginate(PageNumber.zeroIndexed(1) / 2)
+            assertThat(authors).containsExactlyInAnyOrder("Hans Christian Andersen", "J.K. Rowling", "J.R.R. Tolkien")
         }
     }
 
     @Test
     fun `list with total results`() {
         transactor.open { session ->
-            fun paginate(pageNumber: Int, pageSize: Int = 2): Pair<Long, List<String>> {
+            fun paginate(page: Page): PaginationResult<String> {
                 return session.query(BookTable)
-                    .listPaginatedWithTotalResultsZeroIndexed(
-                        pageNumber = pageNumber,
-                        pageSize = pageSize,
+                    .listPaginatedWithTotalResults(
+                        page = page,
                         orders = listOf(
                             { YawnQueryOrder.asc(originalLanguage) },
                             { YawnQueryOrder.desc(name) },
                         ),
                         uniqueColumn = { id },
                     )
-                    .let { (count, results) -> count to results.map { it.name } }
+                    .map { it.name }
             }
 
-            val (total1, books1) = paginate(pageNumber = 0)
+            val (total1, books1) = paginate(PageNumber.zeroIndexed(0) / 2)
             assertThat(total1).isEqualTo(6)
             assertThat(books1).containsExactly("The Ugly Duckling", "The Little Mermaid")
 
-            val (total2, books2) = paginate(pageNumber = 1)
+            val (total2, books2) = paginate(PageNumber.zeroIndexed(1) / 2)
             assertThat(total2).isEqualTo(6)
             assertThat(books2).containsExactly("The Emperor's New Clothes", "The Hobbit")
 
-            val (total3, books3) = paginate(pageNumber = 2)
+            val (total3, books3) = paginate(PageNumber.zeroIndexed(2) / 2)
             assertThat(total3).isEqualTo(6)
             assertThat(books3).containsExactly("Lord of the Rings", "Harry Potter")
 
-            val (total4, book4) = paginate(pageNumber = 3)
+            val (total4, books4) = paginate(PageNumber.zeroIndexed(3) / 2)
             assertThat(total4).isEqualTo(6)
-            assertThat(book4).isEmpty()
+            assertThat(books4).isEmpty()
 
-            val (totalBig1, bigPage1) = paginate(pageNumber = 0, pageSize = 4)
+            val (totalBig1, bigPage1) = paginate(PageNumber.zeroIndexed(0) / 4)
             assertThat(totalBig1).isEqualTo(6)
             assertThat(bigPage1).containsExactly(
                 "The Ugly Duckling",
@@ -104,14 +125,14 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
                 "The Hobbit",
             )
 
-            val (totalBig2, bigPage2) = paginate(pageNumber = 1, pageSize = 4)
+            val (totalBig2, bigPage2) = paginate(PageNumber.zeroIndexed(1) / 4)
             assertThat(totalBig2).isEqualTo(6)
             assertThat(bigPage2).containsExactly(
                 "Lord of the Rings",
                 "Harry Potter",
             )
 
-            val (totalHuge, hugePage) = paginate(pageNumber = 2, pageSize = 100)
+            val (totalHuge, hugePage) = paginate(PageNumber.zeroIndexed(2) / 100)
             assertThat(totalHuge).isEqualTo(6)
             assertThat(hugePage).isEmpty()
         }
@@ -123,13 +144,11 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
             val (total, books) = session.query(BookTable) { books ->
                 val authors = join(books.author)
                 addEq(authors.name, "Hans Christian Andersen")
-            }
-                .listPaginatedWithTotalResultsZeroIndexed(
-                    pageNumber = 1,
-                    pageSize = 2,
-                    orders = listOf { YawnQueryOrder.desc(name) },
-                    uniqueColumn = { id },
-                )
+            }.listPaginatedWithTotalResults(
+                page = PageNumber.zeroIndexed(1) / 2,
+                orders = listOf { YawnQueryOrder.desc(name) },
+                uniqueColumn = { id },
+            )
 
             assertThat(total).isEqualTo(3)
             assertThat(books.map { it.name }).containsExactly(
@@ -230,9 +249,8 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
                 val authors = join(books.author)
                 addEq(authors.name, "Hans Christian Andersen")
                 project(books.name)
-            }.paginateZeroIndexed(
-                pageNumber = 0,
-                pageSize = 3,
+            }.paginate(
+                page = PageNumber.zeroIndexed(0) / 3,
                 orders = listOf { YawnQueryOrder.desc(numberOfPages) },
             ).list()
 
