@@ -5,6 +5,9 @@ import com.faire.yawn.YawnTableDefParent.AssociationTableDefParent
 import com.faire.yawn.criteria.query.ProjectedTypeSafeCriteriaQuery
 import com.faire.yawn.criteria.query.TypeSafeCriteriaQuery
 import com.faire.yawn.criteria.query.TypeSafeCriteriaWithJoinDelegate
+import com.faire.yawn.pagination.Page
+import com.faire.yawn.pagination.PageNumber
+import com.faire.yawn.pagination.PaginationResult
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnQuery
@@ -70,6 +73,7 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         }.uniqueResult() ?: 0
     }
 
+    @Deprecated("Use listPaginatedWithTotalResults with PageNumber instead.")
     fun listPaginatedWithTotalResultsZeroIndexed(
         pageNumber: Int,
         pageSize: Int,
@@ -77,17 +81,32 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<*>,
         forceAnsiCompliance: Boolean = false,
     ): Pair<Long, List<T>> {
+        val page = PageNumber.zeroIndexed(pageNumber) / pageSize
+        val result = listPaginatedWithTotalResults(
+            page = page,
+            orders = orders,
+            uniqueColumn = uniqueColumn,
+            forceAnsiCompliance = forceAnsiCompliance,
+        )
+        return result.totalResults to result.results
+    }
+
+    fun listPaginatedWithTotalResults(
+        page: Page,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+        uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<*>,
+        forceAnsiCompliance: Boolean = false,
+    ): PaginationResult<T> {
         if (forceAnsiCompliance) {
             throw UnsupportedOperationException("forceAnsiCompliance=true is not supported yet in Yawn")
         }
         val totalResults = clone().countDistinct(uniqueColumn)
-        val entities = listPaginatedZeroIndexed(
-            pageNumber = pageNumber,
-            pageSize = pageSize,
+        val entities = listPaginated(
+            page = page,
             orders = orders,
         )
 
-        return Pair(totalResults, entities)
+        return page.toResults(totalResults, entities)
     }
 
     fun rowCount(): Long {
