@@ -11,7 +11,7 @@ internal class PaginationResultTest {
             totalResults = 100,
             results = List(10) { it },
 
-            )
+        )
 
         with(result) {
             assertThat(totalResults).isEqualTo(100)
