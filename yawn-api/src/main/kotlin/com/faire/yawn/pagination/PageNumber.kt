@@ -7,7 +7,7 @@ package com.faire.yawn.pagination
 @JvmInline
 value class PageNumber private constructor(val zeroIndexedPageNumber: Int) {
     init {
-        check(zeroIndexedPageNumber >= 0) { "$zeroIndexedPageNumber is not a valid page number" }
+        check(zeroIndexedPageNumber >= 0) { "$zeroIndexedPageNumber is not a valid zero-indexed page number" }
     }
 
     fun next(): PageNumber = PageNumber(zeroIndexedPageNumber = zeroIndexedPageNumber + 1)

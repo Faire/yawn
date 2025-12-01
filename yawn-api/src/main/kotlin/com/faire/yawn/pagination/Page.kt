@@ -2,7 +2,7 @@ package com.faire.yawn.pagination
 
 /**
  * A type-safe wrapper over a page number and size for page-based pagination.
- * Built on top of [PageNumber].
+ * Built on top of [PageNumber], which abstracts away the indexing convention.
  */
 data class Page(
     val pageNumber: PageNumber,
