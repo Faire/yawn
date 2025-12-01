@@ -8,40 +8,53 @@ internal class PageNumberTest {
     @Test
     fun `can create zero-indexed page numbers`() {
         val firstPage = PageNumber.zeroIndexed(0)
-        assertThat(firstPage).isEqualTo(PageNumber.oneIndexed(1))
-        assertThat(firstPage.zeroIndexedPageNumber).isEqualTo(0)
-        assertThat(firstPage.oneIndexedPageNumber).isEqualTo(1)
+        with(firstPage) {
+            assertThat(this).isEqualTo(PageNumber.oneIndexed(1))
+            assertThat(zeroIndexedPageNumber).isEqualTo(0)
+            assertThat(oneIndexedPageNumber).isEqualTo(1)
+        }
 
         val secondPage = PageNumber.zeroIndexed(1)
-        assertThat(secondPage).isEqualTo(PageNumber.oneIndexed(2))
-        assertThat(secondPage.zeroIndexedPageNumber).isEqualTo(1)
-        assertThat(secondPage.oneIndexedPageNumber).isEqualTo(2)
+        with(secondPage) {
+            assertThat(this).isEqualTo(PageNumber.oneIndexed(2))
+            assertThat(zeroIndexedPageNumber).isEqualTo(1)
+            assertThat(oneIndexedPageNumber).isEqualTo(2)
+        }
     }
 
     @Test
     fun `can create one-indexed page numbers`() {
         val firstPage = PageNumber.oneIndexed(1)
-        assertThat(firstPage).isEqualTo(PageNumber.zeroIndexed(0))
-        assertThat(firstPage.zeroIndexedPageNumber).isEqualTo(0)
-        assertThat(firstPage.oneIndexedPageNumber).isEqualTo(1)
+        with(firstPage) {
+            assertThat(this).isEqualTo(PageNumber.zeroIndexed(0))
+            assertThat(zeroIndexedPageNumber).isEqualTo(0)
+            assertThat(oneIndexedPageNumber).isEqualTo(1)
+        }
 
         val secondPage = PageNumber.oneIndexed(2)
-        assertThat(secondPage).isEqualTo(PageNumber.zeroIndexed(1))
-        assertThat(secondPage.zeroIndexedPageNumber).isEqualTo(1)
-        assertThat(secondPage.oneIndexedPageNumber).isEqualTo(2)
+        with(secondPage) {
+            assertThat(this).isEqualTo(PageNumber.zeroIndexed(1))
+            assertThat(zeroIndexedPageNumber).isEqualTo(1)
+            assertThat(oneIndexedPageNumber).isEqualTo(2)
+        }
     }
 
     @Test
     fun `can use starting and next helpers`() {
         val startingPage = PageNumber.starting()
-        assertThat(startingPage).isEqualTo(PageNumber.zeroIndexed(0))
-        assertThat(startingPage.zeroIndexedPageNumber).isEqualTo(0)
-        assertThat(startingPage.oneIndexedPageNumber).isEqualTo(1)
+
+        with(startingPage) {
+            assertThat(this).isEqualTo(PageNumber.zeroIndexed(0))
+            assertThat(zeroIndexedPageNumber).isEqualTo(0)
+            assertThat(oneIndexedPageNumber).isEqualTo(1)
+        }
 
         val nextPage = startingPage.next()
-        assertThat(nextPage).isEqualTo(PageNumber.zeroIndexed(1))
-        assertThat(nextPage.zeroIndexedPageNumber).isEqualTo(1)
-        assertThat(nextPage.oneIndexedPageNumber).isEqualTo(2)
+        with(nextPage) {
+            assertThat(this).isEqualTo(PageNumber.zeroIndexed(1))
+            assertThat(zeroIndexedPageNumber).isEqualTo(1)
+            assertThat(oneIndexedPageNumber).isEqualTo(2)
+        }
     }
 
     @Test

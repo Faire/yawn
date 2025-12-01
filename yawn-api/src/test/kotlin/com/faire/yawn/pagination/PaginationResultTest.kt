@@ -11,17 +11,46 @@ internal class PaginationResultTest {
             totalResults = 100,
             results = List(10) { it },
 
-        )
+            )
 
-        assertThat(result.totalResults).isEqualTo(100)
-        assertThat(result.results).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
-        assertThat(result.page.pageNumber.zeroIndexedPageNumber).isEqualTo(0)
-        assertThat(result.page.pageSize).isEqualTo(10)
+        with(result) {
+            assertThat(totalResults).isEqualTo(100)
+            assertThat(results).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+            assertThat(page.pageNumber.zeroIndexedPageNumber).isEqualTo(0)
+            assertThat(page.pageSize).isEqualTo(10)
+        }
 
-        val mapped = result.map { it * 2 }
-        assertThat(result.totalResults).isEqualTo(100)
-        assertThat(mapped.results).containsExactly(0, 2, 4, 6, 8, 10, 12, 14, 16, 18)
-        assertThat(result.page.pageNumber.zeroIndexedPageNumber).isEqualTo(0)
-        assertThat(result.page.pageSize).isEqualTo(10)
+        with(result.map { it * 2 }) {
+            assertThat(totalResults).isEqualTo(100)
+            assertThat(results).containsExactly(0, 2, 4, 6, 8, 10, 12, 14, 16, 18)
+            assertThat(page.pageNumber.zeroIndexedPageNumber).isEqualTo(0)
+            assertThat(page.pageSize).isEqualTo(10)
+        }
+    }
+
+    @Test
+    fun `can create PaginationResult from list`() {
+        val elements = List(26) { it }
+
+        val startingPage = PageNumber.starting() / 10
+
+        with(PaginationResult.fromList(elements = elements, page = startingPage)) {
+            assertThat(totalResults).isEqualTo(26)
+            assertThat(results).containsExactlyElementsOf(0..9)
+            assertThat(page.pageNumber.zeroIndexedPageNumber).isEqualTo(0)
+            assertThat(page.pageSize).isEqualTo(10)
+        }
+        with(PaginationResult.fromList(elements = elements, page = startingPage.next())) {
+            assertThat(totalResults).isEqualTo(26)
+            assertThat(results).containsExactlyElementsOf(10..19)
+            assertThat(page.pageNumber.zeroIndexedPageNumber).isEqualTo(1)
+            assertThat(page.pageSize).isEqualTo(10)
+        }
+        with(PaginationResult.fromList(elements = elements, page = startingPage.next().next())) {
+            assertThat(totalResults).isEqualTo(26)
+            assertThat(results).containsExactlyElementsOf(20..25)
+            assertThat(page.pageNumber.zeroIndexedPageNumber).isEqualTo(2)
+            assertThat(page.pageSize).isEqualTo(10)
+        }
     }
 }

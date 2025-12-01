@@ -10,4 +10,18 @@ data class PaginationResult<T : Any>(
         results = results.map(mapper),
         page = page,
     )
+
+    companion object {
+        fun <T : Any> fromList(
+            elements: List<T>,
+            page: Page,
+        ): PaginationResult<T> = PaginationResult(
+            totalResults = elements.size.toLong(),
+            results = elements.asSequence()
+                .drop(page.computeOffset())
+                .take(page.pageSize)
+                .toList(),
+            page = page,
+        )
+    }
 }
