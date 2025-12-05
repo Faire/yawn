@@ -1,6 +1,8 @@
 package com.faire.yawn.criteria.builder
 
 import com.faire.yawn.YawnTableDef
+import com.faire.yawn.pagination.Page
+import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.query.CompiledYawnQuery
 import com.faire.yawn.query.YawnQuery
 import com.faire.yawn.query.YawnQueryFactory
@@ -111,24 +113,47 @@ abstract class BaseTypeSafeCriteriaBuilder<
         return maxResults(1).uniqueResult()
     }
 
+    @Deprecated("Use paginate with Page instead.")
     fun paginateZeroIndexed(
         pageNumber: Int,
         pageSize: Int,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
     ): CRITERIA {
-        check(pageSize >= 1) { "$pageSize is not a valid page size" }
-        check(pageNumber >= 0) { "$pageNumber is not a valid page number" }
-        applyOrders(orders)
-        return offset(pageNumber * pageSize)
-            .maxResults(pageSize)
+        val page = PageNumber.zeroIndexed(pageNumber) / pageSize
+        return paginate(page, orders)
     }
 
+    fun paginate(
+        page: Page,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+    ): CRITERIA {
+        applyOrders(orders)
+        return offset(page.computeOffset())
+            .maxResults(page.pageSize)
+    }
+
+    @Deprecated("Use listPaginated with Page instead.")
     fun listPaginatedZeroIndexed(
         pageNumber: Int,
         pageSize: Int,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
     ): List<RETURNS> {
-        return paginateZeroIndexed(pageNumber, pageSize, orders).list()
+        val page = PageNumber.zeroIndexed(pageNumber) / pageSize
+        return listPaginated(page, orders)
+    }
+
+    fun listPaginated(
+        page: Page,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+    ): List<RETURNS> {
+        return paginate(page, orders).list()
+    }
+
+    fun setPaginated(
+        page: Page,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+    ): Set<RETURNS> {
+        return paginate(page, orders).set()
     }
 
     inline fun doPaginated(
@@ -139,9 +164,10 @@ abstract class BaseTypeSafeCriteriaBuilder<
         // only apply the orders once
         applyOrders(orders)
 
-        var pageNumber = 0
+        var page = PageNumber.starting() / pageSize
         do {
-            val results = listPaginatedZeroIndexed(pageNumber++, pageSize, listOf())
+            val results = listPaginated(page, listOf())
+            page = page.next()
             action(results)
         } while (results.size == pageSize)
     }
