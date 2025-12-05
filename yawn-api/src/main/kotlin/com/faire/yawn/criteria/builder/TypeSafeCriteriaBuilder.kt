@@ -73,7 +73,7 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         }.uniqueResult() ?: 0
     }
 
-    @Deprecated("Use listPaginatedWithTotalResults with PageNumber instead.")
+    @Deprecated("Use listPaginatedWithTotalResults with Page instead.")
     fun listPaginatedWithTotalResultsZeroIndexed(
         pageNumber: Int,
         pageSize: Int,

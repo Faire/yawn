@@ -113,7 +113,7 @@ abstract class BaseTypeSafeCriteriaBuilder<
         return maxResults(1).uniqueResult()
     }
 
-    @Deprecated("Use paginate with PageNumber instead.")
+    @Deprecated("Use paginate with Page instead.")
     fun paginateZeroIndexed(
         pageNumber: Int,
         pageSize: Int,
@@ -132,7 +132,7 @@ abstract class BaseTypeSafeCriteriaBuilder<
             .maxResults(page.pageSize)
     }
 
-    @Deprecated("Use listPaginated with PageNumber instead.")
+    @Deprecated("Use listPaginated with Page instead.")
     fun listPaginatedZeroIndexed(
         pageNumber: Int,
         pageSize: Int,
