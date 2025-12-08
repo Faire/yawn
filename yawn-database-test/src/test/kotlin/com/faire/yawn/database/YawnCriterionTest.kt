@@ -590,4 +590,36 @@ internal class YawnCriterionTest : BaseYawnDatabaseTest() {
                 )
         }
     }
+
+    @Test
+    fun `empty or means true`() {
+        transactor.open { session ->
+            val results = session.query(PublisherTable) {
+                addOr(listOf())
+            }.list()
+
+            assertThat(results.map { it.name }).containsExactlyInAnyOrder(
+                "Penguin",
+                "HarperCollins",
+                "Random House",
+                "Co-Owned",
+            )
+        }
+    }
+
+    @Test
+    fun `empty and means true`() {
+        transactor.open { session ->
+            val results = session.query(PublisherTable) {
+                addAnd(listOf())
+            }.list()
+
+            assertThat(results.map { it.name }).containsExactlyInAnyOrder(
+                "Penguin",
+                "HarperCollins",
+                "Random House",
+                "Co-Owned",
+            )
+        }
+    }
 }
