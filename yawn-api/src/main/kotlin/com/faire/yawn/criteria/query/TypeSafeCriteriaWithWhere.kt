@@ -182,7 +182,7 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
     /**
      * Adds an OR condition with nullable predicates, automatically filtering out null values.
      * Equivalent to `addOr(listOfNotNull(criteria1, criteria2, ...))` but more concise.
-     * 
+     *
      * Use case: When building dynamic queries where some criteria may be conditionally null.
      * Instead of manually filtering nulls with `addOr(listOfNotNull(...))`, you can pass
      * nullable criteria directly and let this method handle the filtering.
@@ -206,7 +206,7 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
     /**
      * Adds an AND condition with nullable predicates, automatically filtering out null values.
      * Equivalent to `addAnd(listOfNotNull(criteria1, criteria2, ...))` but more concise.
-     * 
+     *
      * Use case: When building dynamic queries where some criteria may be conditionally null.
      * Instead of manually filtering nulls with `addAnd(listOfNotNull(...))`, you can pass
      * nullable criteria directly and let this method handle the filtering.
