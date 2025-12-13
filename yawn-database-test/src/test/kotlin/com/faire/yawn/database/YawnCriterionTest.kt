@@ -622,4 +622,47 @@ internal class YawnCriterionTest : BaseYawnDatabaseTest() {
             )
         }
     }
+
+    @Test
+    fun `addOrOfNotNull filters out null criteria`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                val authors = join(books.author)
+                addOrOfNotNull(
+                    eq(authors.name, "J.R.R. Tolkien"),
+                    null,
+                    eq(authors.name, "J.K. Rowling"),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder(
+                    "Lord of the Rings",
+                    "The Hobbit",
+                    "Harry Potter",
+                )
+        }
+    }
+
+    @Test
+    fun `addAndOfNotNull filters out null criteria`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                val authors = join(books.author)
+                addAndOfNotNull(
+                    eq(authors.name, "J.R.R. Tolkien"),
+                    null,
+                    gt(books.numberOfPages, 200),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder(
+                    "Lord of the Rings",
+                    "The Hobbit",
+                )
+        }
+    }
 }
