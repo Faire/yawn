@@ -461,7 +461,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             val criteria1 = session.query(BookTable)
             val authorsRef1 = criteria1.joinRef { author }
-            
+
             criteria1.applyJoinRef(authorsRef1) { authors ->
                 addLike(authors.name, "J.%")
             }
@@ -469,7 +469,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
 
             val criteria2 = session.query(BookTable)
             val authorsRef2 = criteria2.joinRef { author }
-            
+
             criteria2.applyFilter { books ->
                 val authors = authorsRef2.get(books)
                 addLike(authors.name, "J.%")
@@ -508,7 +508,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
                 val authors = authorsRef2.get(books)
                 addLike(authors.name, "J.%")
             }
-            
+
             criteria2.applyFilter { books ->
                 val publisher = publishersRef2.get(books)
                 addEq(publisher.name, "HarperCollins")
@@ -518,7 +518,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
             // Verify both approaches produce the same results
             assertThat(results1.map { it.name }).isEqualTo(results2.map { it.name })
             assertThat(results1.map { it.name }).containsExactlyInAnyOrder(
-                "Lord of the Rings"
+                "Lord of the Rings",
             )
         }
     }
@@ -537,7 +537,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
 
             val results = criteria.list()
             assertThat(results.map { it.name }).containsExactlyInAnyOrder(
-                "Lord of the Rings"
+                "Lord of the Rings",
             )
         }
     }
@@ -560,7 +560,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
 
             val results = criteria.list()
             assertThat(results.map { it.reviewText }).containsExactlyInAnyOrder(
-                "Frodo was pretty cool."
+                "Frodo was pretty cool.",
             )
         }
     }
@@ -571,7 +571,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
             val criteria = session.query(BookReviewTable)
             val reviewerRef = criteria.joinRef { reviewer }
             val bookRef = criteria.joinRef { book }
-            val publisherRef = criteria.joinRef { 
+            val publisherRef = criteria.joinRef {
                 val book = bookRef.get(this)
                 book.publisher
             }
@@ -584,7 +584,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
 
             val results = criteria.list()
             assertThat(results.map { it.reviewText }).containsExactlyInAnyOrder(
-                "Frodo was pretty cool."
+                "Frodo was pretty cool.",
             )
         }
     }
