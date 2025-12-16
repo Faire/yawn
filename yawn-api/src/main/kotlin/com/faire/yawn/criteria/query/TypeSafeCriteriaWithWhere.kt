@@ -179,6 +179,23 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
         add(YawnRestrictions.or(predicates))
     }
 
+    /**
+     * Adds an OR condition with nullable predicates, automatically filtering out null values.
+     * Equivalent to `addOr(listOfNotNull(criteria1, criteria2, ...))` but more concise.
+     *
+     * Use case: When building dynamic queries where some criteria may be conditionally null.
+     * Instead of manually filtering nulls with `addOr(listOfNotNull(...))`, you can pass
+     * nullable criteria directly and let this method handle the filtering.
+     *
+     * Note: If all predicates are null (resulting in an empty list), no condition is added to the query.
+     */
+    fun addOrOfNotNull(vararg predicates: YawnQueryCriterion<SOURCE>?) {
+        val eligiblePredicates = predicates.filterNotNull()
+        if (eligiblePredicates.isEmpty()) return
+
+        add(YawnRestrictions.or(eligiblePredicates))
+    }
+
     fun addAnd(lhs: YawnQueryCriterion<SOURCE>, rhs: YawnQueryCriterion<SOURCE>) {
         add(YawnRestrictions.and(lhs, rhs))
     }
@@ -189,6 +206,23 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
 
     fun addAnd(predicates: List<YawnQueryCriterion<SOURCE>>) {
         add(YawnRestrictions.and(predicates))
+    }
+
+    /**
+     * Adds an AND condition with nullable predicates, automatically filtering out null values.
+     * Equivalent to `addAnd(listOfNotNull(criteria1, criteria2, ...))` but more concise.
+     *
+     * Use case: When building dynamic queries where some criteria may be conditionally null.
+     * Instead of manually filtering nulls with `addAnd(listOfNotNull(...))`, you can pass
+     * nullable criteria directly and let this method handle the filtering.
+     *
+     * Note: If all predicates are null (resulting in an empty list), no condition is added to the query.
+     */
+    fun addAndOfNotNull(vararg predicates: YawnQueryCriterion<SOURCE>?) {
+        val eligiblePredicates = predicates.filterNotNull()
+        if (eligiblePredicates.isEmpty()) return
+
+        add(YawnRestrictions.and(eligiblePredicates))
     }
 
     fun <F> addNotEq(
