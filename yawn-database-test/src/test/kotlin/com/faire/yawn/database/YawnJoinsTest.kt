@@ -57,6 +57,7 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
                 "J.K. Rowling" to "Lord of the Rings",
                 "Paul Duchesne" to "Lord of the Rings",
                 "Luan Nico" to "Harry Potter",
+                "Quinn Budan" to null,
                 "Jane Doe" to null,
                 "John Doe" to null,
                 "Hans Christian Andersen" to null,
