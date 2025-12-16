@@ -36,6 +36,12 @@ internal class Person : TimestampedEntity<Person>(), PersonInterface {
     @Column
     lateinit var email: EmailAddress
 
+    /**
+     * Test for value/inline classes that resolve as primitives for Hibernate
+     */
+    @Column
+    var phone: PhoneNumber? = null
+
     @ManyToOne(fetch = FetchType.LAZY)
     var favoriteBook: Book? = null
 

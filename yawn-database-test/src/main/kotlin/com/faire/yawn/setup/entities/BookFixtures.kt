@@ -142,6 +142,7 @@ internal class BookFixtures(
             val paul = createPerson {
                 name = "Paul Duchesne"
                 email = EmailAddress("paul.duchesne@faire.com")
+                phone = PhoneNumber("(555) 123-4567")
                 favoriteBook = lordOfTheRings
                 favoriteAuthor = andersen
             }
@@ -149,8 +150,18 @@ internal class BookFixtures(
             val luan = createPerson {
                 name = "Luan Nico"
                 email = EmailAddress("luan@faire.com")
+                phone = PhoneNumber(
+                    areaCode = "555",
+                    centralOfficeCode = "987",
+                    lineNumber = "6543",
+                )
                 favoriteBook = hp
                 favoriteAuthor = tolkien
+            }
+            createPerson {
+                name = "Quinn Budan"
+                email = EmailAddress("quinn@faire.com")
+                phone = PhoneNumber("(333) 000-1111")
             }
             update(rowling) {
                 favoriteBook = lordOfTheRings
