@@ -59,6 +59,42 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         return this
     }
 
+    fun <F : Any, D : YawnTableDef<T, F>> applyJoinRef(
+        joinRef: YawnJoinRef<F, D>,
+        lambda: TypeSafeCriteriaQuery<T, DEF>.(joinedTableDef: D) -> Unit,
+    ): TypeSafeCriteriaBuilder<T, DEF> {
+        return applyFilter { tableDef ->
+            val joinedTableDef = joinRef.get(tableDef)
+            lambda(joinedTableDef)
+        }
+    }
+
+    fun <F1 : Any, D1 : YawnTableDef<T, F1>, F2 : Any, D2 : YawnTableDef<T, F2>> applyJoinRefs(
+        ref1: YawnJoinRef<F1, D1>,
+        ref2: YawnJoinRef<F2, D2>,
+        lambda: TypeSafeCriteriaQuery<T, DEF>.(table1: D1, table2: D2) -> Unit,
+    ): TypeSafeCriteriaBuilder<T, DEF> {
+        return applyFilter { tableDef ->
+            val table1 = ref1.get(tableDef)
+            val table2 = ref2.get(tableDef)
+            lambda(table1, table2)
+        }
+    }
+
+    fun <F1 : Any, D1 : YawnTableDef<T, F1>, F2 : Any, D2 : YawnTableDef<T, F2>, F3 : Any, D3 : YawnTableDef<T, F3>> applyJoinRefs(
+        ref1: YawnJoinRef<F1, D1>,
+        ref2: YawnJoinRef<F2, D2>,
+        ref3: YawnJoinRef<F3, D3>,
+        lambda: TypeSafeCriteriaQuery<T, DEF>.(table1: D1, table2: D2, table3: D3) -> Unit,
+    ): TypeSafeCriteriaBuilder<T, DEF> {
+        return applyFilter { tableDef ->
+            val table1 = ref1.get(tableDef)
+            val table2 = ref2.get(tableDef)
+            val table3 = ref3.get(tableDef)
+            lambda(table1, table2, table3)
+        }
+    }
+
     fun <RETURNS : Any?> applyProjection(
         lambda: ProjectedTypeSafeCriteriaQuery<T, T, DEF, RETURNS>.(tableDef: DEF) -> YawnQueryProjection<T, RETURNS>,
     ): ProjectedTypeSafeCriteriaBuilder<T, DEF, RETURNS> {

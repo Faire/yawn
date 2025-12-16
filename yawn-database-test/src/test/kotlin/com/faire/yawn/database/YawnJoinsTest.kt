@@ -3,7 +3,9 @@ package com.faire.yawn.database
 import com.faire.yawn.Yawn
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
+import com.faire.yawn.setup.entities.Book.Language.ENGLISH
 import com.faire.yawn.setup.entities.BookRankingTable
+import com.faire.yawn.setup.entities.BookReviewTable
 import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PersonTable
 import com.faire.yawn.setup.entities.PublisherTable
@@ -450,6 +452,139 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
             assertThat(results).containsExactlyInAnyOrder(
                 "Lord of the Rings" to "Hans Christian Andersen",
                 "The Hobbit" to "Hans Christian Andersen",
+            )
+        }
+    }
+
+    @Test
+    fun `applyJoinRef equivalence test`() {
+        transactor.open { session ->
+            val criteria1 = session.query(BookTable)
+            val authorsRef1 = criteria1.joinRef { author }
+
+            criteria1.applyJoinRef(authorsRef1) { authors ->
+                addLike(authors.name, "J.%")
+            }
+            val results1 = criteria1.list()
+
+            val criteria2 = session.query(BookTable)
+            val authorsRef2 = criteria2.joinRef { author }
+
+            criteria2.applyFilter { books ->
+                val authors = authorsRef2.get(books)
+                addLike(authors.name, "J.%")
+            }
+            val results2 = criteria2.list()
+
+            assertThat(results1.map { it.name }).isEqualTo(results2.map { it.name })
+            assertThat(results1.map { it.name }).containsExactlyInAnyOrder(
+                "The Hobbit",
+                "Lord of the Rings",
+                "Harry Potter",
+            )
+        }
+    }
+
+    @Test
+    fun `applyJoinRefs with multiple references test - equivalent to multiple applyFilter calls`() {
+        transactor.open { session ->
+            // Test applyJoinRefs approach
+            val criteria1 = session.query(BookTable)
+            val authorsRef1 = criteria1.joinRef { author }
+            val publishersRef1 = criteria1.joinRef { publisher }
+
+            criteria1.applyJoinRefs(authorsRef1, publishersRef1) { authors, publisher ->
+                addLike(authors.name, "J.%")
+                addEq(publisher.name, "HarperCollins")
+            }
+            val results1 = criteria1.list()
+
+            // Test equivalent multiple applyFilter approach
+            val criteria2 = session.query(BookTable)
+            val authorsRef2 = criteria2.joinRef { author }
+            val publishersRef2 = criteria2.joinRef { publisher }
+
+            criteria2.applyFilter { books ->
+                val authors = authorsRef2.get(books)
+                addLike(authors.name, "J.%")
+            }
+
+            criteria2.applyFilter { books ->
+                val publisher = publishersRef2.get(books)
+                addEq(publisher.name, "HarperCollins")
+            }
+            val results2 = criteria2.list()
+
+            // Verify both approaches produce the same results
+            assertThat(results1.map { it.name }).isEqualTo(results2.map { it.name })
+            assertThat(results1.map { it.name }).containsExactlyInAnyOrder(
+                "Lord of the Rings",
+            )
+        }
+    }
+
+    @Test
+    fun `applyJoinRefs usage demonstration`() {
+        transactor.open { session ->
+            val criteria = session.query(BookTable)
+            val authorsRef = criteria.joinRef { author }
+            val publishersRef = criteria.joinRef { publisher }
+
+            criteria.applyJoinRefs(authorsRef, publishersRef) { authors, publisher ->
+                addLike(authors.name, "J.%")
+                addEq(publisher.name, "HarperCollins")
+            }
+
+            val results = criteria.list()
+            assertThat(results.map { it.name }).containsExactlyInAnyOrder(
+                "Lord of the Rings",
+            )
+        }
+    }
+
+    @Test
+    fun `applyJoinRefs with 2 references test, one is from a multiple join - reviewer and publisher`() {
+        transactor.open { session ->
+            val criteria = session.query(BookReviewTable)
+            val reviewerRef = criteria.joinRef { reviewer }
+            val bookRef = criteria.joinRef { book }
+            val publisherRef = criteria.joinRef {
+                val book = bookRef.get(this)
+                book.publisher
+            }
+
+            criteria.applyJoinRefs(reviewerRef, publisherRef) { reviewer, publisher ->
+                addLike(reviewer.name, "%Doe%")
+                addEq(publisher.name, "HarperCollins")
+            }
+
+            val results = criteria.list()
+            assertThat(results.map { it.reviewText }).containsExactlyInAnyOrder(
+                "Frodo was pretty cool.",
+            )
+        }
+    }
+
+    @Test
+    fun `applyJoinRefs with 3 references test - reviewer, book, and publisher`() {
+        transactor.open { session ->
+            val criteria = session.query(BookReviewTable)
+            val reviewerRef = criteria.joinRef { reviewer }
+            val bookRef = criteria.joinRef { book }
+            val publisherRef = criteria.joinRef {
+                val book = bookRef.get(this)
+                book.publisher
+            }
+
+            criteria.applyJoinRefs(reviewerRef, bookRef, publisherRef) { reviewer, book, publisher ->
+                addLike(reviewer.name, "%Doe%")
+                addEq(book.originalLanguage, ENGLISH)
+                addEq(publisher.name, "HarperCollins")
+            }
+
+            val results = criteria.list()
+            assertThat(results.map { it.reviewText }).containsExactlyInAnyOrder(
+                "Frodo was pretty cool.",
             )
         }
     }
