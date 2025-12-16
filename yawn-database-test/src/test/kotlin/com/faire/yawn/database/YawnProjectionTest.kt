@@ -2,12 +2,16 @@ package com.faire.yawn.database
 
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
+import com.faire.yawn.project.YawnQueryProjection
+import com.faire.yawn.query.YawnCompilationContext
 import com.faire.yawn.query.YawnQueryOrder
 import com.faire.yawn.setup.entities.Book
 import com.faire.yawn.setup.entities.Book.Language.ENGLISH
 import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PublisherTable
 import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.criterion.Projection
+import org.hibernate.criterion.Projections
 import org.junit.jupiter.api.Test
 
 internal class YawnProjectionTest : BaseYawnDatabaseTest() {
@@ -656,6 +660,33 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
                     aNullableString = null,
                 ),
             )
+        }
+    }
+
+    @Test
+    fun `use custom user-defined projection`() {
+        transactor.open { session ->
+            val results = session.project(BookTable) {
+                // when creating a user-defined projection, you are responsible for ensuring the return type safety!
+                project(object : YawnQueryProjection<Book, Long> {
+                    override fun compile(context: YawnCompilationContext): Projection {
+                        val vowels = setOf('a', 'e', 'i', 'o', 'u')
+                        return Projections.sqlProjection(
+                            // count the number of vowels in the book name
+                            """
+                                   ${vowels.size} * LENGTH({alias}.name)
+                                   ${vowels.joinToString("\n") { "- LENGTH(REPLACE(LOWER({alias}.name), '$it', ''))" }}
+                                   AS name_length
+                            """,
+                            arrayOf("name_length"),
+                            arrayOf(org.hibernate.type.LongType.INSTANCE),
+                        )
+                    }
+
+                    override fun project(value: Any?): Long = value as Long
+                })
+            }.list()
+            assertThat(results.toSet().sorted()).containsExactlyInAnyOrder(3L, 4L, 6L, 7L)
         }
     }
 }
