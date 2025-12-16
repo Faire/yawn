@@ -190,7 +190,10 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
      * Note: If all predicates are null (resulting in an empty list), no condition is added to the query.
      */
     fun addOrOfNotNull(vararg predicates: YawnQueryCriterion<SOURCE>?) {
-        add(YawnRestrictions.or(predicates.filterNotNull()))
+        val eligiblePredicates = predicates.filterNotNull()
+        if (eligiblePredicates.isEmpty()) return
+
+        add(YawnRestrictions.or(eligiblePredicates))
     }
 
     fun addAnd(lhs: YawnQueryCriterion<SOURCE>, rhs: YawnQueryCriterion<SOURCE>) {
@@ -216,7 +219,10 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
      * Note: If all predicates are null (resulting in an empty list), no condition is added to the query.
      */
     fun addAndOfNotNull(vararg predicates: YawnQueryCriterion<SOURCE>?) {
-        add(YawnRestrictions.and(predicates.filterNotNull()))
+        val eligiblePredicates = predicates.filterNotNull()
+        if (eligiblePredicates.isEmpty()) return
+
+        add(YawnRestrictions.and(eligiblePredicates))
     }
 
     fun <F> addNotEq(
