@@ -202,12 +202,12 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         columnDef: DEF.() -> YawnTableDef<T, *>.JoinColumnDef<F, D>,
     ): YawnJoinRef<F, D> {
         val joinColumnDef = tableDef.columnDef()
-        
+
         // Check if a join already exists for this column definition
         val existingJoin = query.joins.find { existingJoin ->
             existingJoin.columnDef === joinColumnDef
         }
-        
+
         return if (existingJoin != null) {
             // Reuse existing join by creating a YawnJoinRef that references the existing join's parent
             YawnJoinRef(columnDef, existingJoin.parent)
@@ -259,7 +259,6 @@ fun <T : Any, DEF : YawnTableDef<T, T>, F : Any, D : YawnTableDef<T, F>> TypeSaf
     return TypeSafeCriteriaWithJoinRef(this, joinRef)
 }
 
-
 /**
  * Wrapper class that holds a TypeSafeCriteriaBuilder along with a specific join reference.
  * This allows for a fluent API where both the criteria and join reference are returned together.
@@ -273,4 +272,3 @@ data class TypeSafeCriteriaWithJoinRef<T : Any, DEF : YawnTableDef<T, T>, F : An
     val criteria: TypeSafeCriteriaBuilder<T, DEF>,
     val joinRef: TypeSafeCriteriaBuilder<T, DEF>.YawnJoinRef<F, D>,
 )
-

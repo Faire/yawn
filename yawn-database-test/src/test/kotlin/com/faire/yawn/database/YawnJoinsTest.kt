@@ -1,18 +1,13 @@
 package com.faire.yawn.database
 
 import com.faire.yawn.Yawn
-import com.faire.yawn.criteria.builder.TypeSafeCriteriaWithJoinRef
 import com.faire.yawn.criteria.builder.attachJoinRef
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
-import com.faire.yawn.setup.entities.Book
 import com.faire.yawn.setup.entities.Book.Language.ENGLISH
 import com.faire.yawn.setup.entities.BookRankingTable
-import com.faire.yawn.setup.entities.BookReview
 import com.faire.yawn.setup.entities.BookReviewTable
-import com.faire.yawn.setup.entities.BookReviewTableDef
 import com.faire.yawn.setup.entities.BookTable
-import com.faire.yawn.setup.entities.BookTableDef
 import com.faire.yawn.setup.entities.PersonTable
 import com.faire.yawn.setup.entities.PublisherTable
 import org.assertj.core.api.Assertions.assertThat
