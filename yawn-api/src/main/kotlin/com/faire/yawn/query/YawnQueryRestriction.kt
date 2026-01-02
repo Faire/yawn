@@ -19,7 +19,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.eq(property.generatePath(context), value)
+        ): Criterion = Restrictions.eq(property.generatePath(context), property.adaptValue(value))
     }
 
     class EqualsProperty<SOURCE : Any, F>(
@@ -37,7 +37,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.ne(property.generatePath(context), value)
+        ): Criterion = Restrictions.ne(property.generatePath(context), property.adaptValue(value))
     }
 
     class NotEqualsProperty<SOURCE : Any, F>(
@@ -55,7 +55,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.gt(property.generatePath(context), value)
+        ): Criterion = Restrictions.gt(property.generatePath(context), property.adaptValue(value))
     }
 
     class GreaterThanProperty<SOURCE : Any, F>(
@@ -73,7 +73,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.ge(property.generatePath(context), value)
+        ): Criterion = Restrictions.ge(property.generatePath(context), property.adaptValue(value))
     }
 
     class GreaterThanOrEqualToProperty<SOURCE : Any, F>(
@@ -91,7 +91,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.lt(property.generatePath(context), value)
+        ): Criterion = Restrictions.lt(property.generatePath(context), property.adaptValue(value))
     }
 
     class LessThanProperty<SOURCE : Any, F>(
@@ -109,7 +109,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.le(property.generatePath(context), value)
+        ): Criterion = Restrictions.le(property.generatePath(context), property.adaptValue(value))
     }
 
     class LessThanOrEqualToProperty<SOURCE : Any, F>(
@@ -128,7 +128,11 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.between(property.generatePath(context), lo, hi)
+        ): Criterion = Restrictions.between(
+            property.generatePath(context),
+            property.adaptValue(lo),
+            property.adaptValue(hi),
+        )
     }
 
     class Not<SOURCE : Any>(
@@ -147,9 +151,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
         internal constructor(vararg criteria: YawnQueryCriterion<SOURCE>) : this(criteria.toList())
 
         override fun compile(context: YawnCompilationContext): Criterion = Restrictions.or(
-            *criteria.map {
-                it.yawnRestriction.compile(context)
-            }.toTypedArray(),
+            *criteria.map { it.yawnRestriction.compile(context) }.toTypedArray(),
         )
     }
 
@@ -159,9 +161,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
         constructor(vararg criteria: YawnQueryCriterion<SOURCE>) : this(criteria.toList())
 
         override fun compile(context: YawnCompilationContext): Criterion = Restrictions.and(
-            *criteria.map {
-                it.yawnRestriction.compile(context)
-            }.toTypedArray(),
+            *criteria.map { it.yawnRestriction.compile(context) }.toTypedArray(),
         )
     }
 
@@ -172,7 +172,9 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.like(column.generatePath(context), value, matchMode)
+        ): Criterion {
+            return Restrictions.like(column.generatePath(context), column.adaptAsString(value), matchMode)
+        }
     }
 
     class ILike<SOURCE : Any, F : String?>(
@@ -182,7 +184,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.ilike(column.generatePath(context), value, matchMode)
+        ): Criterion = Restrictions.ilike(column.generatePath(context), column.adaptAsString(value), matchMode)
     }
 
     class IsNotNull<SOURCE : Any, F>(
@@ -207,7 +209,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.eqOrIsNull(column.generatePath(context), value)
+        ): Criterion = Restrictions.eqOrIsNull(column.generatePath(context), column.adaptValue(value))
     }
 
     class In<SOURCE : Any, F>(
@@ -218,7 +220,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
             return if (values.isEmpty()) {
                 Restrictions.sqlRestriction("0=1")
             } else {
-                Restrictions.`in`(column.generatePath(context), values)
+                Restrictions.`in`(column.generatePath(context), values.map { column.adaptValue(it) })
             }
         }
     }
@@ -231,7 +233,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
             return if (values.isEmpty()) {
                 Restrictions.sqlRestriction("1=1")
             } else {
-                Restrictions.not(Restrictions.`in`(column.generatePath(context), values))
+                Restrictions.not(Restrictions.`in`(column.generatePath(context), values.map { column.adaptValue(it) }))
             }
         }
     }
@@ -251,4 +253,17 @@ interface YawnQueryRestriction<SOURCE : Any> {
             context: YawnCompilationContext,
         ): Criterion = Restrictions.isNotEmpty(joinColumn.path(context))
     }
+}
+
+private fun <SOURCE : Any, F : String?> YawnDef<SOURCE, *>.YawnColumnDef<F>.adaptAsString(value: F): String? {
+    val adaptedValue = adaptValue(value)
+    if (adaptedValue !is String?) {
+        error(
+            """
+                Like restriction can only be applied to String values,
+                but got: ${adaptedValue.javaClass} due to adapter on column $this
+            """.trimIndent(),
+        )
+    }
+    return adaptedValue
 }
