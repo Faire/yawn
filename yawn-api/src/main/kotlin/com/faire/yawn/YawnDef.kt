@@ -22,6 +22,10 @@ abstract class YawnDef<SOURCE : Any, D : Any> {
     abstract inner class YawnColumnDef<F> : YawnQueryProjection<SOURCE, F> {
         abstract fun generatePath(context: YawnCompilationContext): String
 
+        open fun adaptValue(value: F): Any? {
+            return value
+        }
+
         override fun compile(context: YawnCompilationContext): Projection {
             return Projections.property(generatePath(context))
         }

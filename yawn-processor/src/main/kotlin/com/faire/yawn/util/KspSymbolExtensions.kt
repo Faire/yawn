@@ -9,6 +9,7 @@ import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
+import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.toClassName
@@ -153,4 +154,8 @@ internal fun KSPropertyDeclaration.getHibernateForeignKeyReference(): ForeignKey
 
 internal fun KSDeclaration.isYawnEntity(): Boolean {
     return isAnnotationPresent<YawnEntity>()
+}
+
+internal fun KSType.isValueClass(): Boolean {
+    return declaration is KSClassDeclaration && Modifier.VALUE in declaration.modifiers
 }
