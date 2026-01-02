@@ -261,7 +261,7 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
 
     fun <F : String?> addLike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        value: String,
+        value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
     ) {
         add(YawnRestrictions.like(column, value, matchMode))
@@ -269,7 +269,7 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
 
     fun <F : String?> addILike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        value: String,
+        value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
     ) {
         add(YawnRestrictions.iLike(column, value, matchMode))
@@ -277,7 +277,7 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
 
     fun <F : String?> addNotLike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        value: String,
+        value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
     ) {
         add(YawnRestrictions.not(YawnRestrictions.like(column, value, matchMode)))
@@ -285,7 +285,7 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
 
     fun <F : String?> addNotILike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        value: String,
+        value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
     ) {
         add(YawnRestrictions.not(YawnRestrictions.iLike(column, value, matchMode)))

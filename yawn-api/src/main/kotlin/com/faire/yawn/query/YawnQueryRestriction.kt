@@ -167,7 +167,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
 
     class Like<SOURCE : Any, F : String?>(
         private val column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        private val value: String,
+        private val value: F & Any,
         private val matchMode: MatchMode,
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
@@ -177,7 +177,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
 
     class ILike<SOURCE : Any, F : String?>(
         private val column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        private val value: String,
+        private val value: F & Any,
         private val matchMode: MatchMode,
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
