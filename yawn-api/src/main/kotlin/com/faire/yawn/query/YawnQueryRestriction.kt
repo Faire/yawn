@@ -262,7 +262,7 @@ private fun <SOURCE : Any, F : String?> YawnDef<SOURCE, *>.YawnColumnDef<F>.adap
             """
                 Like restriction can only be applied to String values,
                 but got: ${adaptedValue.javaClass} due to adapter on column $this.
-                This means a wrong adapter was code-gened into the metamodel.
+                This means a wrong adapter was code-generated into the metamodel.
                 Please open an issue on GitHub with your schema definition.
             """.trimIndent(),
         )
