@@ -84,9 +84,16 @@ internal object ColumnDefGenerator : YawnPropertyGenerator() {
         yawnContext: YawnContext,
         fieldType: KSType,
     ): YawnParameter? {
-        return VALUE_ADAPTER_GENERATORS
-            .firstOrNull { it.qualifies(yawnContext, fieldType) }
-            ?.generate(yawnContext, fieldType)
+        val matchingAdapters = VALUE_ADAPTER_GENERATORS.filter { it.qualifies(yawnContext, fieldType) }
+        return when (matchingAdapters.size) {
+            0 -> null
+            1 -> matchingAdapters.single().generate(yawnContext, fieldType)
+            else -> {
+                val fieldName = fieldType.declaration.qualifiedName?.asString()
+                val adapterNames = matchingAdapters.joinToString { "${it::class.qualifiedName}" }
+                throw YawnProcessorException("Multiple adapters qualified for type $fieldName: $adapterNames")
+            }
+        }
     }
 
     private val VALUE_ADAPTER_GENERATORS = listOf(
