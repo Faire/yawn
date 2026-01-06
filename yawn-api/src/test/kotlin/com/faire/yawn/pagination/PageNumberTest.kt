@@ -66,4 +66,11 @@ internal class PageNumberTest {
             .isInstanceOf(IllegalStateException::class.java)
             .withFailMessage("-1 is not a valid zero-indexed page number")
     }
+
+    @Test
+    fun `can use Long overloads to create page numbers`() {
+        assertThat(PageNumber.zeroIndexed(0L).zeroIndexedPageNumber).isEqualTo(0)
+        assertThat(PageNumber.oneIndexed(1L).oneIndexedPageNumber).isEqualTo(1)
+        assertThat((PageNumber.starting() / 10L).pageSize).isEqualTo(10)
+    }
 }
