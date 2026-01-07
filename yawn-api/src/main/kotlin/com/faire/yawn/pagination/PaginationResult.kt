@@ -12,6 +12,10 @@ data class PaginationResult<T : Any>(
     )
 
     companion object {
+        fun <T : Any> empty(page: Page): PaginationResult<T> {
+            return fromList(elements = listOf(), page = page)
+        }
+
         fun <T : Any> fromList(
             elements: List<T>,
             page: Page,
