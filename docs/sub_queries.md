@@ -1,7 +1,7 @@
 # Sub-queries
 
 How do sub-queries work on **Yawn**? As with our other APIs, it is actually heavily inspired by Hibernate, but comes with type-safety on top. Currently,
-**Yawn** supports creating projected detached criteria that can be used in type-safe subquery restrictions.
+**Yawn** supports creating projected detached criteria that can be used in type-safe sub-query restrictions.
 
 We support two types of sub-queries:
 
@@ -42,3 +42,9 @@ val people = session.query(PersonTable) { people ->
     addExists(correlatedSubQuery)
 }.list()
 ```
+
+## Risks
+While **Yawn** provides guarantees through the type system that a sub-query is only used against columns of the correct
+type, it _cannot_ guarantee that the sub-query only returns 1 row. This means that if a sub-query is used in an `addEq`
+restriction and it returns multiple results, your database will likely fail and an exception will be thrown in your
+application. See [#96](https://github.com/Faire/yawn/issues/96) for more details.
