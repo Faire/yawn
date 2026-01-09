@@ -44,7 +44,8 @@ val people = session.query(PersonTable) { people ->
 ```
 
 ## Risks
+
 While **Yawn** provides guarantees through the type system that a sub-query is only used against columns of the correct
-type, it _cannot_ guarantee that the sub-query only returns 1 row. This means that if a sub-query is used in an `addEq`
+type, it *cannot* guarantee that the sub-query only returns 1 row. This means that if a sub-query is used in an `addEq`
 restriction and it returns multiple results, your database will likely fail and an exception will be thrown in your
 application. See [#96](https://github.com/Faire/yawn/issues/96) for more details.
