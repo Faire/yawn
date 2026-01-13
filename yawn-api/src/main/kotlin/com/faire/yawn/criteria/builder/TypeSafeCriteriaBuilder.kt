@@ -213,7 +213,7 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
             YawnJoinRef(columnDef, existingJoin.parent)
         } else {
             // Create new join if none exists
-            this.joinRef(joinType, columnDef)
+            joinRef(joinType, columnDef)
         }
     }
 
@@ -255,7 +255,7 @@ fun <T : Any, DEF : YawnTableDef<T, T>, F : Any, D : YawnTableDef<T, F>> TypeSaf
     joinType: JoinType = JoinType.INNER_JOIN,
     columnDef: DEF.() -> YawnTableDef<T, *>.JoinColumnDef<F, D>,
 ): TypeSafeCriteriaWithJoinRef<T, DEF, F, D> {
-    val joinRef = this.getOrCreateJoinRef(joinType, columnDef)
+    val joinRef = getOrCreateJoinRef(joinType, columnDef)
     return TypeSafeCriteriaWithJoinRef(this, joinRef)
 }
 
