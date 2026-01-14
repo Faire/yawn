@@ -193,6 +193,30 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         return applyOrders(listOf(order))
     }
 
+    /**
+     * Gets an existing join reference for the given column definition, or creates a new one if none exists.
+     * This method prevents duplicate join errors by reusing existing joins when possible.
+     */
+    fun <F : Any, D : YawnTableDef<T, F>> getOrCreateJoinRef(
+        joinType: JoinType = JoinType.INNER_JOIN,
+        columnDef: DEF.() -> YawnTableDef<T, *>.JoinColumnDef<F, D>,
+    ): YawnJoinRef<F, D> {
+        val joinColumnDef = tableDef.columnDef()
+
+        // Check if a join already exists for this column definition
+        val existingJoin = query.joins.find { existingJoin ->
+            existingJoin.columnDef === joinColumnDef
+        }
+
+        return if (existingJoin != null) {
+            // Reuse existing join by creating a YawnJoinRef that references the existing join's parent
+            YawnJoinRef(columnDef, existingJoin.parent)
+        } else {
+            // Create new join if none exists
+            joinRef(joinType, columnDef)
+        }
+    }
+
     companion object {
         /**
          * Create a TypeSafeCriteria from a raw Criteria, wiring in the generics from a provided [tableDef].
@@ -210,3 +234,41 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         }
     }
 }
+
+/**
+ * Extension method that creates a join and returns a wrapper containing both the criteria and the join reference.
+ * This is useful when you want to create a join reference that can be used multiple times later.
+ *
+ * Example:
+ * ```
+ * val result = session.query(BookTable).attachJoinRef { author }
+ * result.criteria.applyJoinRef(result.joinRef) { authors ->
+ *     addLike(authors.name, "J.%")
+ * }
+ * ```
+ *
+ * @param joinType the type of join to perform (defaults to INNER_JOIN)
+ * @param columnDef a lambda that returns the join column definition
+ * @return a TypeSafeCriteriaWithJoinRef containing both the criteria and the join reference
+ */
+fun <T : Any, DEF : YawnTableDef<T, T>, F : Any, D : YawnTableDef<T, F>> TypeSafeCriteriaBuilder<T, DEF>.attachJoinRef(
+    joinType: JoinType = JoinType.INNER_JOIN,
+    columnDef: DEF.() -> YawnTableDef<T, *>.JoinColumnDef<F, D>,
+): TypeSafeCriteriaWithJoinRef<T, DEF, F, D> {
+    val joinRef = getOrCreateJoinRef(joinType, columnDef)
+    return TypeSafeCriteriaWithJoinRef(this, joinRef)
+}
+
+/**
+ * Wrapper class that holds a TypeSafeCriteriaBuilder along with a specific join reference.
+ * This allows for a fluent API where both the criteria and join reference are returned together.
+ *
+ * @param T the type of the entity being queried.
+ * @param DEF the table definition of the entity being queried.
+ * @param F the type of the joined entity.
+ * @param D the table definition of the joined entity.
+ */
+data class TypeSafeCriteriaWithJoinRef<T : Any, DEF : YawnTableDef<T, T>, F : Any, D : YawnTableDef<T, F>>(
+    val criteria: TypeSafeCriteriaBuilder<T, DEF>,
+    val joinRef: TypeSafeCriteriaBuilder<T, DEF>.YawnJoinRef<F, D>,
+)

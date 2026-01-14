@@ -1,6 +1,7 @@
 package com.faire.yawn.database
 
 import com.faire.yawn.Yawn
+import com.faire.yawn.criteria.builder.attachJoinRef
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.setup.entities.Book.Language.ENGLISH
@@ -580,6 +581,50 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
             criteria.applyJoinRefs(reviewerRef, bookRef, publisherRef) { reviewer, book, publisher ->
                 addLike(reviewer.name, "%Doe%")
                 addEq(book.originalLanguage, ENGLISH)
+                addEq(publisher.name, "HarperCollins")
+            }
+
+            val results = criteria.list()
+            assertThat(results.map { it.reviewText }).containsExactlyInAnyOrder(
+                "Frodo was pretty cool.",
+            )
+        }
+    }
+
+    @Test
+    fun `use attachJoinRef for basic functionality`() {
+        transactor.open { session ->
+            val result = session.query(BookTable).attachJoinRef { author }
+
+            result.criteria.applyJoinRef(result.joinRef) { authors ->
+                addLike(authors.name, "J.%")
+            }
+
+            val books = result.criteria.list()
+            assertThat(books.map { it.name }).containsExactlyInAnyOrder(
+                "The Hobbit",
+                "Lord of the Rings",
+                "Harry Potter",
+            )
+        }
+    }
+
+    @Test
+    fun `use attachJoinRef to reuse reference which has been called in the query before, without creating duplicate path`() {
+        transactor.open { session ->
+            val criteriaAttachJoinRef = session.query(BookReviewTable) { bookReviews ->
+                val reviewer = join(bookReviews.reviewer)
+                val book = join(bookReviews.book)
+
+                addLike(reviewer.name, "%Doe%")
+                addEq(book.originalLanguage, ENGLISH)
+            }.attachJoinRef { book }
+
+            val criteria = criteriaAttachJoinRef.criteria
+            val bookJoinRef = criteriaAttachJoinRef.joinRef
+
+            criteria.applyJoinRef(bookJoinRef) { book ->
+                val publisher = join(book.publisher)
                 addEq(publisher.name, "HarperCollins")
             }
 
