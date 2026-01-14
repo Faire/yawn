@@ -1,5 +1,6 @@
 package com.faire.yawn
 
+import com.faire.yawn.adapter.YawnValueAdapter
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnCompilationContext
 import org.hibernate.criterion.Projection
@@ -52,9 +53,16 @@ abstract class YawnTableDef<SOURCE : Any, D : Any>(
      *
      * @param F the type of the column.
      */
-    inner class ColumnDef<F>(private vararg val path: String?) : YawnColumnDef<F>() {
+    inner class ColumnDef<F>(
+        private vararg val path: String?,
+        private val adapter: YawnValueAdapter<F>? = null,
+    ) : YawnColumnDef<F>() {
         override fun generatePath(context: YawnCompilationContext): String {
             return listOfNotNull(context.generateAlias(parent), *path).joinToString(".")
+        }
+
+        override fun adaptValue(value: F): Any? {
+            return adapter?.adapt(value) ?: super.adaptValue(value)
         }
     }
 

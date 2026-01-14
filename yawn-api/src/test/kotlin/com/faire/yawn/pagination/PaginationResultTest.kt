@@ -53,4 +53,15 @@ internal class PaginationResultTest {
             assertThat(page.pageSize).isEqualTo(10)
         }
     }
+
+    @Test
+    fun `can create empty PaginationResult`() {
+        val page = PageNumber.starting() / 10
+        with(PaginationResult.empty<Int>(page = page)) {
+            assertThat(totalResults).isEqualTo(0)
+            assertThat(results).isEmpty()
+            assertThat(page.pageNumber.zeroIndexedPageNumber).isEqualTo(0)
+            assertThat(page.pageSize).isEqualTo(10)
+        }
+    }
 }

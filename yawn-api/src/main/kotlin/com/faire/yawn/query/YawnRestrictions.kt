@@ -155,7 +155,7 @@ object YawnRestrictions {
 
     fun <SOURCE : Any, F : String?> like(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        value: String,
+        value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
     ): YawnQueryCriterion<SOURCE> {
         return YawnQueryCriterion(Like(column, value, matchMode))
@@ -163,7 +163,7 @@ object YawnRestrictions {
 
     fun <SOURCE : Any, F : String?> iLike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        value: String,
+        value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
     ): YawnQueryCriterion<SOURCE> {
         return YawnQueryCriterion(ILike(column, value, matchMode))

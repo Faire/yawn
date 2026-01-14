@@ -6,7 +6,6 @@ foojay # github.com/gradle/foojay-toolchains
 gson # github.com/google/gson
 guice # github.com/google/guice
 javax # part of the Java SDK
-jdbc # Java Database Connectivity
 kotlinpoet # github.com/square/kotlinpoet
 stdlib # the standard library of a programming language
 testkit # part of github.com/Nava2/gradle-plugin-better-testing
