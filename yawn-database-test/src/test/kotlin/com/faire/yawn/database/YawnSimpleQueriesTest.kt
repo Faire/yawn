@@ -20,6 +20,7 @@ import org.hibernate.NullPrecedence.FIRST
 import org.hibernate.NullPrecedence.LAST
 import org.junit.jupiter.api.Test
 import java.sql.SQLException
+import java.time.DayOfWeek
 
 internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
     @Test
@@ -108,6 +109,30 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
             val theHobbit = results.single()
             assertThat(theHobbit.name).isEqualTo("The Hobbit")
             assertThat(theHobbit.author.name).isEqualTo("J.R.R. Tolkien")
+        }
+    }
+
+    @Test
+    fun `external-library enum support`() {
+        transactor.open { session ->
+            val monday = session.query(PublisherTable) { publishers ->
+                addEq(publishers.billingDay, DayOfWeek.MONDAY)
+            }.list()
+            assertThat(monday.single().name).isEqualTo("Penguin")
+            val friday = session.project(PublisherTable) { publishers ->
+                addEq(publishers.billingDay, DayOfWeek.FRIDAY)
+                project(publishers.name)
+            }.list()
+            assertThat(friday).containsOnly("HarperCollins")
+            val saturday = session.project(PublisherTable) { publishers ->
+                addEq(publishers.billingDay, DayOfWeek.SATURDAY)
+                project(publishers.name)
+            }.set()
+            assertThat(saturday).containsExactlyInAnyOrder("Co-Owned", "Random House")
+            val noSaturday = session.query(PublisherTable) { publishers ->
+                addNotEq(publishers.billingDay, DayOfWeek.SATURDAY)
+            }.set()
+            assertThat(noSaturday.map { it.name }).containsExactlyInAnyOrder("Penguin", "HarperCollins")
         }
     }
 

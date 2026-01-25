@@ -9,6 +9,7 @@ import com.faire.yawn.setup.entities.Book.Language.DANISH
 import com.faire.yawn.setup.entities.Book.Language.ENGLISH
 import com.faire.yawn.setup.hibernate.YawnTestSession
 import com.faire.yawn.setup.hibernate.YawnTestTransactor
+import java.time.DayOfWeek
 import kotlin.reflect.KClass
 
 internal class BookFixtures(
@@ -29,10 +30,22 @@ internal class BookFixtures(
                 email = EmailAddress("andersen@faire.com")
             }
 
-            val penguin = createPublisher { name = "Penguin" }
-            val harperCollins = createPublisher { name = "HarperCollins" }
-            val randomHouse = createPublisher { name = "Random House" }
-            val coOwned = createPublisher { name = "Co-Owned" }
+            val penguin = createPublisher {
+                name = "Penguin"
+                billingDay = DayOfWeek.MONDAY
+            }
+            val harperCollins = createPublisher {
+                name = "HarperCollins"
+                billingDay = DayOfWeek.FRIDAY
+            }
+            val randomHouse = createPublisher {
+                name = "Random House"
+                billingDay = DayOfWeek.SATURDAY
+            }
+            val coOwned = createPublisher {
+                name = "Co-Owned"
+                billingDay = DayOfWeek.SATURDAY
+            }
 
             val lordOfTheRings = createBook(tolkien) {
                 name = "Lord of the Rings"

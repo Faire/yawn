@@ -2,6 +2,7 @@ package com.faire.yawn.setup.entities
 
 import com.faire.yawn.YawnEntity
 import org.hibernate.annotations.Formula
+import java.time.DayOfWeek
 import javax.persistence.CollectionTable
 import javax.persistence.Column
 import javax.persistence.ElementCollection
@@ -55,4 +56,8 @@ internal class Publisher : TimestampedEntity<Publisher>() {
     @Formula("LENGTH(name)")
     var nameLetterCount: Int = 0
         protected set
+
+    // tests an enum from an external package
+    @Column
+    lateinit var billingDay: DayOfWeek
 }
