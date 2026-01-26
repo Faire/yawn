@@ -101,4 +101,16 @@ internal class PaginationResultTest {
         assertThat(paginate(PageNumber.zeroIndexed(2)).hasNext()).isFalse()
         assertThat(paginate(PageNumber.zeroIndexed(3)).hasNext()).isFalse()
     }
+
+    @Test
+    fun `has next - empty`() {
+        val pageSize = 10
+
+        fun paginate(pageNumber: PageNumber): PaginationResult<Int> {
+            return PaginationResult.empty(page = pageNumber / pageSize)
+        }
+
+        assertThat(paginate(PageNumber.zeroIndexed(0)).hasNext()).isFalse()
+        assertThat(paginate(PageNumber.zeroIndexed(1)).hasNext()).isFalse()
+    }
 }
