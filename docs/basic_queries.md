@@ -92,9 +92,7 @@ Use `forUpdate()` when you intend to update the selected rows. This adds `FOR UP
 ```kotlin
 val results = yawn.query(BookTable) { books ->
     addEq(books.name, "The Hobbit")
-}
-    .forUpdate()
-    .list()
+}.forUpdate().list()
 ```
 
 This is commonly used in event consumers and batch update operations where you need to prevent concurrent modifications.
@@ -106,9 +104,7 @@ Use `forShare()` for "find or create" patterns where you need to prevent concurr
 ```kotlin
 val existing = yawn.query(BookTable) { books ->
     addEq(books.token, bookToken)
-}
-    .forShare()
-    .uniqueResult()
+}.forShare().uniqueResult()
 
 if (existing == null) {
     // Safe to create - other transactions will wait
@@ -123,9 +119,7 @@ You can also use `setLockMode` directly with any `YawnLockMode` value:
 ```kotlin
 val results = yawn.query(BookTable) { books ->
     addEq(books.name, "The Hobbit")
-}
-    .setLockMode(YawnLockMode.PESSIMISTIC_WRITE)
-    .list()
+}.setLockMode(YawnLockMode.PESSIMISTIC_WRITE).list()
 ```
 
 Available lock modes:
