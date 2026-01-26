@@ -26,6 +26,13 @@ internal class PaginationResultTest {
             assertThat(page.pageNumber.zeroIndexedPageNumber).isEqualTo(0)
             assertThat(page.pageSize).isEqualTo(10)
         }
+
+        with(result.mapResults { results -> results.filter { it % 2 == 0 } }) {
+            assertThat(totalResults).isEqualTo(100)
+            assertThat(results).containsExactly(0, 2, 4, 6, 8)
+            assertThat(page.pageNumber.zeroIndexedPageNumber).isEqualTo(0)
+            assertThat(page.pageSize).isEqualTo(10)
+        }
     }
 
     @Test
