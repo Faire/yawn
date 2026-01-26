@@ -4,7 +4,7 @@ import com.faire.yawn.query.CompiledYawnQuery
 import org.hibernate.Criteria
 
 internal class YawnTestCompiledQuery<T>(
-    private val rawQuery: Criteria,
+    val rawQuery: Criteria,
 ) : CompiledYawnQuery<T> {
     override fun list(): List<T> {
         @Suppress("UNCHECKED_CAST")
