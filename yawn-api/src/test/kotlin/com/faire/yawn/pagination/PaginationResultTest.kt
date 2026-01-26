@@ -71,4 +71,34 @@ internal class PaginationResultTest {
             assertThat(page.pageSize).isEqualTo(10)
         }
     }
+
+    @Test
+    fun `has next - partial last page`() {
+        val elements = List(25) { it }
+        val pageSize = 10
+
+        fun paginate(pageNumber: PageNumber): PaginationResult<Int> {
+            return PaginationResult.fromList(elements = elements, page = pageNumber / pageSize)
+        }
+
+        assertThat(paginate(PageNumber.zeroIndexed(0)).hasNext()).isTrue()
+        assertThat(paginate(PageNumber.zeroIndexed(1)).hasNext()).isTrue()
+        assertThat(paginate(PageNumber.zeroIndexed(2)).hasNext()).isFalse()
+        assertThat(paginate(PageNumber.zeroIndexed(3)).hasNext()).isFalse()
+    }
+
+    @Test
+    fun `has next - full last page`() {
+        val elements = List(30) { it }
+        val pageSize = 10
+
+        fun paginate(pageNumber: PageNumber): PaginationResult<Int> {
+            return PaginationResult.fromList(elements = elements, page = pageNumber / pageSize)
+        }
+
+        assertThat(paginate(PageNumber.zeroIndexed(0)).hasNext()).isTrue()
+        assertThat(paginate(PageNumber.zeroIndexed(1)).hasNext()).isTrue()
+        assertThat(paginate(PageNumber.zeroIndexed(2)).hasNext()).isFalse()
+        assertThat(paginate(PageNumber.zeroIndexed(3)).hasNext()).isFalse()
+    }
 }

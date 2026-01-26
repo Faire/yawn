@@ -13,6 +13,11 @@ data class PaginationResult<T : Any>(
         page = page,
     )
 
+    fun hasNext(): Boolean {
+        val nextOffset = page.next().computeOffset()
+        return nextOffset < totalResults
+    }
+
     companion object {
         fun <T : Any> empty(page: Page): PaginationResult<T> {
             return fromList(elements = listOf(), page = page)
