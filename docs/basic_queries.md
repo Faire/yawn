@@ -82,7 +82,7 @@ Some operations that do require the column context are also available outside th
 
 ## Lock Modes
 
-Yawn supports pessimistic locking through the `setLockMode`, `forUpdate`, and `forShare` methods. These are useful when you need to prevent concurrent
+Yawn supports pessimistic locking through the `setLockMode` (or the `forUpdate` and `forShare` helpers. These are useful when you need to prevent concurrent
 modifications to rows you're reading.
 
 ### forUpdate (PESSIMISTIC_WRITE)

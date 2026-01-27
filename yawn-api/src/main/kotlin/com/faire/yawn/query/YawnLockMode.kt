@@ -1,7 +1,7 @@
 package com.faire.yawn.query
 
 /**
- * Lock modes for Yawn queries, abstracting over Hibernate's LockMode.
+ * Lock modes for Yawn queries, abstracting over SQL's locking mechanisms.
  *
  * These lock modes control how the database handles concurrent access to selected rows.
  * When a lock mode is set, the generated SQL will include the appropriate locking clause
