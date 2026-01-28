@@ -18,7 +18,7 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
             }.forUpdate().compile() as YawnTestCompiledQuery<Book>
 
             val hibernateCriteriaImpl = compiledQuery.rawQuery as CriteriaImpl
-            assertThat(hibernateCriteriaImpl.lockModes.values.single()).isEqualTo(LockMode.PESSIMISTIC_WRITE)
+            assertThat(hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.PESSIMISTIC_WRITE)
             assertThat(compiledQuery.list().single().name).isEqualTo("The Hobbit")
         }
     }
@@ -31,7 +31,7 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
             }.forShare().compile() as YawnTestCompiledQuery<Book>
 
             val hibernateCriteriaImpl = compiledQuery.rawQuery as CriteriaImpl
-            assertThat(hibernateCriteriaImpl.lockModes.values.single()).isEqualTo(LockMode.PESSIMISTIC_READ)
+            assertThat(hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.PESSIMISTIC_READ)
             assertThat(compiledQuery.list().single().name).isEqualTo("The Hobbit")
         }
     }
@@ -44,7 +44,7 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
             }.setLockMode(YawnLockMode.PESSIMISTIC_WRITE).compile() as YawnTestCompiledQuery<Book>
 
             val hibernateCriteriaImpl = compiledQuery.rawQuery as CriteriaImpl
-            assertThat(hibernateCriteriaImpl.lockModes.values.single()).isEqualTo(LockMode.PESSIMISTIC_WRITE)
+            assertThat(hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.PESSIMISTIC_WRITE)
             assertThat(compiledQuery.list().single().name).isEqualTo("The Hobbit")
         }
     }
@@ -57,7 +57,7 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
             }.setLockMode(YawnLockMode.PESSIMISTIC_READ).compile() as YawnTestCompiledQuery<Book>
 
             val hibernateCriteriaImpl = compiledQuery.rawQuery as CriteriaImpl
-            assertThat(hibernateCriteriaImpl.lockModes.values.single()).isEqualTo(LockMode.PESSIMISTIC_READ)
+            assertThat(hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.PESSIMISTIC_READ)
             assertThat(compiledQuery.list().single().name).isEqualTo("The Hobbit")
         }
     }
@@ -70,7 +70,7 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
             }.setLockMode(YawnLockMode.NONE).compile() as YawnTestCompiledQuery<Book>
 
             val hibernateCriteriaImpl = compiledQuery.rawQuery as CriteriaImpl
-            assertThat(hibernateCriteriaImpl.lockModes.values.single()).isEqualTo(LockMode.NONE)
+            assertThat(hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.NONE)
             assertThat(compiledQuery.list().single().name).isEqualTo("The Hobbit")
         }
     }
@@ -83,7 +83,7 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
             }.forUpdate().maxResults(2).offset(1).compile() as YawnTestCompiledQuery<Book>
 
             val hibernateCriteriaImpl = compiledQuery.rawQuery as CriteriaImpl
-            assertThat(hibernateCriteriaImpl.lockModes.values.single()).isEqualTo(LockMode.PESSIMISTIC_WRITE)
+            assertThat(hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.PESSIMISTIC_WRITE)
             assertThat(compiledQuery.list().map { it.name })
                 .containsExactly("Lord of the Rings", "The Emperor's New Clothes")
         }
