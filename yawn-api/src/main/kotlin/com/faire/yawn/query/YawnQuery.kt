@@ -21,6 +21,7 @@ data class YawnQuery<SOURCE : Any, T : Any>(
 
     var offset: Int? = null,
     var maxResults: Int? = null,
+    var lockMode: YawnLockMode? = null,
 ) : YawnCriteriaQuery<SOURCE, T> {
 
     override fun addCriterion(criterion: YawnQueryCriterion<SOURCE>) {

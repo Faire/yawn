@@ -3,9 +3,11 @@ package com.faire.yawn.setup.hibernate
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.query.CompiledYawnQuery
 import com.faire.yawn.query.YawnCompilationContext
+import com.faire.yawn.query.YawnLockMode
 import com.faire.yawn.query.YawnQuery
 import com.faire.yawn.query.YawnQueryFactory
 import com.faire.yawn.query.YawnQueryRestriction.And
+import org.hibernate.LockMode
 import org.hibernate.Session
 
 internal class YawnTestQueryFactory(
@@ -60,6 +62,20 @@ internal class YawnTestQueryFactory(
             rawQuery.setProjection(hibernateProjection)
         }
 
+        val lockMode = query.lockMode
+        if (lockMode != null) {
+            rawQuery.setLockMode(lockMode.toHibernateLockMode())
+        }
+
         return YawnTestCompiledQuery(rawQuery)
     }
+}
+
+/**
+ * Maps [YawnLockMode] to Hibernate's [LockMode].
+ */
+private fun YawnLockMode.toHibernateLockMode(): LockMode = when (this) {
+    YawnLockMode.NONE -> LockMode.NONE
+    YawnLockMode.PESSIMISTIC_READ -> LockMode.PESSIMISTIC_READ
+    YawnLockMode.PESSIMISTIC_WRITE -> LockMode.PESSIMISTIC_WRITE
 }

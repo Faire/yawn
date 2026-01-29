@@ -4,6 +4,7 @@ import com.faire.yawn.YawnTableDef
 import com.faire.yawn.pagination.Page
 import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.query.CompiledYawnQuery
+import com.faire.yawn.query.YawnLockMode
 import com.faire.yawn.query.YawnQuery
 import com.faire.yawn.query.YawnQueryFactory
 import com.faire.yawn.query.YawnQueryHint
@@ -211,5 +212,46 @@ abstract class BaseTypeSafeCriteriaBuilder<
     fun addQueryHint(hint: String): CRITERIA {
         query.queryHints.add(YawnQueryHint(hint))
         return builderReturn()
+    }
+
+    /**
+     * Sets the lock mode for this query.
+     *
+     * Lock modes control how the database handles concurrent access to the selected rows.
+     * When set, the generated SQL will include the appropriate locking clause.
+     *
+     * @param lockMode The lock mode to use.
+     * @return this builder for chaining.
+     * @see YawnLockMode
+     */
+    fun setLockMode(lockMode: YawnLockMode): CRITERIA {
+        query.lockMode = lockMode
+        return builderReturn()
+    }
+
+    /**
+     * Locks selected rows with a PESSIMISTIC_WRITE lock (SQL: `FOR UPDATE`).
+     *
+     * Use when you intend to update the selected rows and need to prevent concurrent
+     * modifications. This is the strongest lock mode and will block other transactions
+     * from reading (with locks) or writing to the locked rows until this transaction completes.
+     *
+     * @return this builder for chaining.
+     */
+    fun forUpdate(): CRITERIA {
+        return setLockMode(YawnLockMode.PESSIMISTIC_WRITE)
+    }
+
+    /**
+     * Locks selected rows with a PESSIMISTIC_READ lock (SQL: `FOR SHARE`).
+     *
+     * Use for "find or create" patterns where you need to prevent concurrent creates
+     * but allow concurrent reads. This lock allows other transactions to read the rows
+     * but prevents them from acquiring an exclusive lock until this transaction completes.
+     *
+     * @return this builder for chaining.
+     */
+    fun forShare(): CRITERIA {
+        return setLockMode(YawnLockMode.PESSIMISTIC_READ)
     }
 }
