@@ -5,11 +5,18 @@ data class PaginationResult<T : Any>(
     val results: List<T>,
     val page: Page,
 ) {
-    fun <R : Any> map(mapper: (T) -> R): PaginationResult<R> = PaginationResult(
+    fun <R : Any> map(mapper: (T) -> R): PaginationResult<R> = mapResults { results.map(mapper) }
+
+    fun <R : Any> mapResults(mapper: (List<T>) -> List<R>): PaginationResult<R> = PaginationResult(
         totalResults = totalResults,
-        results = results.map(mapper),
+        results = mapper(results),
         page = page,
     )
+
+    fun hasNext(): Boolean {
+        val nextOffset = page.next().computeOffset()
+        return nextOffset < totalResults
+    }
 
     companion object {
         fun <T : Any> empty(page: Page): PaginationResult<T> {
