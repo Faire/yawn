@@ -80,6 +80,60 @@ Some operations that do require the column context are also available outside th
 - `applyProjection`
 - `minBy` / `maxBy`
 
+## Lock Modes
+
+Yawn supports pessimistic locking through the `setLockMode` (or the `forUpdate` and `forShare` helpers. These are useful when you need to prevent concurrent
+modifications to rows you're reading.
+
+### forUpdate (PESSIMISTIC_WRITE)
+
+Use `forUpdate()` when you intend to update the selected rows. This adds `FOR UPDATE` to the SQL query, acquiring an exclusive lock:
+
+```kotlin
+val results = yawn.query(BookTable) { books ->
+    addEq(books.name, "The Hobbit")
+}
+    .forUpdate()
+    .list()
+```
+
+This is commonly used in event consumers and batch update operations where you need to prevent concurrent modifications.
+
+### forShare (PESSIMISTIC_READ)
+
+Use `forShare()` for "find or create" patterns where you need to prevent concurrent creates but allow concurrent reads. This adds `FOR SHARE` to the SQL query:
+
+```kotlin
+val existing = yawn.query(BookTable) { books ->
+    addEq(books.token, bookToken)
+}
+    .forShare()
+    .uniqueResult()
+
+if (existing == null) {
+    // Safe to create - other transactions will wait
+    session.save(DbBook(...))
+}
+```
+
+### Explicit Lock Mode
+
+You can also use `setLockMode` directly with any `YawnLockMode` value:
+
+```kotlin
+val results = yawn.query(BookTable) { books ->
+    addEq(books.name, "The Hobbit")
+}
+    .setLockMode(YawnLockMode.PESSIMISTIC_WRITE)
+    .list()
+```
+
+Available lock modes:
+
+- `YawnLockMode.NONE` - No lock (default behavior)
+- `YawnLockMode.PESSIMISTIC_READ` - Shared lock (`FOR SHARE`)
+- `YawnLockMode.PESSIMISTIC_WRITE` - Exclusive lock (`FOR UPDATE`)
+
 ## Terminal Operations
 
 Terminal operations such as `uniqueResult` or `list` can only be called outside the lambda, and they do not return the builder as they terminate the query.
