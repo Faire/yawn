@@ -4,7 +4,6 @@ import com.faire.yawn.YawnTableDef
 import com.faire.yawn.criteria.builder.TypeSafeCriteriaBuilder
 import com.faire.yawn.query.YawnLockMode
 import com.faire.yawn.setup.entities.BaseEntity
-import com.faire.yawn.setup.entities.Book
 import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.hibernate.YawnTestCompiledQuery
 import org.assertj.core.api.Assertions.assertThat
@@ -101,8 +100,8 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
         }
     }
 
-    private fun <T: BaseEntity<T>, DEF: YawnTableDef<T, T>> getCompiledQuery(
-        queryProvider: () -> TypeSafeCriteriaBuilder<T, DEF>
+    private fun <T : BaseEntity<T>, DEF : YawnTableDef<T, T>> getCompiledQuery(
+        queryProvider: () -> TypeSafeCriteriaBuilder<T, DEF>,
     ): YawnTestCompiledQuery<T> {
         return queryProvider().compile() as YawnTestCompiledQuery<T>
     }
