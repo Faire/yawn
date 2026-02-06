@@ -6,8 +6,11 @@ import com.faire.yawn.YawnTableDefParent
 import com.faire.yawn.generators.addGeneratedAnnotation
 import com.faire.yawn.generators.objects.YawnReferenceObjectGenerator
 import com.faire.yawn.util.YawnContext
+import com.faire.yawn.util.YawnLogger
+import com.faire.yawn.util.YawnProcessorException
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
@@ -38,6 +41,7 @@ import kotlin.reflect.KClass
  */
 internal abstract class BaseYawnProcessor(
     private val codeGenerator: CodeGenerator,
+    protected val logger: YawnLogger,
 ) : SymbolProcessor {
     protected abstract val annotationClass: KClass<out Annotation>
     protected abstract val yawnDefClass: KClass<out YawnDef<*, *>>
@@ -50,7 +54,11 @@ internal abstract class BaseYawnProcessor(
             .filterIsInstance<KSClassDeclaration>()
 
         for (ksClassDeclaration in ksClassDeclarationWithYawnAnnotation) {
-            generateFile(ksClassDeclaration)
+            try {
+                generateFile(ksClassDeclaration)
+            } catch (e: YawnProcessorException) {
+                logger.error(e.ksNode, e)
+            }
         }
 
         return listOf()

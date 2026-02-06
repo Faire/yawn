@@ -6,9 +6,11 @@ import com.faire.yawn.generators.properties.ProjectionColumnDefGenerator
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjectionDef
 import com.faire.yawn.util.YawnContext
+import com.faire.yawn.util.YawnLogger
 import com.faire.yawn.util.YawnNamesGenerator.generateProjectionDefClassName
 import com.google.auto.service.AutoService
 import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
@@ -17,7 +19,10 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.PropertySpec
 import kotlin.reflect.KClass
 
-internal class YawnProjectionProcessor(codeGenerator: CodeGenerator) : BaseYawnProcessor(codeGenerator) {
+internal class YawnProjectionProcessor(
+    codeGenerator: CodeGenerator,
+    logger: YawnLogger,
+) : BaseYawnProcessor(codeGenerator, logger) {
     override val annotationClass: KClass<out Annotation> = YawnProjection::class
     override val yawnDefClass: KClass<out YawnDef<*, *>> = YawnProjectionDef::class
 
@@ -46,6 +51,7 @@ internal class YawnProjectionProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
         return YawnProjectionProcessor(
             codeGenerator = environment.codeGenerator,
+            logger = YawnLogger(environment.logger),
         )
     }
 }

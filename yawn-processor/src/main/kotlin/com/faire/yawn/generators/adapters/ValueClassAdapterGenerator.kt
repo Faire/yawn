@@ -5,6 +5,7 @@ import com.faire.yawn.util.YawnParameter
 import com.faire.yawn.util.YawnProcessorException
 import com.faire.yawn.util.isValueClass
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSType
 
 internal class ValueClassAdapterGenerator : ValueAdapterGenerator {
@@ -20,17 +21,32 @@ internal class ValueClassAdapterGenerator : ValueAdapterGenerator {
         fieldType: KSType,
     ): YawnParameter {
         val declaration = fieldType.declaration as? KSClassDeclaration
-            ?: fail("Expected a class declaration for value class, but found ${fieldType.declaration}")
+            ?: fail(
+                ksNode = yawnContext.classDeclaration,
+                message = "Expected a class declaration for value class, but found ${fieldType.declaration}"
+            )
+
         val primaryConstructor = declaration.primaryConstructor
-            ?: fail("Value class ${declaration.qualifiedName?.asString()} must have a primary constructor")
+            ?: fail(
+                ksNode = yawnContext.classDeclaration,
+                message = "Value class ${declaration.qualifiedName?.asString()} must have a primary constructor"
+            )
+
         val valueClassProperty = primaryConstructor.parameters.singleOrNull()
-            ?: fail("Value class ${declaration.qualifiedName?.asString()} must have a single property in its primary constructor")
+            ?: fail(
+                ksNode = yawnContext.classDeclaration,
+                message = "Value class ${declaration.qualifiedName?.asString()} must have a single property in its primary constructor"
+            )
+
         val valueClassPropertyName = valueClassProperty.name?.asString()
-            ?: fail("Value class property must have a name")
+            ?: fail(
+                ksNode = yawnContext.classDeclaration,
+                message = "Value class property must have a name"
+            )
         return YawnParameter("adapter = { it?.%N }", listOf(valueClassPropertyName))
     }
 }
 
-private fun fail(message: String): Nothing {
-    throw YawnProcessorException(message)
+private fun fail(ksNode: KSNode, message: String): Nothing {
+    throw YawnProcessorException(ksNode, message)
 }

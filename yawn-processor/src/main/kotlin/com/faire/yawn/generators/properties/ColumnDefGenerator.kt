@@ -1,6 +1,7 @@
 package com.faire.yawn.generators.properties
 
 import com.faire.yawn.YawnTableDef
+import com.faire.yawn.generators.adapters.TmpValueAdapterGenerator
 import com.faire.yawn.generators.adapters.ValueClassAdapterGenerator
 import com.faire.yawn.util.ForeignKeyReference
 import com.faire.yawn.util.YawnContext
@@ -64,7 +65,11 @@ internal object ColumnDefGenerator : YawnPropertyGenerator() {
         val typeArguments = try {
             listOf(fieldType.toTypeName()) // Token<FOO>
         } catch (e: IllegalArgumentException) {
-            throw YawnProcessorException("Failed to get type name for ${yawnContext.superClassName}.$fieldName", e)
+            throw YawnProcessorException(
+                ksNode = yawnContext.classDeclaration,
+                message = "Failed to get type name for ${yawnContext.superClassName}.$fieldName",
+                cause = e,
+            )
         }
         val adapter = generateAdapterForPropertyIfNeeded(yawnContext, fieldType)
         val parameters = pathPrefixes + listOfNotNull(
@@ -91,12 +96,16 @@ internal object ColumnDefGenerator : YawnPropertyGenerator() {
             else -> {
                 val fieldName = fieldType.declaration.qualifiedName?.asString()
                 val adapterNames = matchingAdapters.joinToString { "${it::class.qualifiedName}" }
-                throw YawnProcessorException("Multiple adapters qualified for type $fieldName: $adapterNames")
+                throw YawnProcessorException(
+                    ksNode = fieldType.declaration,
+                    message = "Multiple adapters qualified for type $fieldName: $adapterNames"
+                )
             }
         }
     }
 
     private val VALUE_ADAPTER_GENERATORS = listOf(
         ValueClassAdapterGenerator(),
+        TmpValueAdapterGenerator(),
     )
 }

@@ -15,6 +15,7 @@ import com.faire.yawn.generators.properties.JoinColumnDefWithForeignKeyGenerator
 import com.faire.yawn.generators.types.EmbeddedIdTypeGenerator
 import com.faire.yawn.generators.types.EmbeddedTypeGenerator
 import com.faire.yawn.util.YawnContext
+import com.faire.yawn.util.YawnLogger
 import com.faire.yawn.util.YawnNamesGenerator.generateTableDefClassName
 import com.faire.yawn.util.getHibernateForeignKeyReference
 import com.faire.yawn.util.isColumn
@@ -31,6 +32,7 @@ import com.faire.yawn.util.isTransient
 import com.faire.yawn.util.isYawnEntity
 import com.google.auto.service.AutoService
 import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
@@ -43,7 +45,10 @@ import kotlin.reflect.KClass
 /**
  * Implementation of [BaseYawnProcessor] for [YawnEntity] annotated classes.
  */
-internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProcessor(codeGenerator) {
+internal class YawnEntityProcessor(
+    codeGenerator: CodeGenerator,
+    logger: YawnLogger,
+) : BaseYawnProcessor(codeGenerator, logger) {
     override val annotationClass: KClass<out Annotation> = YawnEntity::class
     override val yawnDefClass: KClass<out YawnDef<*, *>> = YawnTableDef::class
 
@@ -123,6 +128,7 @@ internal class YawnEntityProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
         return YawnEntityProcessor(
             codeGenerator = environment.codeGenerator,
+            logger = YawnLogger(environment.logger),
         )
     }
 }
