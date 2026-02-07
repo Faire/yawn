@@ -15,11 +15,11 @@ import com.faire.yawn.query.YawnQueryOrder
  *
  * This will be either:
  * * [TypeSafeCriteriaBuilder], for normal queries (supports applyFilter {})
- * * [ProjectedTypeSafeCriteriaBuilder], for queries with projections (does not support extra applyFilter {})
+ * * [ProjectedTypeSafeCriteriaBuilder], for queries with projections (supports applyFilter {} for adding WHERE/JOIN/ORDER conditions)
  *
- * The reason for the distinction is that the latter does not support applyFilter, due to the fact that only
- * the lambda returning the projection can be applied. For non-projected queries, there is no problem in applying
- * multiple lambdas.
+ * Both builders support applying filters through the applyFilter method. The difference is that
+ * ProjectedTypeSafeCriteriaBuilder does not allow calling project() within applyFilter since the projection
+ * must be set during creation.
  *
  * @param T the type of the entity being queried.
  * @param DEF the table definition of the entity being queried.

@@ -689,4 +689,93 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
             assertThat(results.toSet().sorted()).containsExactlyInAnyOrder(3L, 4L, 6L, 7L)
         }
     }
+
+    @Test
+    fun `apply filter on projected query`() {
+        transactor.open { session ->
+            // Get statistics for all books by J.R.R. Tolkien
+            // Expected: Lord of the Rings (1000 pages) + The Hobbit (300 pages) = 2 books, 1300 pages
+            val tolkienStats = session.query(BookTable)
+                .applyProjection { books ->
+                    project(
+                        YawnProjectionTest_BookStatisticsProjection.create(
+                            totalBooks = YawnProjections.count(books.id),
+                            totalPages = YawnProjections.sum(books.numberOfPages),
+                        ),
+                    )
+                }
+                .applyFilter { books ->
+                    val authors = join(books.author)
+                    addEq(authors.name, "J.R.R. Tolkien")
+                }
+                .uniqueResult()!!
+
+            assertThat(tolkienStats.totalBooks).isEqualTo(2)
+            assertThat(tolkienStats.totalPages).isEqualTo(1_300L)
+
+            // Get statistics for books by multiple authors
+            // Expected: Tolkien books (1000 + 300) + Andersen books (100 + 110 + 120) = 5 books, 1630 pages
+            val multipleAuthorsStats = session.query(BookTable)
+                .applyProjection { books ->
+                    project(
+                        YawnProjectionTest_BookStatisticsProjection.create(
+                            totalBooks = YawnProjections.count(books.id),
+                            totalPages = YawnProjections.sum(books.numberOfPages),
+                        ),
+                    )
+                }
+                .applyFilter { books ->
+                    val authors = join(books.author)
+                    addIn(authors.name, "J.R.R. Tolkien", "Hans Christian Andersen")
+                }
+                .uniqueResult()!!
+
+            assertThat(multipleAuthorsStats.totalBooks).isEqualTo(5)
+            assertThat(multipleAuthorsStats.totalPages).isEqualTo(1_630L)
+        }
+    }
+
+    @Test
+    fun `apply multiple filters on projected query`() {
+        transactor.open { session ->
+            // Apply multiple filters sequentially
+            // Filter 1: authors IN [Tolkien, Andersen]
+            // Filter 2: numberOfPages > 110
+            // Expected matches:
+            //   - Lord of the Rings (1000 pages) ✓
+            //   - The Hobbit (300 pages) ✓
+            //   - The Little Mermaid (100 pages) ✗ (100 not > 110)
+            //   - The Ugly Duckling (110 pages) ✗ (110 not > 110)
+            //   - The Emperor's New Clothes (120 pages) ✓
+            // Total: 3 books, 1420 pages (1000 + 300 + 120)
+            val stats = session.query(BookTable)
+                .applyProjection { books ->
+                    project(
+                        YawnProjectionTest_BookStatisticsProjection.create(
+                            totalBooks = YawnProjections.count(books.id),
+                            totalPages = YawnProjections.sum(books.numberOfPages),
+                        ),
+                    )
+                }
+                .applyFilter { books ->
+                    // Filter by author
+                    val authors = join(books.author)
+                    addIn(authors.name, "J.R.R. Tolkien", "Hans Christian Andersen")
+                }
+                .applyFilter { books ->
+                    // Further filter by page count
+                    addGt(books.numberOfPages, 110L)
+                }
+                .uniqueResult()!!
+
+            assertThat(stats.totalBooks).isEqualTo(3)
+            assertThat(stats.totalPages).isEqualTo(1_420L)
+        }
+    }
+
+    @YawnProjection
+    internal data class BookStatistics(
+        val totalBooks: Long,
+        val totalPages: Long,
+    )
 }

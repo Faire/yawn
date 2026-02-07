@@ -1,7 +1,6 @@
 package com.faire.yawn.criteria.builder
 
 import com.faire.yawn.YawnTableDef
-import com.faire.yawn.criteria.builder.ProjectedTypeSafeCriteriaBuilder.Companion.create
 import com.faire.yawn.criteria.query.ProjectedTypeSafeCriteriaQuery
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnQuery
@@ -11,11 +10,6 @@ import com.faire.yawn.query.YawnQueryFactory
  * A type-safe builder for Yawn queries with projections.
  *
  * Note that since we are projecting, the [RETURNS] type parameter will be different from [T].
- *
- * Also note that we do not support `applyFilter` here, because:
- * * you can only project once per query
- * * the projection is the return type of the Query DSL lambda
- * For those reasons, with projections you can only have one lambda, which is provided in the [create] method.
  *
  * @param T the type of the entity being queried.
  * @param DEF the table definition of the entity being queried.
@@ -46,6 +40,37 @@ class ProjectedTypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>, RETURN
             query.projection = projection
             mapper = { projection.project(it) }
         }
+    }
+
+    /**
+     * Apply additional filters (WHERE, JOIN, ORDER BY clauses) to this projected query.
+     *
+     * Note: You cannot call `project()` within this lambda as the projection has already been set.
+     * This method is for adding conditions to filter the projected results.
+     *
+     * Example:
+     * ```
+     * session.query(BookTable)
+     *     .applyProjection { books ->
+     *         project(YawnProjections.pair(
+     *             YawnProjections.rowCount(),
+     *             YawnProjections.sum(books.pages)
+     *         ))
+     *     }
+     *     .applyFilter { books ->
+     *         val authors = join(books.author)
+     *         addIn(authors.name, listOf("Author1", "Author2"))
+     *     }
+     *     .uniqueResult()
+     * ```
+     */
+    fun applyFilter(
+        lambda: ProjectedTypeSafeCriteriaQuery<T, T, DEF, RETURNS>.(tableDef: DEF) -> Unit,
+    ): ProjectedTypeSafeCriteriaBuilder<T, DEF, RETURNS> {
+        ProjectedTypeSafeCriteriaQuery.applyLambda<T, T, DEF, RETURNS>(query) {
+            lambda(tableDef)
+        }
+        return this
     }
 
     companion object {
