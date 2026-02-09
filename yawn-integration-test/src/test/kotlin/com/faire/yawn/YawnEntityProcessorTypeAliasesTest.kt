@@ -45,25 +45,11 @@ internal class YawnEntityProcessorTypeAliasesTest {
     @Test
     fun `generates type aliases for ProjectedTypeSafeCriteriaQuery`() {
         assertThat(typeOf<EntityWithElementCollectionProjectedCriteriaQuery<String>>()).isEqualTo(
-            typeOf<
-                ProjectedTypeSafeCriteriaQuery<
-                    EntityWithElementCollection,
-                    EntityWithElementCollection,
-                    EntityWithElementCollectionTableDef<EntityWithElementCollection>,
-                    String,
-                    >,
-                >(),
+            typeOf<ProjectedTypeSafeCriteriaQuery<EntityWithElementCollection, *, *, String>>(),
         )
 
         assertThat(typeOf<EntityWithElementCollectionProjectedCriteriaQuery<Boolean>>()).isEqualTo(
-            typeOf<
-                ProjectedTypeSafeCriteriaQuery<
-                    EntityWithElementCollection,
-                    EntityWithElementCollection,
-                    EntityWithElementCollectionTableDef<EntityWithElementCollection>,
-                    Boolean,
-                    >,
-                >(),
+            typeOf<ProjectedTypeSafeCriteriaQuery<EntityWithElementCollection, *, *, Boolean>>(),
         )
     }
 
