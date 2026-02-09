@@ -7,12 +7,13 @@ import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.STAR
 import com.squareup.kotlinpoet.TypeAliasSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asClassName
 
 /**
- * Generates: `typealias DbBookProjectedCriteriaQuery<PROJECTION> = ProjectedTypeSafeCriteriaQuery<DbBook, DbBook, DbBookTableDef<DbBook>, PROJECTION>`
+ * Generates: `typealias DbBookProjectedCriteriaQuery<PROJECTION> = ProjectedTypeSafeCriteriaQuery<DbBook, *, *, PROJECTION>`
  */
 internal object ProjectedTypeSafeCriteriaQueryTypeAliasGenerator : YawnTableDefTypeAliasGenerator {
     private val projectionTypeVariable = TypeVariableName("PROJECTION", ANY.copy(nullable = true))
@@ -22,8 +23,8 @@ internal object ProjectedTypeSafeCriteriaQueryTypeAliasGenerator : YawnTableDefT
     override fun getType(entityType: ClassName, tableDefType: ParameterizedTypeName): ParameterizedTypeName {
         return ProjectedTypeSafeCriteriaQuery::class.asClassName().parameterizedBy(
             entityType,
-            entityType,
-            tableDefType,
+            STAR,
+            STAR,
             projectionTypeVariable,
         )
     }
