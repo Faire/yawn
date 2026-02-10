@@ -1,6 +1,7 @@
 package com.faire.yawn.criteria.builder
 
 import com.faire.yawn.YawnTableDef
+import com.faire.yawn.criteria.query.TypeSafeCriteriaQuery
 import com.faire.yawn.pagination.Page
 import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.query.CompiledYawnQuery
@@ -14,12 +15,8 @@ import com.faire.yawn.query.YawnQueryOrder
  * An abstract super-class for the type-safe Yawn criteria builder; not be used directly.
  *
  * This will be either:
- * * [TypeSafeCriteriaBuilder], for normal queries (supports applyFilter {})
- * * [ProjectedTypeSafeCriteriaBuilder], for queries with projections (does not support extra applyFilter {})
- *
- * The reason for the distinction is that the latter does not support applyFilter, due to the fact that only
- * the lambda returning the projection can be applied. For non-projected queries, there is no problem in applying
- * multiple lambdas.
+ * * [TypeSafeCriteriaBuilder], for normal queries
+ * * [ProjectedTypeSafeCriteriaBuilder], for queries with projections
  *
  * @param T the type of the entity being queried.
  * @param DEF the table definition of the entity being queried.
@@ -63,6 +60,30 @@ abstract class BaseTypeSafeCriteriaBuilder<
      * [YawnQuery] class.
      */
     protected abstract fun clone(): CRITERIA
+
+    /**
+     * Apply additional filters to this query.
+     *
+     * This method is available on both [TypeSafeCriteriaBuilder] and [ProjectedTypeSafeCriteriaBuilder].
+     * The lambda uses [TypeSafeCriteriaQuery] which does not have access to `project()`, ensuring
+     * that filters can only add conditions and cannot change the projection.
+     *
+     * Example:
+     * ```
+     * session.query(BookTable)
+     *     .applyFilter { books ->
+     *         val authors = join(books.author)
+     *         addIn(authors.name, listOf("Author1", "Author2"))
+     *     }
+     *     .list()
+     * ```
+     */
+    fun applyFilter(
+        lambda: TypeSafeCriteriaQuery<T, DEF>.(tableDef: DEF) -> Unit,
+    ): CRITERIA {
+        TypeSafeCriteriaQuery.applyLambda<T, DEF>(query) { lambda(tableDef) }
+        return builderReturn()
+    }
 
     fun list(): List<RETURNS> {
         return compile().list().map { mapper(it) }

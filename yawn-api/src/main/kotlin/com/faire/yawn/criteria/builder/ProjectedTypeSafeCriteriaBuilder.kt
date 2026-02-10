@@ -1,7 +1,6 @@
 package com.faire.yawn.criteria.builder
 
 import com.faire.yawn.YawnTableDef
-import com.faire.yawn.criteria.builder.ProjectedTypeSafeCriteriaBuilder.Companion.create
 import com.faire.yawn.criteria.query.ProjectedTypeSafeCriteriaQuery
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnQuery
@@ -11,11 +10,6 @@ import com.faire.yawn.query.YawnQueryFactory
  * A type-safe builder for Yawn queries with projections.
  *
  * Note that since we are projecting, the [RETURNS] type parameter will be different from [T].
- *
- * Also note that we do not support `applyFilter` here, because:
- * * you can only project once per query
- * * the projection is the return type of the Query DSL lambda
- * For those reasons, with projections you can only have one lambda, which is provided in the [create] method.
  *
  * @param T the type of the entity being queried.
  * @param DEF the table definition of the entity being queried.
