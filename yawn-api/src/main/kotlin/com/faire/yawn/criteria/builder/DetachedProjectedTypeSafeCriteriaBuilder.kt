@@ -27,7 +27,7 @@ class DetachedProjectedTypeSafeCriteriaBuilder<SOURCE : Any, T : Any, DEF : Yawn
     }
 
     // to be used by `create` only
-    internal fun applyFilter(
+    internal fun applyProjection(
         lambda:
         ProjectedTypeSafeCriteriaQuery<SOURCE, T, DEF, RETURNS>.(tableDef: DEF) -> YawnQueryProjection<SOURCE, RETURNS>,
     ) {
@@ -86,7 +86,7 @@ class DetachedProjectedTypeSafeCriteriaBuilder<SOURCE : Any, T : Any, DEF : Yawn
             ) -> YawnQueryProjection<SOURCE, PROJECTION>,
         ): DetachedProjectedTypeSafeCriteriaBuilder<SOURCE, T, DEF, PROJECTION> {
             val typeSafeCriteria = DetachedProjectedTypeSafeCriteriaBuilder<SOURCE, T, DEF, PROJECTION>(query, tableDef)
-            typeSafeCriteria.applyFilter(lambda)
+            typeSafeCriteria.applyProjection(lambda)
             return typeSafeCriteria
         }
     }

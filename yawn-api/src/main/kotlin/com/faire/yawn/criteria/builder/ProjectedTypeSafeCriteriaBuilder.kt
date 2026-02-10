@@ -42,37 +42,6 @@ class ProjectedTypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>, RETURN
         }
     }
 
-    /**
-     * Apply additional filters (WHERE, JOIN, ORDER BY clauses) to this projected query.
-     *
-     * Note: You cannot call `project()` within this lambda as the projection has already been set.
-     * This method is for adding conditions to filter the projected results.
-     *
-     * Example:
-     * ```
-     * session.query(BookTable)
-     *     .applyProjection { books ->
-     *         project(YawnProjections.pair(
-     *             YawnProjections.rowCount(),
-     *             YawnProjections.sum(books.pages)
-     *         ))
-     *     }
-     *     .applyFilter { books ->
-     *         val authors = join(books.author)
-     *         addIn(authors.name, listOf("Author1", "Author2"))
-     *     }
-     *     .uniqueResult()
-     * ```
-     */
-    fun applyFilter(
-        lambda: ProjectedTypeSafeCriteriaQuery<T, T, DEF, RETURNS>.(tableDef: DEF) -> Unit,
-    ): ProjectedTypeSafeCriteriaBuilder<T, DEF, RETURNS> {
-        ProjectedTypeSafeCriteriaQuery.applyLambda<T, T, DEF, RETURNS>(query) {
-            lambda(tableDef)
-        }
-        return this
-    }
-
     companion object {
         fun <T : Any, DEF : YawnTableDef<T, T>, PROJECTION : Any?> create(
             tableDef: DEF,

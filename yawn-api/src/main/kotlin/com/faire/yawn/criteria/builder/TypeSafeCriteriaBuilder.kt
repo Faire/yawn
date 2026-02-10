@@ -52,13 +52,6 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         return YawnJoinRef(columnDef, joinParent)
     }
 
-    fun applyFilter(
-        lambda: TypeSafeCriteriaQuery<T, DEF>.(tableDef: DEF) -> Unit,
-    ): TypeSafeCriteriaBuilder<T, DEF> {
-        TypeSafeCriteriaQuery.applyLambda<T, DEF>(query) { lambda(tableDef) }
-        return this
-    }
-
     fun <F : Any, D : YawnTableDef<T, F>> applyJoinRef(
         joinRef: YawnJoinRef<F, D>,
         lambda: TypeSafeCriteriaQuery<T, DEF>.(joinedTableDef: D) -> Unit,
