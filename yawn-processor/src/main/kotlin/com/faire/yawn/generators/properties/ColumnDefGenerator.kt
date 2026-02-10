@@ -1,7 +1,6 @@
 package com.faire.yawn.generators.properties
 
 import com.faire.yawn.YawnTableDef
-import com.faire.yawn.generators.adapters.TmpValueAdapterGenerator
 import com.faire.yawn.generators.adapters.ValueClassAdapterGenerator
 import com.faire.yawn.util.ForeignKeyReference
 import com.faire.yawn.util.YawnContext
@@ -106,6 +105,5 @@ internal object ColumnDefGenerator : YawnPropertyGenerator() {
 
     private val VALUE_ADAPTER_GENERATORS = listOf(
         ValueClassAdapterGenerator(),
-        TmpValueAdapterGenerator(),
     )
 }

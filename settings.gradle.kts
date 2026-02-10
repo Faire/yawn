@@ -13,4 +13,5 @@ include(
     "yawn-gradle-plugin",
     "yawn-processor",
     "yawn-integration-test",
+    "yawn-ksp-test-fixtures",
 )

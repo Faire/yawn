@@ -16,4 +16,11 @@ dependencies {
     implementation(libs.ksp.common.deps)
 
     implementation(project(":yawn-api"))
+
+    testImplementation(project(":yawn-ksp-test-fixtures"))
+    testImplementation(libs.assertj)
+    testImplementation(libs.junit.jupiter.api)
+
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
