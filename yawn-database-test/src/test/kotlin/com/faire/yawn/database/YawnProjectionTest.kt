@@ -780,14 +780,14 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
             val results = session.project(BookTable) { books ->
                 val notes = addIsNotNull(books.notes)
                 orderAsc(books.name)
-                project(YawnProjections.pair(books.name, notes))
+                project(YawnProjectionTest_BookNameAndNotesProjection.create(books.name, notes))
             }.list()
 
             // Only books with non-null notes: Harry Potter, Lord of the Rings, The Hobbit
             assertThat(results).containsExactly(
-                "Harry Potter" to "Note for The Hobbit and Harry Potter",
-                "Lord of the Rings" to "Note for Lord of the Rings",
-                "The Hobbit" to "Note for The Hobbit and Harry Potter",
+                BookNameAndNotes(name = "Harry Potter", notes = "Note for The Hobbit and Harry Potter"),
+                BookNameAndNotes(name = "Lord of the Rings", notes = "Note for Lord of the Rings"),
+                BookNameAndNotes(name = "The Hobbit", notes = "Note for The Hobbit and Harry Potter"),
             )
         }
     }
@@ -821,5 +821,11 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     internal data class BookStatistics(
         val totalBooks: Long,
         val totalPages: Long,
+    )
+
+    @YawnProjection
+    internal data class BookNameAndNotes(
+        val name: String,
+        val notes: String,
     )
 }
