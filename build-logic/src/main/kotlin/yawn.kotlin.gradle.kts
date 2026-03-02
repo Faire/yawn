@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.dokka")
     id("yawn.detekt")
 }
 
