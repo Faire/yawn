@@ -4,6 +4,7 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
     id("yawn.kotlin")
+    id("org.jetbrains.dokka")
     id("com.vanniktech.maven.publish")
 }
 
