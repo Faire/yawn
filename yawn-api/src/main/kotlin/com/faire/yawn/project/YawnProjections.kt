@@ -1,6 +1,6 @@
 package com.faire.yawn.project
 
-import com.faire.yawn.YawnTableDef
+import com.faire.yawn.YawnDef
 import com.faire.yawn.query.YawnCompilationContext
 import org.hibernate.criterion.Projection
 import org.hibernate.criterion.Projections
@@ -28,7 +28,7 @@ object YawnProjections {
     }
 
     internal class Count<SOURCE : Any, FROM : Any?>(
-        private val columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Long> {
         override fun compile(
             context: YawnCompilationContext,
@@ -38,13 +38,13 @@ object YawnProjections {
     }
 
     fun <SOURCE : Any, FROM : Any?> count(
-        columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, Long> {
         return Count(columnDef)
     }
 
     internal class CountDistinct<SOURCE : Any, FROM : Any?>(
-        private val columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Long> {
         override fun compile(
             context: YawnCompilationContext,
@@ -54,13 +54,13 @@ object YawnProjections {
     }
 
     fun <SOURCE : Any, FROM : Any?> countDistinct(
-        columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, Long> {
         return CountDistinct(columnDef)
     }
 
     internal class SumNullable<SOURCE : Any, FROM : Number?>(
-        private val columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Long?> {
         override fun compile(
             context: YawnCompilationContext,
@@ -71,13 +71,13 @@ object YawnProjections {
 
     @JvmName("sumNullable")
     fun <SOURCE : Any, FROM : Number?> sum(
-        columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, Long?> {
         return SumNullable(columnDef)
     }
 
     internal class Sum<SOURCE : Any, FROM : Number>(
-        private val columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Long> {
         override fun compile(
             context: YawnCompilationContext,
@@ -87,13 +87,13 @@ object YawnProjections {
     }
 
     fun <SOURCE : Any, FROM : Number> sum(
-        columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, Long> {
         return Sum(columnDef)
     }
 
     internal class AvgNullable<SOURCE : Any, FROM : Any?>(
-        private val columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Double?> {
         override fun compile(
             context: YawnCompilationContext,
@@ -104,13 +104,13 @@ object YawnProjections {
 
     @JvmName("avgNullable")
     fun <SOURCE : Any, FROM : Number?> avg(
-        columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, Double?> {
         return AvgNullable(columnDef)
     }
 
     internal class Avg<SOURCE : Any, FROM : Number>(
-        private val columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Double> {
         override fun compile(
             context: YawnCompilationContext,
@@ -120,13 +120,13 @@ object YawnProjections {
     }
 
     fun <SOURCE : Any, FROM : Number> avg(
-        columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, Double> {
         return Avg(columnDef)
     }
 
     internal class Max<SOURCE : Any, FROM : Comparable<FROM>?>(
-        private val columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, FROM> {
         override fun compile(
             context: YawnCompilationContext,
@@ -137,13 +137,13 @@ object YawnProjections {
     }
 
     fun <SOURCE : Any, FROM : Comparable<FROM>?> max(
-        columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, FROM> {
         return Max(columnDef)
     }
 
     internal class Min<SOURCE : Any, FROM : Comparable<FROM>?>(
-        private val columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, FROM> {
         override fun compile(
             context: YawnCompilationContext,
@@ -154,13 +154,13 @@ object YawnProjections {
     }
 
     fun <SOURCE : Any, FROM : Comparable<FROM>?> min(
-        columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, FROM> {
         return Min(columnDef)
     }
 
     internal class GroupBy<SOURCE : Any, FROM : Any?>(
-        private val columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, FROM> {
         override fun compile(
             context: YawnCompilationContext,
@@ -171,7 +171,7 @@ object YawnProjections {
     }
 
     fun <SOURCE : Any, FROM : Any?> groupBy(
-        columnDef: YawnTableDef<SOURCE, *>.ColumnDef<FROM>,
+        columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, FROM> {
         return GroupBy(columnDef)
     }
