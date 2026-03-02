@@ -1,5 +1,6 @@
 package com.faire.yawn.database
 
+import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.query.YawnRestrictions.and
 import com.faire.yawn.query.YawnRestrictions.between
 import com.faire.yawn.query.YawnRestrictions.eq
@@ -642,6 +643,38 @@ internal class YawnCriterionTest : BaseYawnDatabaseTest() {
                     "The Hobbit",
                     "Harry Potter",
                 )
+        }
+    }
+
+    @Test
+    fun `addIsNotNull filters to non-null rows`() {
+        transactor.open { session ->
+            val results = session.project(BookTable) { books ->
+                val notes = addIsNotNull(books.notes)
+                addLike(notes, "Note for The Hobbit and Harry Potter")
+                orderAsc(books.name)
+                project(books.name)
+            }.list()
+
+            assertThat(results).containsExactly("Harry Potter", "The Hobbit")
+        }
+    }
+
+    @Test
+    fun `addIsNotNull with FK column filters to non-null rows`() {
+        transactor.open { session ->
+            val publisherIdMap = session.project(PublisherTable) { publishers ->
+                project(YawnProjections.pair(publishers.name, publishers.id))
+            }.set().toMap()
+
+            val results = session.project(BookTable) { books ->
+                val publisherFk = addIsNotNull(books.publisher)
+                addEq(publisherFk, publisherIdMap.getValue("Penguin"))
+                orderAsc(books.name)
+                project(books.name)
+            }.list()
+
+            assertThat(results).containsExactly("Harry Potter", "The Emperor's New Clothes")
         }
     }
 

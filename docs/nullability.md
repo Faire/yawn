@@ -128,3 +128,27 @@ But for now you can do:
     // [in a projection]
     aNullableString = TypedProjections.`null`(),
 ```
+
+## `addIsNotNull` returns a non-nullable column
+
+The `addIsNotNull` method not only adds an `IS NOT NULL` criterion to the query, but also returns a non-nullable version of the column. This is useful when
+you want to use the column in a projection after filtering out nulls — the returned column has the nullability stripped from its type parameter.
+
+```kotlin
+session.project(BookTable) { books ->
+    // books.notes is ColumnDef<String?>, but after addIsNotNull it becomes ColumnDef<String>
+    val notes = addIsNotNull(books.notes)
+    project(YawnProjections.pair(books.name, notes))
+}
+```
+
+This works with both regular columns and foreign key join columns:
+
+```kotlin
+session.project(BookTable) { books ->
+    // books.publisher is JoinColumnDefWithForeignKey<*, *, Publisher?>
+    // publisherFk is ColumnDef<Long> (non-nullable FK)
+    val publisherFk = addIsNotNull(books.publisher)
+    project(YawnProjections.pair(books.name, publisherFk))
+}
+```
