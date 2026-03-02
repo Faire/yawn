@@ -773,6 +773,50 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
         }
     }
 
+    @Test
+    fun `project non-null column with addIsNotNull`() {
+        transactor.open { session ->
+            // books.notes is String? — addIsNotNull filters to non-null rows and returns ColumnDef<String>
+            val results = session.project(BookTable) { books ->
+                val notes = addIsNotNull(books.notes)
+                orderAsc(books.name)
+                project(YawnProjections.pair(books.name, notes))
+            }.list()
+
+            // Only books with non-null notes: Harry Potter, Lord of the Rings, The Hobbit
+            assertThat(results).containsExactly(
+                "Harry Potter" to "Note for The Hobbit and Harry Potter",
+                "Lord of the Rings" to "Note for Lord of the Rings",
+                "The Hobbit" to "Note for The Hobbit and Harry Potter",
+            )
+        }
+    }
+
+    @Test
+    fun `project non-null FK column with addIsNotNull`() {
+        transactor.open { session ->
+            val publisherIdMap = session.project(PublisherTable) { publishers ->
+                project(YawnProjections.pair(publishers.name, publishers.id))
+            }.set().toMap()
+
+            // books.publisher is Publisher? — addIsNotNull on FK should filter to non-null rows and return non-null
+            // FK column
+            val results = session.project(BookTable) { books ->
+                val publisherFk = addIsNotNull(books.publisher)
+                orderAsc(books.name)
+                project(YawnProjections.pair(books.name, publisherFk))
+            }.list()
+
+            // 4 books have publishers: Harry Potter, Lord of the Rings, The Emperor's New Clothes, The Hobbit
+            assertThat(results).containsExactly(
+                "Harry Potter" to publisherIdMap.getValue("Penguin"),
+                "Lord of the Rings" to publisherIdMap.getValue("HarperCollins"),
+                "The Emperor's New Clothes" to publisherIdMap.getValue("Penguin"),
+                "The Hobbit" to publisherIdMap.getValue("Random House"),
+            )
+        }
+    }
+
     @YawnProjection
     internal data class BookStatistics(
         val totalBooks: Long,

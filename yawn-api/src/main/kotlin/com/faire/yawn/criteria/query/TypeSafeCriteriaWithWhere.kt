@@ -293,14 +293,16 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
 
     fun <F> addIsNotNull(
         column: YawnTableDef<SOURCE, *>.JoinColumnDefWithForeignKey<*, *, F>,
-    ) {
-        addIsNotNull(column.foreignKey)
+    ): YawnDef<SOURCE, *>.YawnColumnDef<F & Any> {
+        return addIsNotNull(column.foreignKey)
     }
 
     fun <F> addIsNotNull(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-    ) {
+    ): YawnDef<SOURCE, *>.YawnColumnDef<F & Any> {
         add(YawnRestrictions.isNotNull(column))
+        @Suppress("UNCHECKED_CAST")
+        return column as YawnDef<SOURCE, *>.YawnColumnDef<F & Any>
     }
 
     fun <F> addIsNull(
