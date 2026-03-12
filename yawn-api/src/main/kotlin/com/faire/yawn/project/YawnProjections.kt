@@ -27,7 +27,7 @@ object YawnProjections {
         return Distinct(projection)
     }
 
-    internal class Count<SOURCE : Any, FROM : Any?>(
+    internal class Count<SOURCE : Any, FROM>(
         private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Long> {
         override fun compile(
@@ -37,13 +37,13 @@ object YawnProjections {
         override fun project(value: Any?): Long = value as Long
     }
 
-    fun <SOURCE : Any, FROM : Any?> count(
+    fun <SOURCE : Any, FROM> count(
         columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, Long> {
         return Count(columnDef)
     }
 
-    internal class CountDistinct<SOURCE : Any, FROM : Any?>(
+    internal class CountDistinct<SOURCE : Any, FROM>(
         private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Long> {
         override fun compile(
@@ -53,7 +53,7 @@ object YawnProjections {
         override fun project(value: Any?): Long = value as Long
     }
 
-    fun <SOURCE : Any, FROM : Any?> countDistinct(
+    fun <SOURCE : Any, FROM> countDistinct(
         columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, Long> {
         return CountDistinct(columnDef)
@@ -92,7 +92,7 @@ object YawnProjections {
         return Sum(columnDef)
     }
 
-    internal class AvgNullable<SOURCE : Any, FROM : Any?>(
+    internal class AvgNullable<SOURCE : Any, FROM>(
         private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Double?> {
         override fun compile(
@@ -159,7 +159,7 @@ object YawnProjections {
         return Min(columnDef)
     }
 
-    internal class GroupBy<SOURCE : Any, FROM : Any?>(
+    internal class GroupBy<SOURCE : Any, FROM>(
         private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, FROM> {
         override fun compile(
@@ -170,7 +170,7 @@ object YawnProjections {
         override fun project(value: Any?): FROM = value as FROM
     }
 
-    fun <SOURCE : Any, FROM : Any?> groupBy(
+    fun <SOURCE : Any, FROM> groupBy(
         columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ): YawnQueryProjection<SOURCE, FROM> {
         return GroupBy(columnDef)
@@ -204,7 +204,7 @@ object YawnProjections {
         return SelectConstant(constant)
     }
 
-    internal class Coalesce<SOURCE : Any, FROM : Any?>(
+    internal class Coalesce<SOURCE : Any, FROM>(
         private val projection: YawnQueryProjection<SOURCE, FROM?>,
         private val defaultValue: FROM,
     ) : YawnQueryProjection<SOURCE, FROM> {
@@ -239,7 +239,7 @@ object YawnProjections {
         return Null()
     }
 
-    internal class PairProjection<SOURCE : Any, A : Any?, B : Any?>(
+    internal class PairProjection<SOURCE : Any, A, B>(
         private val firstProjection: YawnQueryProjection<SOURCE, A>,
         private val secondProjection: YawnQueryProjection<SOURCE, B>,
     ) : YawnQueryProjection<SOURCE, Pair<A, B>> {
@@ -255,14 +255,14 @@ object YawnProjections {
         }
     }
 
-    fun <SOURCE : Any, A : Any?, B : Any?> pair(
+    fun <SOURCE : Any, A, B> pair(
         firstProjection: YawnQueryProjection<SOURCE, A>,
         secondProjection: YawnQueryProjection<SOURCE, B>,
     ): YawnQueryProjection<SOURCE, Pair<A, B>> {
         return PairProjection(firstProjection, secondProjection)
     }
 
-    internal class TripleProjection<SOURCE : Any, A : Any?, B : Any?, C : Any?>(
+    internal class TripleProjection<SOURCE : Any, A, B, C>(
         private val firstProjection: YawnQueryProjection<SOURCE, A>,
         private val secondProjection: YawnQueryProjection<SOURCE, B>,
         private val thirdProjection: YawnQueryProjection<SOURCE, C>,
@@ -284,7 +284,7 @@ object YawnProjections {
         }
     }
 
-    fun <SOURCE : Any, A : Any?, B : Any?, C : Any?> triple(
+    fun <SOURCE : Any, A, B, C> triple(
         firstProjection: YawnQueryProjection<SOURCE, A>,
         secondProjection: YawnQueryProjection<SOURCE, B>,
         thirdProjection: YawnQueryProjection<SOURCE, C>,
