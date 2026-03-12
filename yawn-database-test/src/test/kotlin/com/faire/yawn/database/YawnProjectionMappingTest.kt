@@ -25,7 +25,7 @@ internal class YawnProjectionMappingTest : BaseYawnDatabaseTest() {
 
             with(hobbit!!) {
                 assertThat(uppercaseTitle).isEqualTo("THE HOBBIT")
-                assertThat(authorNotes).isEqualTo("J.R.R. Tolkien says: J.R.R. Tolkien")
+                assertThat(authorNotes).isEqualTo("J.R.R. Tolkien says: Note for The Hobbit and Harry Potter")
             }
         }
     }
