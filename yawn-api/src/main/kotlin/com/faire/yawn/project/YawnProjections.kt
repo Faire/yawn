@@ -291,6 +291,47 @@ object YawnProjections {
     ): YawnQueryProjection<SOURCE, Triple<A, B, C>> {
         return TripleProjection(firstProjection, secondProjection, thirdProjection)
     }
+
+    /**
+     * Provides an in-memory transformation over a column value to a different type.
+     * Use this when using more complex data classes as projections to apply minor
+     * type or value compliance transformations to database column values
+     * while keeping your projection classes type-safe, without needing to use
+     * intermediary representations.
+     * NOTE: this _does not_ change the query and is post-processed in memory.
+     */
+    fun <SOURCE : Any, FROM, TO> mapping(
+        column: YawnQueryProjection<SOURCE, FROM>,
+        transform: (FROM) -> TO,
+    ): YawnQueryProjection<SOURCE, TO> {
+        return object : YawnQueryProjection<SOURCE, TO> {
+            override fun compile(context: YawnCompilationContext): Projection = column.compile(context)
+
+            @Suppress("UNCHECKED_CAST")
+            override fun project(value: Any?): TO = transform(column.project(value))
+        }
+    }
+
+    /**
+     * A 2-arity version of the [mapping] method.
+     */
+    fun <SOURCE : Any, C1, C2, TO> mapping(
+        column1: YawnQueryProjection<SOURCE, C1>,
+        column2: YawnQueryProjection<SOURCE, C2>,
+        transform: (C1, C2) -> TO,
+    ): YawnQueryProjection<SOURCE, TO> {
+        return object : YawnQueryProjection<SOURCE, TO> {
+            override fun compile(context: YawnCompilationContext): Projection {
+                return Projections.projectionList()
+                    .add(column1.compile(context))
+                    .add(column2.compile(context))
+            }
+
+            override fun project(value: Any?): TO {
+                return transform(column1.project(value), column2.project(value))
+            }
+        }
+    }
 }
 
 private const val CONSTANT_ALIAS = "_yawn_ct"
