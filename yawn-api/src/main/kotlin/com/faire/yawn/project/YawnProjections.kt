@@ -1,6 +1,7 @@
 package com.faire.yawn.project
 
 import com.faire.yawn.YawnDef
+import com.faire.yawn.project.YawnProjections.mapping
 import com.faire.yawn.query.YawnCompilationContext
 import org.hibernate.criterion.Projection
 import org.hibernate.criterion.Projections
@@ -240,20 +241,9 @@ object YawnProjections {
     }
 
     internal class PairProjection<SOURCE : Any, A : Any?, B : Any?>(
-        private val firstProjection: YawnQueryProjection<SOURCE, A>,
-        private val secondProjection: YawnQueryProjection<SOURCE, B>,
-    ) : YawnQueryProjection<SOURCE, Pair<A, B>> {
-        override fun compile(context: YawnCompilationContext): Projection {
-            return Projections.projectionList()
-                .add(firstProjection.compile(context))
-                .add(secondProjection.compile(context))
-        }
-
-        override fun project(value: Any?): Pair<A, B> {
-            val queryResult = value as Array<*>
-            return Pair(firstProjection.project(queryResult[0]), secondProjection.project(queryResult[1]))
-        }
-    }
+        firstProjection: YawnQueryProjection<SOURCE, A>,
+        secondProjection: YawnQueryProjection<SOURCE, B>,
+    ) : Mapping2Projection<SOURCE, A, B, Pair<A, B>>(firstProjection, secondProjection, { a, b -> Pair(a, b) })
 
     fun <SOURCE : Any, A : Any?, B : Any?> pair(
         firstProjection: YawnQueryProjection<SOURCE, A>,
@@ -263,26 +253,15 @@ object YawnProjections {
     }
 
     internal class TripleProjection<SOURCE : Any, A : Any?, B : Any?, C : Any?>(
-        private val firstProjection: YawnQueryProjection<SOURCE, A>,
-        private val secondProjection: YawnQueryProjection<SOURCE, B>,
-        private val thirdProjection: YawnQueryProjection<SOURCE, C>,
-    ) : YawnQueryProjection<SOURCE, Triple<A, B, C>> {
-        override fun compile(context: YawnCompilationContext): Projection {
-            return Projections.projectionList()
-                .add(firstProjection.compile(context))
-                .add(secondProjection.compile(context))
-                .add(thirdProjection.compile(context))
-        }
-
-        override fun project(value: Any?): Triple<A, B, C> {
-            val queryResult = value as Array<*>
-            return Triple(
-                firstProjection.project(queryResult[0]),
-                secondProjection.project(queryResult[1]),
-                thirdProjection.project(queryResult[2]),
-            )
-        }
-    }
+        firstProjection: YawnQueryProjection<SOURCE, A>,
+        secondProjection: YawnQueryProjection<SOURCE, B>,
+        thirdProjection: YawnQueryProjection<SOURCE, C>,
+    ) : Mapping3Projection<SOURCE, A, B, C, Triple<A, B, C>>(
+        firstProjection,
+        secondProjection,
+        thirdProjection,
+        { a, b, c -> Triple(a, b, c) },
+    )
 
     fun <SOURCE : Any, A : Any?, B : Any?, C : Any?> triple(
         firstProjection: YawnQueryProjection<SOURCE, A>,
@@ -304,12 +283,7 @@ object YawnProjections {
         column: YawnQueryProjection<SOURCE, FROM>,
         transform: (FROM) -> TO,
     ): YawnQueryProjection<SOURCE, TO> {
-        return object : YawnQueryProjection<SOURCE, TO> {
-            override fun compile(context: YawnCompilationContext): Projection = column.compile(context)
-
-            @Suppress("UNCHECKED_CAST")
-            override fun project(value: Any?): TO = transform(column.project(value))
-        }
+        return Mapping1Projection(column, transform)
     }
 
     /**
@@ -320,16 +294,55 @@ object YawnProjections {
         column2: YawnQueryProjection<SOURCE, C2>,
         transform: (C1, C2) -> TO,
     ): YawnQueryProjection<SOURCE, TO> {
-        return object : YawnQueryProjection<SOURCE, TO> {
-            override fun compile(context: YawnCompilationContext): Projection {
-                return Projections.projectionList()
-                    .add(column1.compile(context))
-                    .add(column2.compile(context))
-            }
+        return Mapping2Projection(column1, column2, transform)
+    }
 
-            override fun project(value: Any?): TO {
-                return transform(column1.project(value), column2.project(value))
-            }
+    internal open class Mapping1Projection<SOURCE : Any, FROM, TO>(
+        private val column: YawnQueryProjection<SOURCE, FROM>,
+        private val transform: (FROM) -> TO,
+    ) : YawnQueryProjection<SOURCE, TO> {
+        override fun compile(context: YawnCompilationContext): Projection = column.compile(context)
+
+        override fun project(value: Any?): TO = transform(column.project(value))
+    }
+
+    internal open class Mapping2Projection<SOURCE : Any, C1, C2, TO>(
+        private val column1: YawnQueryProjection<SOURCE, C1>,
+        private val column2: YawnQueryProjection<SOURCE, C2>,
+        private val transform: (C1, C2) -> TO,
+    ) : YawnQueryProjection<SOURCE, TO> {
+        override fun compile(context: YawnCompilationContext): Projection {
+            return Projections.projectionList()
+                .add(column1.compile(context))
+                .add(column2.compile(context))
+        }
+
+        override fun project(value: Any?): TO {
+            val queryResult = value as Array<*>
+            return transform(column1.project(queryResult[0]), column2.project(queryResult[1]))
+        }
+    }
+
+    internal open class Mapping3Projection<SOURCE : Any, C1, C2, C3, TO>(
+        private val column1: YawnQueryProjection<SOURCE, C1>,
+        private val column2: YawnQueryProjection<SOURCE, C2>,
+        private val column3: YawnQueryProjection<SOURCE, C3>,
+        private val transform: (C1, C2, C3) -> TO,
+    ) : YawnQueryProjection<SOURCE, TO> {
+        override fun compile(context: YawnCompilationContext): Projection {
+            return Projections.projectionList()
+                .add(column1.compile(context))
+                .add(column2.compile(context))
+                .add(column3.compile(context))
+        }
+
+        override fun project(value: Any?): TO {
+            val queryResult = value as Array<*>
+            return transform(
+                column1.project(queryResult[0]),
+                column2.project(queryResult[1]),
+                column3.project(queryResult[2]),
+            )
         }
     }
 }
