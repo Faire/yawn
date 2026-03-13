@@ -1,18 +1,15 @@
 package com.faire.yawn.project
 
 import com.faire.yawn.query.YawnCompilationContext
-import org.hibernate.criterion.Projection
-import org.hibernate.criterion.Projections
 
 /**
- * Wraps a [YawnQueryProjection] with a unique SQL alias, so that it can also be used as a
- * [com.faire.yawn.query.YawnQueryOrder] target via [YawnPathProvider].
+ * Selects a single-value projection under a unique SQL alias, and is itself the [YawnPathProvider] naming it.
  *
- * This is an internal implementation detail of [com.faire.yawn.criteria.query.orderAsc]/
- * [com.faire.yawn.criteria.query.orderDesc] (see those for the public entry point to order by a projected/
+ * This is an internal implementation detail of [com.faire.yawn.criteria.query.orderAscBy]/
+ * [com.faire.yawn.criteria.query.orderDescBy] (see those for the public entry point to order by a projected/
  * aggregate expression) and should never be constructed directly: Hibernate can only resolve `ORDER BY` against an
  * alias that is present in the query's own SELECT list (unlike a plain mapped column, an aggregate or other
- * projected expression has no property name of its own to order by), so [orderAsc]/[orderDesc] return this same
+ * projected expression has no property name of its own to order by), so those functions return this same
  * instance for the caller to pass to `project(...)`, ensuring the alias is actually selected.
  *
  * The alias is generated lazily via [YawnCompilationContext.generateResultAlias] and cached per context - rather
@@ -21,9 +18,9 @@ import org.hibernate.criterion.Projections
  * alias, but caching per context means it doesn't matter whether the SELECT list or the ORDER BY clause happens
  * to compile this projection first within a single compilation - both resolve to the same alias.
  */
-internal class AliasedYawnQueryProjection<SOURCE : Any, TO>(
-    private val projection: YawnQueryProjection<SOURCE, TO>,
-) : YawnQueryProjection<SOURCE, TO>, YawnPathProvider<SOURCE> {
+internal class AliasedYawnValueProjector<SOURCE : Any, TO>(
+    private val projection: YawnValueProjector<SOURCE, TO>,
+) : YawnValueProjector<SOURCE, TO>, YawnPathProvider<SOURCE> {
     private var aliasContext: YawnCompilationContext? = null
     private var alias: String? = null
 
@@ -35,11 +32,10 @@ internal class AliasedYawnQueryProjection<SOURCE : Any, TO>(
         return checkNotNull(alias)
     }
 
-    override fun compile(context: YawnCompilationContext): Projection {
-        return Projections.alias(projection.compile(context), aliasFor(context))
+    override fun projection(): ProjectionNode.Value<SOURCE, TO> {
+        val inner = projection.projection()
+        return ProjectionNode.Value(ProjectionLeaf.Aliased(inner.leaf, this), inner.mapper)
     }
-
-    override fun project(value: Any?): TO = projection.project(value)
 
     override fun generatePath(context: YawnCompilationContext): String = aliasFor(context)
 }

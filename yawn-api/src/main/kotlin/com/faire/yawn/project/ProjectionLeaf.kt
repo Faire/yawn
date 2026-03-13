@@ -79,4 +79,16 @@ sealed interface ProjectionLeaf<SOURCE : Any> {
         val render: YawnSqlScope<SOURCE>.() -> String,
         val resultType: KClass<*>,
     ) : ProjectionLeaf<SOURCE>
+
+    /**
+     * Selects another leaf under a name, so that the rest of the query can refer back to it.
+     *
+     * An aggregate has no name of its own to sort on, so ordering by one means selecting it under an alias and
+     * ordering by that alias instead. [alias] supplies the name, and is the same object the `ORDER BY` clause
+     * resolves its path from - which is what keeps the two halves agreeing on it.
+     */
+    data class Aliased<SOURCE : Any>(
+        val inner: ProjectionLeaf<SOURCE>,
+        val alias: YawnPathProvider<SOURCE>,
+    ) : ProjectionLeaf<SOURCE>
 }
