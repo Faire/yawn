@@ -3,9 +3,9 @@ package com.faire.yawn.generators.objects
 import com.faire.ksp.getAllPropertiesWithAllAnnotations
 import com.faire.ksp.getEffectiveVisibility
 import com.faire.yawn.generators.addGeneratedAnnotation
-import com.faire.yawn.project.YawnCompositeQueryProjection
+import com.faire.yawn.project.ProjectionNode
 import com.faire.yawn.project.YawnProjectionRef
-import com.faire.yawn.project.YawnQueryProjection
+import com.faire.yawn.project.YawnProjector
 import com.faire.yawn.util.YawnContext
 import com.faire.yawn.util.YawnNamesGenerator.generateProjectionObjectName
 import com.faire.yawn.util.isConstructorProperty
@@ -20,8 +20,8 @@ import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 
-private val yawnQueryProjection = YawnQueryProjection::class.asClassName()
-private val typedProjectionImpl = YawnCompositeQueryProjection::class.asClassName()
+private val yawnProjector = YawnProjector::class.asClassName()
+private val projectionNodeClass = ProjectionNode::class.asClassName()
 
 internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator {
     /**
@@ -31,7 +31,7 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
      * The output code will look like:
      * object SimpleBookProjection: YawnProjectionRef<SimpleBook, SimpleBookProjectionDef<SimpleBook>>() {
      *  // see the definition of the create function below
-     *  fun create(...): TypedProjection<SOURCE, YawnProjectionTest.SimpleBook> { ... }
+     *  fun create(...): YawnProjector<SOURCE, YawnProjectionTest.SimpleBook> { ... }
      * }
      */
     override fun generate(
@@ -62,7 +62,7 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
 
         val create = FunSpec.builder("create")
             .addTypeVariable(source)
-            .returns(yawnQueryProjection.parameterizedBy(source, f))
+            .returns(yawnProjector.parameterizedBy(source, f))
 
         data class Property(
             val index: Int,
@@ -83,8 +83,8 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
         var extraTypeParametersIdx = 0
         for (property in properties) {
             // if the type is nullable, we want to accept both nullable and non-nullable projections
-            // so we add an extra type parameter `Tx : Type?`, so that Projection<SOURCE, Tx> can be either
-            // Projection<SOURCE, Type> or Projection<SOURCE, Type?>.
+            // so we add an extra type parameter `Tx : Type?`, so that YawnProjector<SOURCE, Tx> can be either
+            // YawnProjector<SOURCE, Type> or YawnProjector<SOURCE, Type?>.
             val projectionType = if (property.type.isNullable) {
                 val typeVariable = TypeVariableName("T$extraTypeParametersIdx", property.type)
                 extraTypeParametersIdx++
@@ -94,27 +94,30 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
             } else {
                 property.type
             }
-            create.addParameter(property.name, yawnQueryProjection.parameterizedBy(source, projectionType))
+            create.addParameter(property.name, yawnProjector.parameterizedBy(source, projectionType))
         }
 
-        val propertyProjections = properties.joinToString(separator = ",\n") { it.name }
+        val propertyProjections = properties.joinToString(separator = ", ") { it.name }
         val propertyParameters = properties.joinToString(separator = ",\n") {
-            "${it.name} = ${it.name}.project(queryResult[${it.index}])"
+            "${it.name} = values[${it.index}] as ${it.type}"
         }
         create.addStatement(
             """
+          @Suppress("UNCHECKED_CAST")
           return (
-            %T(
-                $propertyProjections
-            ) { row ->
-                val queryResult = row as Array<*>
-                %T(
-                  $propertyParameters
-                )
+            %T {
+                %T.composite(
+                    listOf($propertyProjections)
+                ) { values ->
+                    %T(
+                      $propertyParameters
+                    )
+                }
             }
           )
             """.trimIndent(),
-            typedProjectionImpl.parameterizedBy(source, f),
+            yawnProjector.parameterizedBy(source, f),
+            projectionNodeClass,
             yawnContext.classDeclaration.toClassName(),
         )
 
