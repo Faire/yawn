@@ -10,8 +10,6 @@ import com.faire.yawn.project.AggregateKind.SUM
 import com.faire.yawn.project.ModifierKind.DISTINCT
 import com.faire.yawn.project.ProjectionLeaf
 import com.faire.yawn.project.ProjectionNode
-import com.faire.yawn.project.ProjectorResolver
-import com.faire.yawn.project.ResolvedProjectionAdapter
 import com.faire.yawn.project.YawnProjector
 import com.faire.yawn.project.YawnValueProjector
 import com.faire.yawn.query.YawnQueryOrder
@@ -23,8 +21,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 /**
- * Integration tests for [ResolvedProjectionAdapter], verifying that the new projection system
- * produces correct SQL and result mapping when bridged into the existing Hibernate pipeline.
+ * Integration tests for the v2 projection pipeline, verifying that [YawnProjector] instances
+ * produce correct SQL and result mapping when resolved through [com.faire.yawn.project.ProjectorResolver]
+ * and bridged to Hibernate via [com.faire.yawn.project.ResolvedProjectionAdapter].
+ *
+ * These tests exercise v2-specific features like [ProjectionNode.Composite], [ProjectionNode.Mapped],
+ * [ProjectionNode.Constant], and leaf deduplication.
  */
 internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
     @Test
@@ -32,7 +34,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             val languages = session.project(BookTable) { books ->
                 addEq(books.name, "The Hobbit")
-                project(adapt(YawnValueProjector { ProjectionNode.property(books.originalLanguage) }))
+                project(YawnValueProjector { ProjectionNode.property(books.originalLanguage) })
             }.list()
 
             assertThat(languages).containsOnly(ENGLISH)
@@ -45,7 +47,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val sum = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 addEq(authors.name, "J.R.R. Tolkien")
-                project(adapt(YawnValueProjector { ProjectionNode.aggregate(SUM, books.numberOfPages) }))
+                project(YawnValueProjector { ProjectionNode.aggregate(SUM, books.numberOfPages) })
             }.uniqueResult()!!
 
             assertThat(sum).isEqualTo(1_300L)
@@ -58,7 +60,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val count = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 addEq(authors.name, "Hans Christian Andersen")
-                project(adapt(YawnValueProjector<Book, Long> { ProjectionNode.aggregateAs(COUNT, books.id) }))
+                project(YawnValueProjector<Book, Long> { ProjectionNode.aggregateAs(COUNT, books.id) })
             }.uniqueResult()!!
 
             assertThat(count).isEqualTo(3L)
@@ -72,7 +74,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 val authors = join(books.author)
                 addEq(authors.name, "Hans Christian Andersen")
                 project(
-                    adapt(YawnValueProjector<Book, Long> { ProjectionNode.aggregateAs(COUNT_DISTINCT, authors.name) }),
+                    YawnValueProjector<Book, Long> { ProjectionNode.aggregateAs(COUNT_DISTINCT, authors.name) },
                 )
             }.uniqueResult()!!
 
@@ -87,7 +89,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 val authors = join(books.author)
                 addEq(authors.name, "J.R.R. Tolkien")
                 project(
-                    adapt(YawnValueProjector<Book, Double> { ProjectionNode.aggregateAs(AVG, books.numberOfPages) }),
+                    YawnValueProjector<Book, Double> { ProjectionNode.aggregateAs(AVG, books.numberOfPages) },
                 )
             }.uniqueResult()!!
 
@@ -99,12 +101,12 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
     fun `aggregate - min and max`() {
         transactor.open { session ->
             val min = session.project(BookTable) { books ->
-                project(adapt(YawnValueProjector { ProjectionNode.aggregate(MIN, books.numberOfPages) }))
+                project(YawnValueProjector { ProjectionNode.aggregate(MIN, books.numberOfPages) })
             }.uniqueResult()!!
             assertThat(min).isEqualTo(100L)
 
             val max = session.project(BookTable) { books ->
-                project(adapt(YawnValueProjector { ProjectionNode.aggregate(MAX, books.numberOfPages) }))
+                project(YawnValueProjector { ProjectionNode.aggregate(MAX, books.numberOfPages) })
             }.uniqueResult()!!
             assertThat(max).isEqualTo(1_000L)
         }
@@ -114,7 +116,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
     fun `row count`() {
         transactor.open { session ->
             val count = session.project(BookTable) {
-                project(adapt(YawnValueProjector { ProjectionNode.rowCount() }))
+                project(YawnValueProjector { ProjectionNode.rowCount() })
             }.uniqueResult()!!
 
             assertThat(count).isEqualTo(6L)
@@ -127,13 +129,11 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val authors = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 project(
-                    adapt(
-                        YawnValueProjector<Book, String> {
-                            ProjectionNode.Value(
-                                ProjectionLeaf.Modifier(DISTINCT, ProjectionLeaf.Property(authors.name)),
-                            )
-                        },
-                    ),
+                    YawnValueProjector<Book, String> {
+                        ProjectionNode.Value(
+                            ProjectionLeaf.Modifier(DISTINCT, ProjectionLeaf.Property(authors.name)),
+                        )
+                    },
                 )
             }.list()
 
@@ -152,7 +152,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 val authors = join(books.author)
                 addEq(authors.name, "J.K. Rowling")
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(authors.name) },
                             YawnValueProjector { ProjectionNode.aggregate(SUM, books.numberOfPages) },
@@ -171,7 +171,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val results = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.aggregate(GROUP_BY, authors.name) },
                             YawnValueProjector<Book, Long> { ProjectionNode.aggregateAs(COUNT, books.name) },
@@ -194,7 +194,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val results = session.project(BookTable) { books ->
                 addEq(books.name, "The Hobbit")
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.name) },
                             { ProjectionNode.constant("hardcoded") },
@@ -219,7 +219,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 val authors = join(books.author)
                 addEq(authors.name, "J.R.R. Tolkien")
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.aggregate(SUM, books.numberOfPages) },
                             YawnValueProjector { ProjectionNode.aggregate(SUM, books.numberOfPages) },
@@ -237,15 +237,13 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             val results = session.project(BookTable) {
                 project(
-                    adapt(
-                        YawnValueProjector<Book, Long> {
-                            ProjectionNode.sql(
-                                sqlExpression = "COUNT(*) AS total",
-                                aliases = listOf("total"),
-                                resultTypes = listOf(Long::class),
-                            )
-                        },
-                    ),
+                    YawnValueProjector<Book, Long> {
+                        ProjectionNode.sql(
+                            sqlExpression = "COUNT(*) AS total",
+                            aliases = listOf("total"),
+                            resultTypes = listOf(Long::class),
+                        )
+                    },
                 )
             }.uniqueResult()!!
 
@@ -260,7 +258,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 val authors = join(books.author)
                 addEq(authors.name, "J.K. Rowling")
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.name) },
                             YawnValueProjector { ProjectionNode.property(authors.name) },
@@ -280,14 +278,14 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val results1 = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 addEq(authors.name, "J.R.R. Tolkien")
-                project(adapt(YawnValueProjector { ProjectionNode.property(authors.name) }))
+                project(YawnValueProjector { ProjectionNode.property(authors.name) })
             }.set()
             assertThat(results1).containsExactlyInAnyOrder("J.R.R. Tolkien")
 
             val results2 = session.project(BookTable) { books ->
                 addLike(books.name, "The %")
                 val authors = join(books.author)
-                project(adapt(YawnValueProjector { ProjectionNode.property(authors.name) }))
+                project(YawnValueProjector { ProjectionNode.property(authors.name) })
             }.set()
             assertThat(results2).containsExactlyInAnyOrder("J.R.R. Tolkien", "Hans Christian Andersen")
         }
@@ -298,7 +296,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             val resultsAsc = session.project(BookTable) { books ->
                 orderAsc(books.name)
-                project(adapt(YawnValueProjector { ProjectionNode.property(books.name) }))
+                project(YawnValueProjector { ProjectionNode.property(books.name) })
             }.list()
 
             assertThat(resultsAsc).containsExactly(
@@ -312,7 +310,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
 
             val resultsDesc = session.project(BookTable) { books ->
                 orderDesc(books.name)
-                project(adapt(YawnValueProjector { ProjectionNode.property(books.name) }))
+                project(YawnValueProjector { ProjectionNode.property(books.name) })
             }.list()
 
             assertThat(resultsDesc).containsExactly(
@@ -328,7 +326,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 val authors = join(books.author)
                 order(YawnQueryOrder.asc(authors.name), YawnQueryOrder.desc(books.name))
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(authors.name) },
                             YawnValueProjector { ProjectionNode.property(books.name) },
@@ -353,7 +351,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             val publisherIdMap = session.project(PublisherTable) { publishers ->
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(publishers.name) },
                             YawnValueProjector { ProjectionNode.property(publishers.id) },
@@ -365,7 +363,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val publisherWithThe = session.project(BookTable) { books ->
                 addLike(books.name, "The %")
                 addIsNotNull(books.publisher.foreignKey)
-                project(adapt(YawnValueProjector { ProjectionNode.property(books.publisher.foreignKey) }))
+                project(YawnValueProjector { ProjectionNode.property(books.publisher.foreignKey) })
             }.set()
             assertThat(publisherWithThe)
                 .containsExactlyInAnyOrder(
@@ -383,7 +381,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                     val authors = join(books.author)
                     addIn(authors.name, *authorNames)
                     project(
-                        adapt {
+                        YawnProjector {
                             ProjectionNode.composite(
                                 YawnValueProjector { ProjectionNode.aggregate(GROUP_BY, books.originalLanguage) },
                                 YawnValueProjector<Book, Long?> { ProjectionNode.aggregateAs(SUM, books.rating) },
@@ -417,7 +415,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                     val authors = join(books.author)
                     addIn(authors.name, *authorNames)
                     project(
-                        adapt {
+                        YawnProjector {
                             ProjectionNode.composite(
                                 YawnValueProjector { ProjectionNode.aggregate(GROUP_BY, books.originalLanguage) },
                                 YawnValueProjector<Book, Double?> { ProjectionNode.aggregateAs(AVG, books.rating) },
@@ -450,7 +448,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 addIn(books.name, setOf("The Hobbit", "The Little Mermaid"))
                 val authors = join(books.author)
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.name) },
                             { ProjectionNode.constant<Book, Long?>(null) },
@@ -474,7 +472,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 addIn(books.name, setOf("The Hobbit", "The Little Mermaid"))
                 orderAsc(books.name)
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.name) },
                             {
@@ -500,7 +498,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val tolkienStats = session.query(BookTable)
                 .applyProjection { books ->
                     project(
-                        adapt {
+                        YawnProjector {
                             ProjectionNode.composite(
                                 YawnValueProjector<Book, Long> { ProjectionNode.aggregateAs(COUNT, books.id) },
                                 YawnValueProjector { ProjectionNode.aggregate(SUM, books.numberOfPages) },
@@ -520,7 +518,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val multipleAuthorsStats = session.query(BookTable)
                 .applyProjection { books ->
                     project(
-                        adapt {
+                        YawnProjector {
                             ProjectionNode.composite(
                                 YawnValueProjector<Book, Long> { ProjectionNode.aggregateAs(COUNT, books.id) },
                                 YawnValueProjector { ProjectionNode.aggregate(SUM, books.numberOfPages) },
@@ -545,7 +543,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val stats = session.query(BookTable)
                 .applyProjection { books ->
                     project(
-                        adapt {
+                        YawnProjector {
                             ProjectionNode.composite(
                                 YawnValueProjector<Book, Long> { ProjectionNode.aggregateAs(COUNT, books.id) },
                                 YawnValueProjector { ProjectionNode.aggregate(SUM, books.numberOfPages) },
@@ -573,7 +571,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val results = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             // outer level: author name (group by)
                             YawnValueProjector { ProjectionNode.aggregate(GROUP_BY, authors.name) },
@@ -603,7 +601,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val results = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.aggregate(GROUP_BY, authors.name) },
                             {
@@ -640,12 +638,5 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 "Hans Christian Andersen" to Pair(3L to 330L, 100L to 120L),
             )
         }
-    }
-
-    private fun <SOURCE : Any, TO> adapt(
-        projector: YawnProjector<SOURCE, TO>,
-    ): ResolvedProjectionAdapter<SOURCE, TO> {
-        val resolved = ProjectorResolver<SOURCE>().resolve(projector)
-        return ResolvedProjectionAdapter(resolved)
     }
 }

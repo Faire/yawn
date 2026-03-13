@@ -1,6 +1,9 @@
 package com.faire.yawn.criteria.query
 
 import com.faire.yawn.YawnTableDef
+import com.faire.yawn.project.ProjectorResolver
+import com.faire.yawn.project.ResolvedProjectionAdapter
+import com.faire.yawn.project.YawnProjector
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnQuery
 
@@ -36,6 +39,10 @@ private constructor(
         projection: YawnQueryProjection<SOURCE, PROJECTION>,
     ): YawnQueryProjection<SOURCE, PROJECTION> {
         ensureUniqueProjection()
+        if (projection is YawnProjector) {
+            val resolved = ProjectorResolver<SOURCE>().resolve(projection)
+            return ResolvedProjectionAdapter(resolved)
+        }
         return projection
     }
 
