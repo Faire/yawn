@@ -712,6 +712,7 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
 
             assertThat(tolkienStats.totalBooks).isEqualTo(2)
             assertThat(tolkienStats.totalPages).isEqualTo(1_300L)
+            assertThat(tolkienStats.averagePagesPerBook).isEqualTo(650.0)
 
             // Get statistics for books by multiple authors
             // Expected: Tolkien books (1000 + 300) + Andersen books (100 + 110 + 120) = 5 books, 1630 pages
@@ -821,7 +822,9 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     internal data class BookStatistics(
         val totalBooks: Long,
         val totalPages: Long,
-    )
+    ) {
+        val averagePagesPerBook: Double get() = totalPages.toDouble() / totalBooks
+    }
 
     @YawnProjection
     internal data class BookNameAndNotes(

@@ -7,6 +7,7 @@ import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjectionDef
 import com.faire.yawn.util.YawnContext
 import com.faire.yawn.util.YawnNamesGenerator.generateProjectionDefClassName
+import com.faire.yawn.util.isConstructorProperty
 import com.google.auto.service.AutoService
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.SymbolProcessor
@@ -31,6 +32,9 @@ internal class YawnProjectionProcessor(codeGenerator: CodeGenerator) : BaseYawnP
         yawnContext: YawnContext,
         property: KSPropertyDeclaration,
     ): PropertySpec? {
+        if (!yawnContext.classDeclaration.isConstructorProperty(property)) {
+            return null
+        }
         return ProjectionColumnDefGenerator.generate(
             yawnContext = yawnContext,
             property = property,
