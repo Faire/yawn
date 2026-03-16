@@ -156,6 +156,12 @@ internal fun KSDeclaration.isYawnEntity(): Boolean {
     return isAnnotationPresent<YawnEntity>()
 }
 
+internal fun KSClassDeclaration.isConstructorProperty(property: KSPropertyDeclaration): Boolean {
+    return primaryConstructor?.parameters
+        ?.any { it.name?.asString() == property.simpleName.asString() }
+        ?: false
+}
+
 internal fun KSType.isValueClass(): Boolean {
     return declaration is KSClassDeclaration && Modifier.VALUE in declaration.modifiers
 }

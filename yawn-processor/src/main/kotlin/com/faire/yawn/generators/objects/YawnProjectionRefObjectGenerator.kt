@@ -7,6 +7,7 @@ import com.faire.yawn.project.YawnProjectionRef
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.util.YawnContext
 import com.faire.yawn.util.YawnNamesGenerator.generateProjectionObjectName
+import com.faire.yawn.util.isConstructorProperty
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -68,13 +69,15 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
             val type: TypeName,
         )
 
-        val properties = yawnContext.classDeclaration.getAllProperties().mapIndexed { idx, property ->
-            Property(
-                index = idx,
-                name = property.simpleName.asString(),
-                type = property.type.toTypeName(),
-            )
-        }
+        val properties = yawnContext.classDeclaration.getAllProperties()
+            .filter { yawnContext.classDeclaration.isConstructorProperty(it) }
+            .mapIndexed { idx, property ->
+                Property(
+                    index = idx,
+                    name = property.simpleName.asString(),
+                    type = property.type.toTypeName(),
+                )
+            }
 
         var extraTypeParametersIdx = 0
         for (property in properties) {
