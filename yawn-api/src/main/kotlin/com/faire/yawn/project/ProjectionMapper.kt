@@ -8,6 +8,6 @@ package com.faire.yawn.project
  * You should never need to implement this directly; use the simple lambdas pointing to [ProjectionNode.Value],
  * [ProjectionNode.Composite], or [ProjectionNode.Mapped].
  */
-fun interface ProjectionMapper<TO> {
+internal fun interface ProjectionMapper<TO> {
     fun map(results: List<Any?>): TO
 }
