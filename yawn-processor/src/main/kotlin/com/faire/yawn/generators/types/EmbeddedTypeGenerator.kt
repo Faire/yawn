@@ -1,5 +1,6 @@
 package com.faire.yawn.generators.types
 
+import com.faire.ksp.getAllPropertiesWithAllAnnotations
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.generators.addGeneratedAnnotation
 import com.faire.yawn.generators.properties.ColumnDefGenerator
@@ -114,7 +115,7 @@ internal object EmbeddedTypeGenerator : YawnEmbeddableTypeGenerator {
             .addSuperclassConstructorParameter("%S", pathPrefix)
 
         propertyDeclaration.typeAsClassDeclaration()
-            ?.getAllProperties()
+            ?.getAllPropertiesWithAllAnnotations()
             ?.forEach { property ->
                 val propertySpec = ColumnDefGenerator.generate(yawnContext, property, pathPrefixes)
                 typeSpec.addProperty(propertySpec)

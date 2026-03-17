@@ -1,5 +1,6 @@
 package com.faire.yawn.processors
 
+import com.faire.ksp.getAllPropertiesWithAllAnnotations
 import com.faire.ksp.getEffectiveVisibility
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnTableDefParent
@@ -109,7 +110,7 @@ internal abstract class BaseYawnProcessor(
             .superclass(yawnContext.superClassName)
             .run { additionalClassBuilder(yawnContext, this) }
 
-        for (propertyDeclaration in yawnContext.classDeclaration.getAllProperties()) {
+        for (propertyDeclaration in yawnContext.classDeclaration.getAllPropertiesWithAllAnnotations()) {
             val property = generateProperty(yawnContext, propertyDeclaration)
                 ?: continue
 

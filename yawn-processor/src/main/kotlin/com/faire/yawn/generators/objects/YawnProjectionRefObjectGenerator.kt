@@ -1,5 +1,6 @@
 package com.faire.yawn.generators.objects
 
+import com.faire.ksp.getAllPropertiesWithAllAnnotations
 import com.faire.ksp.getEffectiveVisibility
 import com.faire.yawn.generators.addGeneratedAnnotation
 import com.faire.yawn.project.YawnCompositeQueryProjection
@@ -69,7 +70,7 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
             val type: TypeName,
         )
 
-        val properties = yawnContext.classDeclaration.getAllProperties()
+        val properties = yawnContext.classDeclaration.getAllPropertiesWithAllAnnotations()
             .filter { yawnContext.classDeclaration.isConstructorProperty(it) }
             .mapIndexed { idx, property ->
                 Property(
