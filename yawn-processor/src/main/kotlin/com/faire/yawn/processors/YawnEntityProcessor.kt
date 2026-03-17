@@ -1,5 +1,6 @@
 package com.faire.yawn.processors
 
+import com.faire.ksp.getAllPropertiesWithAllAnnotations
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnEntity
 import com.faire.yawn.YawnTableDef
@@ -102,7 +103,7 @@ internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProce
     private fun generateEmbeddedDefinitions(
         yawnContext: YawnContext,
     ): List<TypeSpec> {
-        return yawnContext.classDeclaration.getAllProperties()
+        return yawnContext.classDeclaration.getAllPropertiesWithAllAnnotations()
             .mapNotNull { property ->
                 val generator = when {
                     property.isEmbeddedId() -> EmbeddedIdTypeGenerator

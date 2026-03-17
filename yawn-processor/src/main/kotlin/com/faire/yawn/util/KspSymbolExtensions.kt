@@ -1,5 +1,6 @@
 package com.faire.yawn.util
 
+import com.faire.ksp.getAllPropertiesWithAllAnnotations
 import com.faire.ksp.getAnnotationsByType
 import com.faire.ksp.isAnnotationPresent
 import com.faire.yawn.YawnEntity
@@ -130,7 +131,7 @@ internal fun KSPropertyDeclaration.getHibernateForeignKeyReference(): ForeignKey
     // if it is a composite key we just assume it is the PK on the other end
     val isCompositeKey = joinColumns.size > 1
 
-    return declaration.getAllProperties()
+    return declaration.getAllPropertiesWithAllAnnotations()
         .filter { property ->
             when {
                 isCompositeKey -> property.isAnnotationPresent<EmbeddedId>()

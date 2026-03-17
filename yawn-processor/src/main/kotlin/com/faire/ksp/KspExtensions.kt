@@ -4,6 +4,7 @@ import com.google.devtools.ksp.getVisibility
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ksp.toClassName
@@ -53,4 +54,8 @@ private fun KSClassDeclaration.getClassDeclarationNestedChain(): Sequence<KSClas
  */
 internal fun ClassName.getUniqueSimpleName(): String {
     return simpleNames.joinToString("_")
+}
+
+internal fun KSClassDeclaration.getAllPropertiesWithAllAnnotations(): Sequence<KSPropertyDeclaration> {
+    return KspPropertiesWithAnnotationsResolver(this).resolve()
 }
