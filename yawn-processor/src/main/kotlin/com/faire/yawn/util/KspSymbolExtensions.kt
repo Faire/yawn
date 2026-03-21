@@ -27,6 +27,7 @@ import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.persistence.Transient
+import kotlin.jvm.JvmInline
 
 internal fun KSPropertyDeclaration.isTransient(): Boolean {
     return isAnnotationPresent<Transient>()
@@ -163,6 +164,16 @@ internal fun KSClassDeclaration.isConstructorProperty(property: KSPropertyDeclar
         ?: false
 }
 
+/**
+ * Returns true if this type is a Kotlin value class.
+ *
+ * This checks both [Modifier.VALUE] (reliable for source symbols in the current compilation unit)
+ * and the [JvmInline] annotation (reliable for binary symbols from external dependencies).
+ * The dual check is necessary because KSP2 does not always include [Modifier.VALUE] in
+ * [com.google.devtools.ksp.symbol.KSClassDeclaration.modifiers] for classes loaded from
+ * binary (compiled) dependencies.
+ */
 internal fun KSType.isValueClass(): Boolean {
-    return declaration is KSClassDeclaration && Modifier.VALUE in declaration.modifiers
+    val classDecl = declaration as? KSClassDeclaration ?: return false
+    return Modifier.VALUE in classDecl.modifiers || classDecl.isAnnotationPresent<JvmInline>()
 }
