@@ -611,7 +611,12 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                                     // first inner: count + sum
                                     {
                                         ProjectionNode.composite(
-                                            YawnValueProjector<Book, Long> { ProjectionNode.aggregateAs(COUNT, books.id) },
+                                            YawnValueProjector<Book, Long> {
+                                                ProjectionNode.aggregateAs(
+                                                    COUNT,
+                                                    books.id,
+                                                )
+                                            },
                                             YawnValueProjector { ProjectionNode.aggregate(SUM, books.numberOfPages) },
                                         ) { count, sum -> count to sum }
                                     },
@@ -630,9 +635,9 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             }.list()
 
             assertThat(results).containsExactlyInAnyOrder(
-                "J.R.R. Tolkien" to ((2L to 1_300L) to (300L to 1_000L)),
-                "J.K. Rowling" to ((1L to 500L) to (500L to 500L)),
-                "Hans Christian Andersen" to ((3L to 330L) to (100L to 120L)),
+                "J.R.R. Tolkien" to Pair(2L to 1_300L, 300L to 1_000L),
+                "J.K. Rowling" to Pair(1L to 500L, 500L to 500L),
+                "Hans Christian Andersen" to Pair(3L to 330L, 100L to 120L),
             )
         }
     }
