@@ -6,7 +6,6 @@ import com.faire.yawn.criteria.query.ProjectedTypeSafeCriteriaQuery
 import com.faire.yawn.criteria.query.TypeSafeCriteriaQuery
 import com.faire.yawn.criteria.query.TypeSafeCriteriaWithJoinDelegate
 import com.faire.yawn.pagination.Page
-import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.pagination.PaginationResult
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.project.YawnQueryProjection
@@ -100,24 +99,6 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         return applyProjection { table ->
             project(YawnProjections.countDistinct(table.uniqueColumn()))
         }.uniqueResult() ?: 0
-    }
-
-    @Deprecated("Use listPaginatedWithTotalResults with Page instead.")
-    fun listPaginatedWithTotalResultsZeroIndexed(
-        pageNumber: Int,
-        pageSize: Int,
-        orders: List<DEF.() -> YawnQueryOrder<T>>,
-        uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<*>,
-        forceAnsiCompliance: Boolean = false,
-    ): Pair<Long, List<T>> {
-        val page = PageNumber.zeroIndexed(pageNumber) / pageSize
-        val result = listPaginatedWithTotalResults(
-            page = page,
-            orders = orders,
-            uniqueColumn = uniqueColumn,
-            forceAnsiCompliance = forceAnsiCompliance,
-        )
-        return result.totalResults to result.results
     }
 
     fun listPaginatedWithTotalResults(
