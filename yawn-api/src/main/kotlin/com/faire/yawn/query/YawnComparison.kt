@@ -7,7 +7,7 @@ enum class YawnComparison {
 
     fun <SOURCE : Any, F> compare(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        value: F,
+        value: F & Any,
     ): YawnQueryCriterion<SOURCE> = when (this) {
         LT -> YawnRestrictions.lt(column, value)
         LE -> YawnRestrictions.le(column, value)
