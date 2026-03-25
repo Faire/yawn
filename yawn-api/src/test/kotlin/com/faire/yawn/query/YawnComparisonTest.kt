@@ -14,6 +14,12 @@ internal class YawnComparisonTest {
     private class TestEntity
 
     @Test
+    fun `EQ delegates to YawnRestrictions eq`() {
+        val criterion = YawnComparison.EQ.compare(TestDef.amount, 10)
+        assertThat(criterion.yawnRestriction).isInstanceOf(YawnQueryRestriction.Equals::class.java)
+    }
+
+    @Test
     fun `LT delegates to YawnRestrictions lt`() {
         val criterion = YawnComparison.LT.compare(TestDef.amount, 10)
         assertThat(criterion.yawnRestriction).isInstanceOf(YawnQueryRestriction.LessThan::class.java)
@@ -42,6 +48,7 @@ internal class YawnComparisonTest {
         for (comparison in YawnComparison.entries) {
             val fromEnum = comparison.compare(TestDef.amount, 42)
             val fromRestrictions = when (comparison) {
+                YawnComparison.EQ -> YawnRestrictions.eq(TestDef.amount, 42)
                 YawnComparison.LT -> YawnRestrictions.lt(TestDef.amount, 42)
                 YawnComparison.LE -> YawnRestrictions.le(TestDef.amount, 42)
                 YawnComparison.GT -> YawnRestrictions.gt(TestDef.amount, 42)
@@ -52,8 +59,9 @@ internal class YawnComparisonTest {
     }
 
     @Test
-    fun `all four comparison variants are present`() {
+    fun `all five comparison variants are present`() {
         assertThat(YawnComparison.entries).containsExactly(
+            YawnComparison.EQ,
             YawnComparison.LT,
             YawnComparison.LE,
             YawnComparison.GT,
