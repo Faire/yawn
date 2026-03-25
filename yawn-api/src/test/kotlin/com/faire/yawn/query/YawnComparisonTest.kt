@@ -7,59 +7,93 @@ import org.junit.jupiter.api.Test
 
 internal class YawnComparisonTest {
 
-    private object TestDef : YawnTableDef<TestEntity, TestEntity>(YawnTableDefParent.RootTableDefParent) {
+    private class OrderEntity
+
+    /**
+     * Simulates a table with columns of different types — the scenario where
+     * you can't pass YawnRestrictions::le as a function parameter because F
+     * is invariant and would need to unify across Int, String, and Long.
+     */
+    private object OrderDef : YawnTableDef<OrderEntity, OrderEntity>(YawnTableDefParent.RootTableDefParent) {
         val amount: ColumnDef<Int> = ColumnDef("amount")
+        val createdAt: ColumnDef<String> = ColumnDef("created_at")
+        val itemCount: ColumnDef<Long> = ColumnDef("item_count")
     }
 
-    private class TestEntity
-
-    @Test
-    fun `EQ delegates to YawnRestrictions eq`() {
-        val criterion = YawnComparison.EQ.compare(TestDef.amount, 10)
-        assertThat(criterion.yawnRestriction).isInstanceOf(YawnQueryRestriction.Equals::class.java)
-    }
-
-    @Test
-    fun `LT delegates to YawnRestrictions lt`() {
-        val criterion = YawnComparison.LT.compare(TestDef.amount, 10)
-        assertThat(criterion.yawnRestriction).isInstanceOf(YawnQueryRestriction.LessThan::class.java)
-    }
-
-    @Test
-    fun `LE delegates to YawnRestrictions le`() {
-        val criterion = YawnComparison.LE.compare(TestDef.amount, 10)
-        assertThat(criterion.yawnRestriction).isInstanceOf(YawnQueryRestriction.LessThanOrEqualTo::class.java)
-    }
-
-    @Test
-    fun `GT delegates to YawnRestrictions gt`() {
-        val criterion = YawnComparison.GT.compare(TestDef.amount, 10)
-        assertThat(criterion.yawnRestriction).isInstanceOf(YawnQueryRestriction.GreaterThan::class.java)
-    }
-
-    @Test
-    fun `GE delegates to YawnRestrictions ge`() {
-        val criterion = YawnComparison.GE.compare(TestDef.amount, 10)
-        assertThat(criterion.yawnRestriction).isInstanceOf(YawnQueryRestriction.GreaterThanOrEqualTo::class.java)
+    /**
+     * A helper that applies the same comparison to columns of different types.
+     * This is the pattern YawnComparison enables: F is resolved independently
+     * at each compare() call site, so a single comparison value works across
+     * ColumnDef<Int>, ColumnDef<String>, and ColumnDef<Long>.
+     *
+     * This cannot be expressed with a Kotlin function type parameter like
+     * `(YawnDef<SOURCE, *>.YawnColumnDef<F>, F & Any) -> YawnQueryCriterion<SOURCE>`
+     * because F would have to be fixed for the entire function signature.
+     */
+    private fun buildOrderCriteria(
+        comparison: YawnComparison,
+        amount: Int,
+        createdAt: String,
+        itemCount: Long,
+    ): List<YawnQueryCriterion<OrderEntity>> {
+        return listOf(
+            comparison.compare(OrderDef.amount, amount),
+            comparison.compare(OrderDef.createdAt, createdAt),
+            comparison.compare(OrderDef.itemCount, itemCount),
+        )
     }
 
     @Test
-    fun `compare produces same restriction type as calling YawnRestrictions directly`() {
-        for (comparison in YawnComparison.entries) {
-            val fromEnum = comparison.compare(TestDef.amount, 42)
-            val fromRestrictions = when (comparison) {
-                YawnComparison.EQ -> YawnRestrictions.eq(TestDef.amount, 42)
-                YawnComparison.LT -> YawnRestrictions.lt(TestDef.amount, 42)
-                YawnComparison.LE -> YawnRestrictions.le(TestDef.amount, 42)
-                YawnComparison.GT -> YawnRestrictions.gt(TestDef.amount, 42)
-                YawnComparison.GE -> YawnRestrictions.ge(TestDef.amount, 42)
-            }
-            assertThat(fromEnum.yawnRestriction::class).isEqualTo(fromRestrictions.yawnRestriction::class)
+    fun `same comparison applies to columns of different types`() {
+        val criteria = buildOrderCriteria(
+            comparison = YawnComparison.LE,
+            amount = 100,
+            createdAt = "2026-01-01",
+            itemCount = 50L,
+        )
+
+        assertThat(criteria).hasSize(3)
+        assertThat(criteria).allSatisfy { criterion ->
+            assertThat(criterion.yawnRestriction)
+                .isInstanceOf(YawnQueryRestriction.LessThanOrEqualTo::class.java)
         }
     }
 
     @Test
-    fun `all five comparison variants are present`() {
+    fun `switching comparison changes all generated restrictions`() {
+        val leCriteria = buildOrderCriteria(YawnComparison.LE, 100, "2026-01-01", 50L)
+        val gtCriteria = buildOrderCriteria(YawnComparison.GT, 100, "2026-01-01", 50L)
+
+        assertThat(leCriteria).allSatisfy { criterion ->
+            assertThat(criterion.yawnRestriction)
+                .isInstanceOf(YawnQueryRestriction.LessThanOrEqualTo::class.java)
+        }
+        assertThat(gtCriteria).allSatisfy { criterion ->
+            assertThat(criterion.yawnRestriction)
+                .isInstanceOf(YawnQueryRestriction.GreaterThan::class.java)
+        }
+    }
+
+    @Test
+    fun `each variant produces the expected restriction type`() {
+        val expected = mapOf(
+            YawnComparison.EQ to YawnQueryRestriction.Equals::class.java,
+            YawnComparison.LT to YawnQueryRestriction.LessThan::class.java,
+            YawnComparison.LE to YawnQueryRestriction.LessThanOrEqualTo::class.java,
+            YawnComparison.GT to YawnQueryRestriction.GreaterThan::class.java,
+            YawnComparison.GE to YawnQueryRestriction.GreaterThanOrEqualTo::class.java,
+        )
+
+        for ((comparison, restrictionClass) in expected) {
+            val criterion = comparison.compare(OrderDef.amount, 42)
+            assertThat(criterion.yawnRestriction)
+                .`as`("YawnComparison.%s", comparison.name)
+                .isInstanceOf(restrictionClass)
+        }
+    }
+
+    @Test
+    fun `all comparison variants are present`() {
         assertThat(YawnComparison.entries).containsExactly(
             YawnComparison.EQ,
             YawnComparison.LT,
