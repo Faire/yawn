@@ -40,10 +40,16 @@ internal class YawnComparisonTest {
     @Test
     fun `switching comparison changes all generated restrictions`() {
         val (leAmount, leCreatedAt, leItemCount) = buildOrderCriteria(
-            YawnComparison.LE, 100, "2026-01-01", 50L,
+            comparison = YawnComparison.LE,
+            amount = 100,
+            createdAt = "2026-01-01",
+            itemCount = 50L,
         )
         val (gtAmount, gtCreatedAt, gtItemCount) = buildOrderCriteria(
-            YawnComparison.GT, 100, "2026-01-01", 50L,
+            comparison = YawnComparison.GT,
+            amount = 100,
+            createdAt = "2026-01-01",
+            itemCount = 50L,
         )
 
         assertThat(leAmount.yawnRestriction)
