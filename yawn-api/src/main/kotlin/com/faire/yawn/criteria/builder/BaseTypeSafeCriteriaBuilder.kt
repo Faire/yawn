@@ -135,16 +135,6 @@ abstract class BaseTypeSafeCriteriaBuilder<
         return maxResults(1).uniqueResult()
     }
 
-    @Deprecated("Use paginate with Page instead.")
-    fun paginateZeroIndexed(
-        pageNumber: Int,
-        pageSize: Int,
-        orders: List<DEF.() -> YawnQueryOrder<T>>,
-    ): CRITERIA {
-        val page = PageNumber.zeroIndexed(pageNumber) / pageSize
-        return paginate(page, orders)
-    }
-
     fun paginate(
         page: Page,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
@@ -152,16 +142,6 @@ abstract class BaseTypeSafeCriteriaBuilder<
         applyOrders(orders)
         return offset(page.computeOffset())
             .maxResults(page.pageSize)
-    }
-
-    @Deprecated("Use listPaginated with Page instead.")
-    fun listPaginatedZeroIndexed(
-        pageNumber: Int,
-        pageSize: Int,
-        orders: List<DEF.() -> YawnQueryOrder<T>>,
-    ): List<RETURNS> {
-        val page = PageNumber.zeroIndexed(pageNumber) / pageSize
-        return listPaginated(page, orders)
     }
 
     fun listPaginated(
