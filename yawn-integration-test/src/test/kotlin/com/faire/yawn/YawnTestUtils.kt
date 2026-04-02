@@ -3,6 +3,7 @@ package com.faire.yawn
 import com.faire.yawn.project.YawnProjectionDef
 import com.faire.yawn.project.YawnProjectionRef
 import org.assertj.core.api.Assertions.assertThat
+import java.io.File
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
 import kotlin.reflect.KVisibility
@@ -10,6 +11,9 @@ import kotlin.reflect.full.functions
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.typeOf
+
+// Standard KSP output directory - configured by the KSP Gradle plugin
+private const val GENERATED_SOURCE_DIR = "build/generated/ksp/main/kotlin"
 
 internal object YawnTestUtils {
     inline fun <reified T : Any> assertGeneratedEntity(
@@ -36,6 +40,20 @@ internal object YawnTestUtils {
             expectedVisibility = expectedVisibility,
             builder = builder,
         )
+    }
+
+    inline fun <reified T : YawnTableRef<*, *>> assertGeneratedFile(
+        builder: GeneratedFileAssertContext.() -> Unit,
+    ) {
+        val clazz = T::class
+        val packagePath = clazz.java.packageName.replace('.', '/')
+        val fileName = "${clazz.getClassNamePrefix()}Def.kt"
+
+        val file = File("$GENERATED_SOURCE_DIR/$packagePath/$fileName")
+
+        val lines = file.readLines()
+
+        builder(GeneratedFileAssertContext(lines))
     }
 
     fun <T : Any> internalAssertGeneratedEntity(
@@ -71,9 +89,7 @@ internal object YawnTestUtils {
     ): KClass<*> {
         val classPath = clazz.java.packageName
         val defName = expectedSuperClass.simpleName!!.removePrefix("Yawn").removeSuffix("Ref")
-        val classNamePrefix = clazz.java
-            .getNestingChain()
-            .joinToString(separator = "_") { it.simpleName }
+        val classNamePrefix = clazz.getClassNamePrefix()
         val className = "$classNamePrefix$defName"
         return Class.forName("$classPath.$className").kotlin
     }
@@ -139,6 +155,15 @@ internal object YawnTestUtils {
             assertThat(properties).anyMatch { it.name == columnName && it.returnType.toString() == columnType }
         }
     }
+
+    class GeneratedFileAssertContext(private val lines: List<String>) {
+        fun containsTypeAlias(name: String, visibility: KVisibility) {
+            val visibilityKeyword = visibility.name.lowercase()
+            val expectedPrefix = "$visibilityKeyword typealias $name"
+
+            assertThat(lines.singleOrNull { it.startsWith(expectedPrefix) }).isNotNull()
+        }
+    }
 }
 
 private fun Class<*>.getNestingChain(): List<Class<*>> {
@@ -153,4 +178,8 @@ private fun Class<*>.getNestingChain(): List<Class<*>> {
 
 private inline fun <reified C> getTypeStringWithSourceReplaced(replacement: String): String {
     return typeOf<C>().toString().replace(replacement, "SOURCE")
+}
+
+private fun KClass<*>.getClassNamePrefix(): String {
+    return java.getNestingChain().joinToString(separator = "_") { it.simpleName!! }
 }

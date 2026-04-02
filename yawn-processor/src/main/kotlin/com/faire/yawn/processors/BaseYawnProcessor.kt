@@ -7,6 +7,7 @@ import com.faire.yawn.YawnTableDefParent
 import com.faire.yawn.generators.addGeneratedAnnotation
 import com.faire.yawn.generators.objects.YawnReferenceObjectGenerator
 import com.faire.yawn.util.YawnContext
+import com.faire.yawn.util.addTypeAliases
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
@@ -21,6 +22,7 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.TypeAliasSpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asClassName
@@ -64,10 +66,12 @@ internal abstract class BaseYawnProcessor(
         val yawnContext = buildYawnContext(classDeclaration, newClassName)
         val objectDef = objectRefGenerator.generate(yawnContext)
         val classDef = generateClassDefinition(yawnContext)
+        val typeAliases = generateTypeAliases(yawnContext)
 
         val fileSpec = FileSpec.builder(packageName, newClassName)
             .addType(objectDef)
             .addType(classDef)
+            .addTypeAliases(typeAliases)
             .build()
 
         val outputFile = codeGenerator.createNewFile(
@@ -132,6 +136,8 @@ internal abstract class BaseYawnProcessor(
     ): PropertySpec?
 
     protected abstract fun generateYawnDefClassName(originalClassName: ClassName): String
+
+    protected open fun generateTypeAliases(yawnContext: YawnContext): List<TypeAliasSpec> = listOf()
 
     companion object {
         const val PARENT_PARAMETER_NAME = "parent"
