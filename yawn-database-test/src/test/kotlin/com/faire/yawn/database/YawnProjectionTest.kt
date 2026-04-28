@@ -819,6 +819,39 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     }
 
     @YawnProjection
+    internal data class AuthorWithPageStats(
+        val author: String,
+        val pageStats: Pair<Long, Long>,
+    )
+
+    @Test
+    fun `nested projection with pair inside generated projection`() {
+        transactor.open { session ->
+            val results = session.project(BookTable) { books ->
+                val authors = join(books.author)
+                project(
+                    YawnProjections.pair(
+                        YawnProjectionTest_AuthorWithPageStatsProjection.create(
+                            author = YawnProjections.groupBy(authors.name),
+                            pageStats = YawnProjections.pair(
+                                YawnProjections.min(books.numberOfPages),
+                                YawnProjections.max(books.numberOfPages),
+                            ),
+                        ),
+                        YawnProjections.count(books.name),
+                    ),
+                )
+            }.list()
+
+            assertThat(results).containsExactlyInAnyOrder(
+                AuthorWithPageStats("J.R.R. Tolkien", 300L to 1_000L) to 2L,
+                AuthorWithPageStats("J.K. Rowling", 500L to 500L) to 1L,
+                AuthorWithPageStats("Hans Christian Andersen", 100L to 120L) to 3L,
+            )
+        }
+    }
+
+    @YawnProjection
     internal data class BookStatistics(
         val totalBooks: Long,
         val totalPages: Long,
