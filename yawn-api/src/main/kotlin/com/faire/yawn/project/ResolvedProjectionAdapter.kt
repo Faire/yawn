@@ -22,13 +22,19 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
         val nodes = resolved.nodes
         check(nodes.isNotEmpty()) { "Cannot compile an empty projection." }
 
-        if (nodes.size == 1) {
-            return compileLeaf(nodes[0].leaf, context)
+        val projection = if (nodes.size == 1) {
+            compileLeaf(nodes[0].leaf, context)
+        } else {
+            Projections.projectionList().apply {
+                for (node in nodes) {
+                    add(compileLeaf(node.leaf, context))
+                }
+            }
         }
 
-        return Projections.projectionList().apply {
-            for (node in nodes) {
-                add(compileLeaf(node.leaf, context))
+        return resolved.modifiers.fold(projection) { acc, modifier ->
+            when (modifier) {
+                ModifierKind.DISTINCT -> Projections.distinct(acc)
             }
         }
     }
@@ -51,7 +57,6 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
         is ProjectionLeaf.Aggregate -> compileAggregate(leaf, context)
         is ProjectionLeaf.RowCount -> Projections.rowCount()
         is ProjectionLeaf.Sql -> compileSql(leaf)
-        is ProjectionLeaf.Modifier -> compileModifier(leaf, context)
     }
 
     private fun compileAggregate(
@@ -76,13 +81,6 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
             leaf.aliases.toTypedArray(),
             leaf.resultTypes.map { it.toHibernateType() }.toTypedArray(),
         )
-    }
-
-    private fun compileModifier(
-        leaf: ProjectionLeaf.Modifier<SOURCE>,
-        context: YawnCompilationContext,
-    ): Projection = when (leaf.kind) {
-        ModifierKind.DISTINCT -> Projections.distinct(compileLeaf(leaf.inner, context))
     }
 
     companion object {

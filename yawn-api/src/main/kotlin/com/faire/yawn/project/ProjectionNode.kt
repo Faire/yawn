@@ -11,6 +11,7 @@ import com.faire.yawn.YawnDef
  * * [Composite]: a grouping of multiple children with a mapper. Flattened during resolution.
  * * [Constant]: a fixed value, with no corresponding SQL. Eliminated during resolution.
  * * [Mapped]: wraps another projection with an in-memory transformation. Eliminated during resolution.
+ * * [Modifier]: passes through any child projection and flags a query-level modifier (e.g. DISTINCT).
  */
 sealed interface ProjectionNode<SOURCE : Any, TO> {
     /**
@@ -52,6 +53,17 @@ sealed interface ProjectionNode<SOURCE : Any, TO> {
     data class Mapped<SOURCE : Any, FROM, TO>(
         val from: YawnProjector<SOURCE, FROM>,
         val transform: (FROM) -> TO,
+    ) : ProjectionNode<SOURCE, TO>
+
+    /**
+     * Passes through any child projection and flags a query-level modifier (e.g. DISTINCT).
+     *
+     * During resolution, the inner projection is resolved normally and the modifier
+     * is hoisted as a flag onto the [ResolvedProjection].
+     */
+    data class Modifier<SOURCE : Any, TO>(
+        val kind: ModifierKind,
+        val inner: YawnProjector<SOURCE, TO>,
     ) : ProjectionNode<SOURCE, TO>
 
     companion object {
@@ -108,5 +120,9 @@ sealed interface ProjectionNode<SOURCE : Any, TO> {
             children: List<YawnProjector<SOURCE, *>>,
             mapper: (List<Any?>) -> R,
         ): Composite<SOURCE, R> = Composite(children, mapper)
+
+        fun <SOURCE : Any, TO> modifier(kind: ModifierKind, inner: YawnProjector<SOURCE, TO>): Modifier<SOURCE, TO> {
+            return Modifier(kind, inner)
+        }
     }
 }

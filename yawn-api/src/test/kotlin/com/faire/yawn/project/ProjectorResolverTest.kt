@@ -153,17 +153,19 @@ internal class ProjectorResolverTest {
     }
 
     @Test
-    fun `modifier wraps leaf`() {
-        val projector = YawnValueProjector {
-            val from = ProjectionNode.property(authorCol)
-            ProjectionNode.Value(ProjectionLeaf.Modifier(DISTINCT, from.leaf), from.mapper)
+    fun `modifier wraps projection`() {
+        val projector = YawnProjector<Any, String> {
+            ProjectionNode.Modifier(
+                DISTINCT,
+                YawnValueProjector { ProjectionNode.property(authorCol) },
+            )
         }
 
         val resolved = resolve(projector)
 
-        val leaf = resolved.nodes.single().leaf as ProjectionLeaf.Modifier
-        assertThat(leaf.kind).isEqualTo(DISTINCT)
-        assertThat(leaf.inner).isEqualTo(ProjectionLeaf.Property(authorCol))
+        assertThat(resolved.modifiers).containsExactly(DISTINCT)
+        val leaf = resolved.nodes.single().leaf as ProjectionLeaf.Property
+        assertThat(leaf.column).isEqualTo(authorCol)
 
         assertThat(resolved.mapRow(listOf("Tolkien"))).isEqualTo("Tolkien")
     }
@@ -194,18 +196,21 @@ internal class ProjectorResolverTest {
                     // topAuthorStats: nested composite
                     YawnProjector {
                         ProjectionNode.composite(
-                            // authorInfo: pair(distinct(author), count(pages))
+                            // authorInfo: distinct(pair(author, count(pages)))
                             {
-                                ProjectionNode.composite(
-                                    YawnValueProjector<Any, String> {
-                                        ProjectionNode.Value(
-                                            ProjectionLeaf.Modifier(DISTINCT, ProjectionLeaf.Property(authorCol)),
-                                        )
+                                ProjectionNode.modifier(
+                                    DISTINCT,
+                                    YawnProjector {
+                                        ProjectionNode.composite(
+                                            YawnValueProjector<Any, String> {
+                                                ProjectionNode.property(authorCol)
+                                            },
+                                            YawnValueProjector<Any, Long> {
+                                                ProjectionNode.aggregateAs(COUNT, pagesCol)
+                                            },
+                                        ) { a, b -> Pair(a, b) }
                                     },
-                                    YawnValueProjector<Any, Long> {
-                                        ProjectionNode.aggregateAs(COUNT, pagesCol)
-                                    },
-                                ) { a, b -> Pair(a, b) }
+                                )
                             },
                             // pageStats: pair(avg(pages), max(pages))
                             {
@@ -247,13 +252,16 @@ internal class ProjectorResolverTest {
 
         val resolved = resolve(projector)
 
+        // Verify distinct modifier hoisted from nested composite
+        assertThat(resolved.modifiers).containsExactly(DISTINCT)
+
         // Verify flat node list: 6 unique leaves (SUM(revenue) deduped)
         assertThat(resolved.nodes).hasSize(6)
 
         // Verify node types in order
         assertThat(resolved.nodes[0].leaf).isEqualTo(ProjectionLeaf.Aggregate(GROUP_BY, nameCol))
         assertThat(resolved.nodes[1].leaf)
-            .isEqualTo(ProjectionLeaf.Modifier(DISTINCT, ProjectionLeaf.Property(authorCol)))
+            .isEqualTo(ProjectionLeaf.Property(authorCol))
         assertThat(resolved.nodes[2].leaf).isEqualTo(ProjectionLeaf.Aggregate(COUNT, pagesCol))
         assertThat(resolved.nodes[3].leaf).isEqualTo(ProjectionLeaf.Aggregate(AVG, pagesCol))
         assertThat(resolved.nodes[4].leaf).isEqualTo(ProjectionLeaf.Aggregate(MAX, pagesCol))
@@ -345,6 +353,41 @@ internal class ProjectorResolverTest {
         assertThat(leaf.sqlExpression).isEqualTo("LENGTH({alias}.name) AS name_length")
 
         assertThat(resolved.mapRow(listOf(10L))).isEqualTo(10L)
+    }
+
+    @Test
+    fun `distinct wrapping a composite projection`() {
+        val projector = YawnProjector<Any, Pair<String, Long>> {
+            ProjectionNode.modifier(
+                DISTINCT,
+                YawnProjector {
+                    ProjectionNode.composite(
+                        YawnValueProjector { ProjectionNode.property(authorCol) },
+                        YawnValueProjector { ProjectionNode.property(pagesCol) },
+                    ) { a, b -> a to b }
+                },
+            )
+        }
+
+        val resolved = resolve(projector)
+
+        assertThat(resolved.modifiers).containsExactly(DISTINCT)
+        assertThat(resolved.nodes).hasSize(2)
+        assertThat(resolved.nodes[0].leaf).isEqualTo(ProjectionLeaf.Property(authorCol))
+        assertThat(resolved.nodes[1].leaf).isEqualTo(ProjectionLeaf.Property(pagesCol))
+
+        val result = resolved.mapRow(listOf("Tolkien", 300L))
+        assertThat(result).isEqualTo("Tolkien" to 300L)
+    }
+
+    @Test
+    fun `distinct flag is false by default`() {
+        val projector = YawnValueProjector {
+            ProjectionNode.property(nameCol)
+        }
+
+        val resolved = resolve(projector)
+        assertThat(resolved.modifiers).isEqualTo(setOf<ModifierKind>())
     }
 
     data class AuthorSummary(

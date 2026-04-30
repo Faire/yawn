@@ -49,12 +49,4 @@ sealed interface ProjectionLeaf<SOURCE : Any> {
         val aliases: List<String>,
         val resultTypes: List<KClass<*>>,
     ) : ProjectionLeaf<SOURCE>
-
-    /**
-     * Wraps another leaf with a SQL modifier (e.g. DISTINCT).
-     */
-    data class Modifier<SOURCE : Any>(
-        val kind: ModifierKind,
-        val inner: ProjectionLeaf<SOURCE>,
-    ) : ProjectionLeaf<SOURCE>
 }

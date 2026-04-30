@@ -20,6 +20,11 @@ interface ResolvedProjection<SOURCE : Any, TO> {
     val nodes: List<ProjectionNode.Value<SOURCE, *>>
 
     /**
+     * The set of query-level modifiers (e.g. DISTINCT) that should be applied to the compiled projection.
+     */
+    val modifiers: Set<ModifierKind> get() = setOf()
+
+    /**
      * Maps a raw result row to the projected type.
      *
      * @param values raw results in the same order as [nodes].
@@ -30,6 +35,7 @@ interface ResolvedProjection<SOURCE : Any, TO> {
 internal class DefaultResolvedProjection<SOURCE : Any, TO>(
     override val nodes: List<ProjectionNode.Value<SOURCE, *>>,
     private val mapper: ProjectionMapper<TO>,
+    override val modifiers: Set<ModifierKind> = setOf(),
 ) : ResolvedProjection<SOURCE, TO> {
     override fun mapRow(values: List<Any?>): TO = mapper.map(values)
 }

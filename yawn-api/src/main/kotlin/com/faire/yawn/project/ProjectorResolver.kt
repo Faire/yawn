@@ -15,13 +15,14 @@ package com.faire.yawn.project
 class ProjectorResolver<SOURCE : Any> {
     private val nodes = mutableListOf<ProjectionNode.Value<SOURCE, *>>()
     private val dedupedLeafsToIndices = mutableMapOf<ProjectionLeaf<SOURCE>, Int>()
+    private val modifiers = mutableSetOf<ModifierKind>()
 
     /**
      * Resolves a [YawnProjector] into a [ResolvedProjection].
      */
     fun <TO> resolve(projector: YawnProjector<SOURCE, TO>): ResolvedProjection<SOURCE, TO> {
         val mapper = resolveNode(projector.projection())
-        return DefaultResolvedProjection(nodes.toList(), mapper)
+        return DefaultResolvedProjection(nodes.toList(), mapper, modifiers.toSet())
     }
 
     private fun <TO> resolveNode(node: ProjectionNode<SOURCE, TO>): ProjectionMapper<TO> {
@@ -30,6 +31,7 @@ class ProjectorResolver<SOURCE : Any> {
             is ProjectionNode.Composite -> resolveComposite(node)
             is ProjectionNode.Constant -> ProjectionMapper { node.value }
             is ProjectionNode.Mapped<SOURCE, *, TO> -> resolveMapped(node)
+            is ProjectionNode.Modifier -> resolveModifier(node)
         }
     }
 
@@ -49,5 +51,10 @@ class ProjectorResolver<SOURCE : Any> {
     private fun <FROM, TO> resolveMapped(node: ProjectionNode.Mapped<SOURCE, FROM, TO>): ProjectionMapper<TO> {
         val innerMapper = resolveNode(node.from.projection())
         return ProjectionMapper { results -> node.transform(innerMapper.map(results)) }
+    }
+
+    private fun <TO> resolveModifier(node: ProjectionNode.Modifier<SOURCE, TO>): ProjectionMapper<TO> {
+        modifiers.add(node.kind)
+        return resolveNode(node.inner.projection())
     }
 }

@@ -8,7 +8,6 @@ import com.faire.yawn.project.AggregateKind.MAX
 import com.faire.yawn.project.AggregateKind.MIN
 import com.faire.yawn.project.AggregateKind.SUM
 import com.faire.yawn.project.ModifierKind.DISTINCT
-import com.faire.yawn.project.ProjectionLeaf
 import com.faire.yawn.project.ProjectionNode
 import com.faire.yawn.project.ProjectorResolver
 import com.faire.yawn.project.ResolvedProjectionAdapter
@@ -128,9 +127,10 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 val authors = join(books.author)
                 project(
                     adapt(
-                        YawnValueProjector<Book, String> {
-                            ProjectionNode.Value(
-                                ProjectionLeaf.Modifier(DISTINCT, ProjectionLeaf.Property(authors.name)),
+                        YawnProjector<Book, String> {
+                            ProjectionNode.modifier(
+                                DISTINCT,
+                                YawnValueProjector { ProjectionNode.property(authors.name) },
                             )
                         },
                     ),

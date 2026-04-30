@@ -19,9 +19,7 @@ fun interface YawnProjector<SOURCE : Any, TO> {
 /**
  * A [YawnProjector] that is guaranteed to produce a [ProjectionNode.Value].
  *
- * This subtype exists mostly so that modifiers like distinct can enforce at compile time
- * that they only wrap single-value projections, not composites. But it can be used for other
- * contexts as needed.
+ * Useful as an internal implementation detail for factory methods that produce single-value nodes.
  */
 fun interface YawnValueProjector<SOURCE : Any, TO> : YawnProjector<SOURCE, TO> {
     override fun projection(): ProjectionNode.Value<SOURCE, TO>
