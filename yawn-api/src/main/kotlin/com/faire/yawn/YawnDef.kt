@@ -1,5 +1,6 @@
 package com.faire.yawn
 
+import com.faire.yawn.project.YawnPathProvider
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnCompilationContext
 import org.hibernate.criterion.Projection
@@ -19,8 +20,8 @@ abstract class YawnDef<SOURCE : Any, D : Any> {
      *
      * @param F the type of the column.
      */
-    abstract inner class YawnColumnDef<F> : YawnQueryProjection<SOURCE, F> {
-        abstract fun generatePath(context: YawnCompilationContext): String
+    abstract inner class YawnColumnDef<F> : YawnQueryProjection<SOURCE, F>, YawnPathProvider<SOURCE> {
+        abstract override fun generatePath(context: YawnCompilationContext): String
 
         open fun adaptValue(value: F): Any? {
             return value

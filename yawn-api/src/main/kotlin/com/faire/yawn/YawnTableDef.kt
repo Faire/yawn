@@ -1,7 +1,11 @@
 package com.faire.yawn
 
 import com.faire.yawn.adapter.YawnValueAdapter
+import com.faire.yawn.project.ProjectionLeaf
+import com.faire.yawn.project.ProjectionNode
+import com.faire.yawn.project.YawnPathProvider
 import com.faire.yawn.project.YawnQueryProjection
+import com.faire.yawn.project.YawnValueProjector
 import com.faire.yawn.query.YawnCompilationContext
 import org.hibernate.criterion.Projection
 import org.hibernate.criterion.Projections
@@ -76,8 +80,8 @@ abstract class YawnTableDef<SOURCE : Any, D : Any>(
         private val parent: YawnTableDefParent,
         protected val name: String,
         private val tableDefProvider: (YawnTableDefParent) -> DEF,
-    ) {
-        fun path(context: YawnCompilationContext): String {
+    ) : YawnPathProvider<SOURCE> {
+        override fun generatePath(context: YawnCompilationContext): String {
             return listOfNotNull(context.generateAlias(parent), name).joinToString(".")
         }
 
@@ -107,17 +111,22 @@ abstract class YawnTableDef<SOURCE : Any, D : Any>(
         name,
         tableDefProvider,
     ),
-        YawnQueryProjection<SOURCE, T> {
+        YawnQueryProjection<SOURCE, T>,
+        YawnValueProjector<SOURCE, T> {
         val foreignKey: REF
             get() = foreignKeyProvider(name)
 
         override fun compile(context: YawnCompilationContext): Projection {
-            return Projections.property(path(context))
+            return Projections.property(generatePath(context))
         }
 
         override fun project(value: Any?): T {
             @Suppress("UNCHECKED_CAST")
             return value as T
+        }
+
+        override fun projection(): ProjectionNode.Value<SOURCE, T> {
+            return ProjectionNode.Value(ProjectionLeaf.Property(this))
         }
     }
 

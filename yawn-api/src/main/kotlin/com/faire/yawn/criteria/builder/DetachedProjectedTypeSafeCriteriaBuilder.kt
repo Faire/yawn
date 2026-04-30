@@ -51,13 +51,13 @@ class DetachedProjectedTypeSafeCriteriaBuilder<SOURCE : Any, T : Any, DEF : Yawn
             if (join.joinCriteria.isNotEmpty()) {
                 val criterion = And(join.joinCriteria)
                 detachedCriteria.createAlias(
-                    join.path(context),
+                    join.generatePath(context),
                     alias,
                     join.joinType,
                     criterion.compile(context),
                 )
             } else {
-                detachedCriteria.createAlias(join.path(context), alias, join.joinType)
+                detachedCriteria.createAlias(join.generatePath(context), alias, join.joinType)
             }
         }
 

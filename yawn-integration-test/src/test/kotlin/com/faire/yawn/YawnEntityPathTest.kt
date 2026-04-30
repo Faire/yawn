@@ -27,7 +27,7 @@ internal class YawnEntityPathTest {
     fun `join column def path contains whole chain`() {
         val withParent = EntityWithSimpleRelationsTableDef<EntityWithoutRelations>(parent = RootTableDefParent)
         val asField = withParent.nonNullOneToOneYawn
-        assertThat(asField.path(context)).isEqualTo("nonNullOneToOneYawn")
+        assertThat(asField.generatePath(context)).isEqualTo("nonNullOneToOneYawn")
 
         val asJoinWithAlias = withParent.nonNullOneToOneYawn.joinTableDef(AssociationTableDefParent(asField))
         assertThat(asJoinWithAlias.randomField.generatePath(context)).isEqualTo("nnotoy.randomField")
@@ -38,7 +38,7 @@ internal class YawnEntityPathTest {
         val subQueryCompilationContext = YawnCompilationContext(withSubQuery = true)
         val withParent = EntityWithSimpleRelationsTableDef<EntityWithoutRelations>(parent = RootTableDefParent)
         val asField = withParent.nonNullOneToOneYawn
-        assertThat(asField.path(subQueryCompilationContext)).isEqualTo("r.nonNullOneToOneYawn")
+        assertThat(asField.generatePath(subQueryCompilationContext)).isEqualTo("r.nonNullOneToOneYawn")
 
         val asJoinWithAlias = withParent.nonNullOneToOneYawn.joinTableDef(AssociationTableDefParent(asField))
         // cSpell:ignore nnotoy - this is the alias given with the initials of "nonUllOneToOneYawn"

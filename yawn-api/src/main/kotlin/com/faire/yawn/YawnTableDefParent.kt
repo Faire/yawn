@@ -43,7 +43,7 @@ interface YawnTableDefParent {
         val parentColumnDef: YawnTableDef<*, *>.JoinColumnDef<*, *>,
     ) : YawnTableDefParent {
         override fun getAliasBaseString(context: YawnCompilationContext): String {
-            return parentColumnDef.path(context)
+            return parentColumnDef.generatePath(context)
         }
     }
 }

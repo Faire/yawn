@@ -34,9 +34,9 @@ internal class YawnTestQueryFactory(
 
             if (join.joinCriteria.isNotEmpty()) {
                 val criterion = And(join.joinCriteria)
-                rawQuery.createAlias(join.path(context), alias, join.joinType, criterion.compile(context))
+                rawQuery.createAlias(join.generatePath(context), alias, join.joinType, criterion.compile(context))
             } else {
-                rawQuery.createAlias(join.path(context), alias, join.joinType)
+                rawQuery.createAlias(join.generatePath(context), alias, join.joinType)
             }
         }
 

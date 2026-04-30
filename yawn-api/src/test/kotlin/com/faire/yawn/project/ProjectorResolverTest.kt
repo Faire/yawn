@@ -1,6 +1,8 @@
 package com.faire.yawn.project
 
 import com.faire.yawn.YawnDef
+import com.faire.yawn.YawnTableDef
+import com.faire.yawn.YawnTableDefParent
 import com.faire.yawn.project.AggregateKind.AVG
 import com.faire.yawn.project.AggregateKind.COUNT
 import com.faire.yawn.project.AggregateKind.COUNT_DISTINCT
@@ -135,6 +137,24 @@ internal class ProjectorResolverTest {
 
         val result = resolved.mapRow(listOf(50_000L))
         assertThat(result).isEqualTo(50_000L to 50_000L) // both fields get the same value
+    }
+
+    @Test
+    fun `deduplication of identical join column leaves`() {
+        val tableDef = TestTableDef()
+        val projector = YawnProjector<TestEntity, Pair<TestEntity, TestEntity>> {
+            ProjectionNode.composite(
+                tableDef.joined,
+                tableDef.joined,
+            ) { a, b -> Pair(a, b) }
+        }
+
+        val resolved = ProjectorResolver<TestEntity>().resolve(projector)
+        assertThat(resolved.nodes).hasSize(1)
+
+        val entity = TestEntity()
+        val result = resolved.mapRow(listOf(entity))
+        assertThat(result).isEqualTo(entity to entity)
     }
 
     @Test
@@ -358,6 +378,17 @@ internal class ProjectorResolverTest {
         val totalRevenue: Long,
         val totalRevenueCheck: Long,
     )
+
+    private class TestEntity
+
+    private class TestTableDef : YawnTableDef<TestEntity, TestEntity>(YawnTableDefParent.RootTableDefParent) {
+        val joined = JoinColumnDefWithForeignKey<TestEntity, TestTableDef, Long>(
+            parent,
+            "joined",
+            "id",
+            { TestTableDef() },
+        )
+    }
 
     private class TestDef : YawnDef<Any, Any>() {
         fun <T> column(name: String): YawnColumnDef<T> = TestColumnDef(name)

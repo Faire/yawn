@@ -376,6 +376,20 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `join column def projection returns entity`() {
+        transactor.open { session ->
+            val publishers = session.project(BookTable) { books ->
+                addLike(books.name, "The %")
+                addIsNotNull(books.publisher.foreignKey)
+                project(adapt(books.publisher))
+            }.set()
+
+            assertThat(publishers.map { it.name })
+                .containsExactlyInAnyOrder("Random House", "Penguin")
+        }
+    }
+
+    @Test
     fun `sum with nullable columns`() {
         transactor.open { session ->
             fun getSumRatingsByLanguage(vararg authorNames: String): Map<Book.Language, Any?> {

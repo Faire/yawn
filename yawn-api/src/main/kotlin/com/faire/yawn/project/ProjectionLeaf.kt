@@ -9,16 +9,19 @@ import kotlin.reflect.KClass
  * Leaves are the terminal elements that produce actual SQL in the compiled query projection tree.
  * The Query Factory is responsible for converting each leaf to the underlying ORM's implementation projection.
  *
- * Leaf deduplication uses data class equality: two [Property] leaves with the same [YawnDef.YawnColumnDef]
+ * Leaf deduplication uses data class equality: two [Property] leaves with the same [YawnPathProvider]
  * reference, or two [Aggregate] leaves with the same [AggregateKind] and column, are considered identical
  * and will share an index in the re-packed result list.
  */
 sealed interface ProjectionLeaf<SOURCE : Any> {
     /**
-     * A simple column property access (SQL: `alias.column`).
+     * A property access (SQL: `alias.column`).
+     *
+     * Works with any [YawnPathProvider], including both [YawnDef.YawnColumnDef]
+     * and [com.faire.yawn.YawnTableDef.JoinColumnDef].
      */
     data class Property<SOURCE : Any>(
-        val column: YawnDef<SOURCE, *>.YawnColumnDef<*>,
+        val column: YawnPathProvider<SOURCE>,
     ) : ProjectionLeaf<SOURCE>
 
     /**

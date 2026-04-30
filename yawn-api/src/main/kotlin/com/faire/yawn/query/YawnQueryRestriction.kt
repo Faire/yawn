@@ -243,7 +243,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.isEmpty(joinColumn.path(context))
+        ): Criterion = Restrictions.isEmpty(joinColumn.generatePath(context))
     }
 
     class IsNotEmpty<SOURCE : Any>(
@@ -251,7 +251,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.isNotEmpty(joinColumn.path(context))
+        ): Criterion = Restrictions.isNotEmpty(joinColumn.generatePath(context))
     }
 }
 
