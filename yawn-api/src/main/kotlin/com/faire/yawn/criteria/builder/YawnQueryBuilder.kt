@@ -1,7 +1,7 @@
 package com.faire.yawn.criteria.builder
 
 import com.faire.yawn.YawnTableDef
-import com.faire.yawn.criteria.query.TypeSafeCriteriaQuery
+import com.faire.yawn.criteria.query.EntityYawnQueryScope
 import com.faire.yawn.pagination.Page
 import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.query.CompiledYawnQuery
@@ -12,26 +12,26 @@ import com.faire.yawn.query.YawnQueryHint
 import com.faire.yawn.query.YawnQueryOrder
 
 /**
- * An abstract super-class for the type-safe Yawn criteria builder; not be used directly.
+ * An abstract super-class for the Yawn criteria builders that build a [YawnQuery]; specifies [BaseYawnBuilder].
  *
  * This will be either:
- * * [TypeSafeCriteriaBuilder], for normal queries
- * * [ProjectedTypeSafeCriteriaBuilder], for queries with projections
+ * * [EntityYawnQueryBuilder], for normal queries
+ * * [ProjectedYawnQueryBuilder], for queries with projections
  *
  * @param T the type of the entity being queried.
  * @param DEF the table definition of the entity being queried.
- * @param RETURNS the return type to be used for the finalizer methods (list, uniqueResult, etc.).
- *                This will either be T for TypeSafeCriteriaBuilder, or the type of the projection for
- *                ProjectedTypeSafeCriteriaBuilder.
+ * @param RETURNS the return type to be used for the finalizer methods ([list], [uniqueResult], etc.).
+ *                This will either be T for [EntityYawnQueryBuilder],
+ *                or the type of the projection for [ProjectedYawnQueryBuilder].
  * @param CRITERIA is the concrete type of the criteria being used;
  *        this is required to specify the return type of the builder-style methods.
  *        It will be one of the above-mentioned types.
  */
-abstract class BaseTypeSafeCriteriaBuilder<
+abstract class YawnQueryBuilder<
     T : Any,
     DEF : YawnTableDef<T, T>,
-    RETURNS : Any?,
-    CRITERIA : BaseTypeSafeCriteriaBuilder<T, DEF, RETURNS, CRITERIA>,
+    RETURNS,
+    CRITERIA : YawnQueryBuilder<T, DEF, RETURNS, CRITERIA>,
     >(
     protected val tableDef: DEF,
     protected val queryFactory: YawnQueryFactory,
@@ -43,17 +43,9 @@ abstract class BaseTypeSafeCriteriaBuilder<
         @Suppress("UNCHECKED_CAST")
         value as RETURNS
     },
-) {
+) : BaseYawnBuilder<CRITERIA>() {
     /**
-     * Following the "builder" pattern, each method on the various TypedCriteriaBuilders returns itself.
-     * However, since we have an inheritance chain, in order for the type to match what you had before, we need this
-     * override.
-     * This should always just return `this`, but will ensure the correct [CRITERIA] typing.
-     */
-    protected abstract fun builderReturn(): CRITERIA
-
-    /**
-     * The various TypedCriteriaBuilders are mutable, which means changes are accumulated within the instance.
+     * The various Yawn Query Builders are mutable, which means changes are accumulated within the instance.
      * If you want to run two different queries with the same base, you can either create e method that returns
      * a new "base" instance each time, or, if you already have the instance, you can use the clone method.
      * Note that this relies on the data class `copy()` method being correctly implemented in the underlying
@@ -64,8 +56,8 @@ abstract class BaseTypeSafeCriteriaBuilder<
     /**
      * Apply additional filters to this query.
      *
-     * This method is available on both [TypeSafeCriteriaBuilder] and [ProjectedTypeSafeCriteriaBuilder].
-     * The lambda uses [TypeSafeCriteriaQuery] which does not have access to `project()`, ensuring
+     * This method is available on both [EntityYawnQueryBuilder] and [ProjectedYawnQueryBuilder].
+     * The lambda uses [EntityYawnQueryScope] which does not have access to `project()`, ensuring
      * that filters can only add conditions and cannot change the projection.
      *
      * Example:
@@ -79,9 +71,9 @@ abstract class BaseTypeSafeCriteriaBuilder<
      * ```
      */
     fun applyFilter(
-        lambda: TypeSafeCriteriaQuery<T, DEF>.(tableDef: DEF) -> Unit,
+        lambda: EntityYawnQueryScope<T, DEF>.(tableDef: DEF) -> Unit,
     ): CRITERIA {
-        TypeSafeCriteriaQuery.applyLambda<T, DEF>(query) { lambda(tableDef) }
+        EntityYawnQueryScope.applyLambda<T, DEF>(query) { lambda(tableDef) }
         return builderReturn()
     }
 
@@ -208,7 +200,7 @@ abstract class BaseTypeSafeCriteriaBuilder<
 
     /**
      * Currently, Yawn does not track database indexes in order to provide type-safe wrappers,
-     * so query hints are just provided as Strings.
+     * so query hints are just provided as Strings and converted to [YawnQueryHint] plainly.
      */
     fun addQueryHint(hint: String): CRITERIA {
         query.queryHints.add(YawnQueryHint(hint))

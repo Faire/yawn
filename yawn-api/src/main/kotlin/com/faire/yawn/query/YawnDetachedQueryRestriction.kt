@@ -1,7 +1,7 @@
 package com.faire.yawn.query
 
 import com.faire.yawn.YawnDef
-import com.faire.yawn.criteria.builder.DetachedProjectedTypeSafeCriteriaBuilder
+import com.faire.yawn.criteria.builder.DetachedProjectedYawnBuilder
 import org.hibernate.criterion.Criterion
 import org.hibernate.criterion.Subqueries
 
@@ -11,206 +11,206 @@ import org.hibernate.criterion.Subqueries
  * @param SOURCE The type of the source entity.
  * @param F the type being projected to by the detached criteria.
  */
-interface YawnDetachedQueryRestriction<SOURCE : Any, F : Any?> : YawnQueryRestriction<SOURCE> {
-    val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>
+interface YawnDetachedQueryRestriction<SOURCE : Any, F> : YawnQueryRestriction<SOURCE> {
+    val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>
 
-    class EqualsDetached<SOURCE : Any, F : Any?>(
+    class EqualsDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion {
             return Subqueries.propertyEq(
                 property.generatePath(context),
-                detachedCriteriaBuilder.compile(context),
+                detachedBuilder.compile(context),
             )
         }
     }
 
-    class EqualsAllDetached<SOURCE : Any, F : Any?>(
+    class EqualsAllDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyEqAll(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class NotEqualsDetached<SOURCE : Any, F : Any?>(
+    class NotEqualsDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(
             context: YawnCompilationContext,
         ): Criterion = Subqueries.propertyNe(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class GreaterThanDetached<SOURCE : Any, F : Any?>(
+    class GreaterThanDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(
             context: YawnCompilationContext,
         ): Criterion = Subqueries.propertyGt(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class GreaterThanAllDetached<SOURCE : Any, F : Any?>(
+    class GreaterThanAllDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyGtAll(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class GreaterThanSomeDetached<SOURCE : Any, F : Any?>(
+    class GreaterThanSomeDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyGtSome(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class GreaterThanOrEqualToDetached<SOURCE : Any, F : Any?>(
+    class GreaterThanOrEqualToDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(
             context: YawnCompilationContext,
         ): Criterion = Subqueries.propertyGe(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class GreaterThanOrEqualToAllDetached<SOURCE : Any, F : Any?>(
+    class GreaterThanOrEqualToAllDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyGeAll(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class GreaterThanOrEqualToSomeDetached<SOURCE : Any, F : Any?>(
+    class GreaterThanOrEqualToSomeDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyGeSome(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class LessThanDetached<SOURCE : Any, F : Any?>(
+    class LessThanDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(
             context: YawnCompilationContext,
         ): Criterion = Subqueries.propertyLt(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class LessThanAllDetached<SOURCE : Any, F : Any?>(
+    class LessThanAllDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyLtAll(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class LessThanSomeDetached<SOURCE : Any, F : Any?>(
+    class LessThanSomeDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyLtSome(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class LessThanOrEqualToDetached<SOURCE : Any, F : Any?>(
+    class LessThanOrEqualToDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(
             context: YawnCompilationContext,
         ): Criterion = Subqueries.propertyLe(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class LessThanOrEqualToAllDetached<SOURCE : Any, F : Any?>(
+    class LessThanOrEqualToAllDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyLeAll(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class LessThanOrEqualToSomeDetached<SOURCE : Any, F : Any?>(
+    class LessThanOrEqualToSomeDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyLeSome(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class InDetached<SOURCE : Any, F : Any?>(
+    class InDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(
             context: YawnCompilationContext,
         ): Criterion = Subqueries.propertyIn(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class NotInDetached<SOURCE : Any, F : Any?>(
+    class NotInDetached<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(context: YawnCompilationContext): Criterion = Subqueries.propertyNotIn(
             property.generatePath(context),
-            detachedCriteriaBuilder.compile(context),
+            detachedBuilder.compile(context),
         )
     }
 
-    class ExistsDetached<SOURCE : Any, F : Any?>(
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    class ExistsDetached<SOURCE : Any, F>(
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Subqueries.exists(detachedCriteriaBuilder.compile(context))
+        ): Criterion = Subqueries.exists(detachedBuilder.compile(context))
     }
 
-    class NotExistsDetached<SOURCE : Any, F : Any?>(
-        override val detachedCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+    class NotExistsDetached<SOURCE : Any, F>(
+        override val detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) : YawnDetachedQueryRestriction<SOURCE, F> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Subqueries.notExists(detachedCriteriaBuilder.compile(context))
+        ): Criterion = Subqueries.notExists(detachedBuilder.compile(context))
     }
 }

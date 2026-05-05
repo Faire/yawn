@@ -2,26 +2,29 @@ package com.faire.yawn.criteria.query
 
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnTableDef
-import com.faire.yawn.criteria.builder.DetachedProjectedTypeSafeCriteriaBuilder
+import com.faire.yawn.criteria.builder.DetachedProjectedYawnBuilder
 import com.faire.yawn.project.YawnQueryProjection
-import com.faire.yawn.query.YawnCriteriaQuery
 import com.faire.yawn.query.YawnQuery
+import com.faire.yawn.query.YawnQueryWithCriterion
 
 /**
- * An abstract super-class for all type-safe Yawn queries DSL; not be used directly.
+ * An abstract super-class for all Yawn query context DSL classes; not be used directly.
  *
- * This breaks down into the following:
- * * [BaseTypeSafeCriteriaQuery], everyone inherits, includes the general filter methods (addEq, etc.)
- * * [TypeSafeCriteriaQuery], the most common case, adds the join methods
- * * [ProjectedTypeSafeCriteriaQuery], for defining projections, adds the project methods
- * * [ProjectionTypeSafeCriteriaQuery], for further refine define projections, no additions
+ * These classes provide the context used inside the Yawn criteria builder lambdas, providing methods such as
+ * `addEq` and `join` depending on the type of query being built.
+ *
+ * The full inheritance chain is as follows:
+ * * [BaseYawnQueryScope], everyone inherits, includes the general filter methods (`addEq`, etc.)
+ * * * [EntityYawnQueryScope], the most common case, adds the join methods
+ * * * [ProjectedYawnQueryScope], for defining projections, adds the project methods
+ * * * [ProjectionYawnQueryScope], for further refine define projections, no additions
  *
  * @param SOURCE the type of the original table that the criteria is based off of.
  * @param T the type being queried (either a projection or an entity).
  * @param DEF the table or projection definition of the entity being queried.
  */
-abstract class BaseTypeSafeCriteriaQuery<SOURCE : Any, T : Any, DEF : YawnDef<SOURCE, T>> protected constructor(
-    protected val query: YawnCriteriaQuery<SOURCE, T>,
+abstract class BaseYawnQueryScope<SOURCE : Any, T : Any, DEF : YawnDef<SOURCE, T>> protected constructor(
+    protected val query: YawnQueryWithCriterion<SOURCE, T>,
 ) {
     /**
      * Creates a correlatable projected subquery that can be used on the parent query in criteria.
@@ -35,12 +38,12 @@ abstract class BaseTypeSafeCriteriaQuery<SOURCE : Any, T : Any, DEF : YawnDef<SO
      */
     inline fun <reified ST : Any, DEF : YawnTableDef<SOURCE, ST>, PROJECTION : Any?> createProjectedSubQuery(
         tableDef: DEF,
-        noinline lambda: ProjectedTypeSafeCriteriaQuery<SOURCE, ST, DEF, PROJECTION>.(
+        noinline lambda: ProjectedYawnQueryScope<SOURCE, ST, DEF, PROJECTION>.(
             tableDef: DEF,
         ) -> YawnQueryProjection<SOURCE, PROJECTION>,
-    ): DetachedProjectedTypeSafeCriteriaBuilder<SOURCE, ST, DEF, PROJECTION> {
+    ): DetachedProjectedYawnBuilder<SOURCE, ST, DEF, PROJECTION> {
         val query = YawnQuery<SOURCE, ST>(ST::class.java)
-        return DetachedProjectedTypeSafeCriteriaBuilder.create(tableDef, query, lambda)
+        return DetachedProjectedYawnBuilder.create(tableDef, query, lambda)
     }
 
     fun <F : Any> nullable(

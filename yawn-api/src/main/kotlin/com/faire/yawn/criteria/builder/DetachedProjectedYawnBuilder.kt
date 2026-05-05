@@ -1,7 +1,7 @@
 package com.faire.yawn.criteria.builder
 
 import com.faire.yawn.YawnTableDef
-import com.faire.yawn.criteria.query.ProjectedTypeSafeCriteriaQuery
+import com.faire.yawn.criteria.query.ProjectedYawnQueryScope
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnCompilationContext
 import com.faire.yawn.query.YawnQuery
@@ -9,7 +9,7 @@ import com.faire.yawn.query.YawnQueryRestriction.And
 import org.hibernate.criterion.DetachedCriteria
 
 /**
- * A type-safe builder for detached Yawn queries with projections.
+ * A builder for detached Yawn queries with projections.
  *
  * Note that since we are projection, the [RETURNS] type parameter will be different from [T]
  *
@@ -17,7 +17,7 @@ import org.hibernate.criterion.DetachedCriteria
  * @param DEF the table definition of the entity being queried
  * @param RETURNS the type being projected to
  */
-class DetachedProjectedTypeSafeCriteriaBuilder<SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>, RETURNS : Any?>(
+class DetachedProjectedYawnBuilder<SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>, RETURNS : Any?>(
     val query: YawnQuery<SOURCE, T>,
     private val tableDef: DEF,
 ) {
@@ -29,16 +29,16 @@ class DetachedProjectedTypeSafeCriteriaBuilder<SOURCE : Any, T : Any, DEF : Yawn
     // to be used by `create` only
     internal fun applyFilter(
         lambda:
-        ProjectedTypeSafeCriteriaQuery<SOURCE, T, DEF, RETURNS>.(tableDef: DEF) -> YawnQueryProjection<SOURCE, RETURNS>,
+        ProjectedYawnQueryScope<SOURCE, T, DEF, RETURNS>.(tableDef: DEF) -> YawnQueryProjection<SOURCE, RETURNS>,
     ) {
-        ProjectedTypeSafeCriteriaQuery.applyLambda<SOURCE, T, DEF, RETURNS>(query) {
+        ProjectedYawnQueryScope.applyLambda<SOURCE, T, DEF, RETURNS>(query) {
             check(query.projection == null) { "At most one projection can be configured per query." }
             val projection = lambda(tableDef)
             query.projection = projection
         }
     }
 
-    // TODO (yawn): Factor out the factory
+    // TODO(yawn): Factor out the factory
     private fun buildDetachedCriteria(context: YawnCompilationContext): DetachedCriteria {
         val alias = checkNotNull(context.generateAlias(tableDef.parent)) { "Unable to alias subquery" }
         val detachedCriteria = DetachedCriteria.forClass(query.clazz, alias)
@@ -81,13 +81,13 @@ class DetachedProjectedTypeSafeCriteriaBuilder<SOURCE : Any, T : Any, DEF : Yawn
         fun <SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>, PROJECTION : Any?> create(
             tableDef: DEF,
             query: YawnQuery<SOURCE, T>,
-            lambda: ProjectedTypeSafeCriteriaQuery<SOURCE, T, DEF, PROJECTION>.(
+            lambda: ProjectedYawnQueryScope<SOURCE, T, DEF, PROJECTION>.(
                 tableDef: DEF,
             ) -> YawnQueryProjection<SOURCE, PROJECTION>,
-        ): DetachedProjectedTypeSafeCriteriaBuilder<SOURCE, T, DEF, PROJECTION> {
-            val typeSafeCriteria = DetachedProjectedTypeSafeCriteriaBuilder<SOURCE, T, DEF, PROJECTION>(query, tableDef)
-            typeSafeCriteria.applyFilter(lambda)
-            return typeSafeCriteria
+        ): DetachedProjectedYawnBuilder<SOURCE, T, DEF, PROJECTION> {
+            val criteria = DetachedProjectedYawnBuilder<SOURCE, T, DEF, PROJECTION>(query, tableDef)
+            criteria.applyFilter(lambda)
+            return criteria
         }
     }
 }

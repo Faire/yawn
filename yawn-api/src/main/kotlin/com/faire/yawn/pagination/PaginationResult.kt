@@ -1,5 +1,12 @@
 package com.faire.yawn.pagination
 
+/**
+ * A wrapper over paginated results of a query.
+ *
+ * @property totalResults the total number of results across all pages (not just the current page)
+ * @property results the list of results for the current page
+ * @property page the original page information used to produce this result
+ */
 data class PaginationResult<T : Any>(
     val totalResults: Long,
     val results: List<T>,
@@ -13,6 +20,9 @@ data class PaginationResult<T : Any>(
         page = page,
     )
 
+    /**
+     * Whether there is a next page, i.e. whether this is not the last page.
+     */
     fun hasNext(): Boolean {
         val nextOffset = page.next().computeOffset()
         return nextOffset < totalResults

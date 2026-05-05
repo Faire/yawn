@@ -1,9 +1,10 @@
 package com.faire.yawn.query
 
 /**
- * A type safe criterion.
+ * Part of an [YawnQuery] representing each criterion in the WHERE clause.
  *
- * It is type safe by restricting construction of this class by TypeSafeRestrictions which is type safe.
+ * It is a thin wrapper over a constructed [YawnQueryRestriction].
+ * Can be safely constructed by using the helpers on [YawnRestrictions].
  */
 data class YawnQueryCriterion<SOURCE : Any>(
     val yawnRestriction: YawnQueryRestriction<SOURCE>,

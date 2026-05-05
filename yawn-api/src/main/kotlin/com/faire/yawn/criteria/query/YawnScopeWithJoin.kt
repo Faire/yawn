@@ -6,24 +6,24 @@ import com.faire.yawn.query.YawnQuery
 import org.hibernate.sql.JoinType
 
 /**
- * A type-safe Yawn queries DSL that supports joins.
- * This serves for both [TypeSafeCriteriaQuery] and [ProjectionTypeSafeCriteriaQuery].
+ * A delegatable interface for Query DSL classes supporting JOIN clauses (via [join]).
+ * This serves for both [EntityYawnQueryScope] and [ProjectionYawnQueryScope].
  */
-sealed interface TypeSafeCriteriaWithJoin<SOURCE : Any, T : Any> {
+sealed interface YawnScopeWithJoin<SOURCE : Any, T : Any> {
     fun <F : Any, D : YawnTableDef<SOURCE, F>> join(
         column: YawnTableDef<SOURCE, *>.JoinColumnDef<F, D>,
         joinType: JoinType = JoinType.INNER_JOIN,
-        lambda: JoinTypeSafeCriteriaQuery<SOURCE, F, D>.(tableDef: D) -> Unit = {},
+        lambda: JoinYawnQueryScope<SOURCE, F, D>.(tableDef: D) -> Unit = {},
     ): D
 }
 
-internal class TypeSafeCriteriaWithJoinDelegate<SOURCE : Any, T : Any>(
+internal class YawnScopeWithJoinDelegate<SOURCE : Any, T : Any>(
     private val query: YawnQuery<SOURCE, T>,
-) : TypeSafeCriteriaWithJoin<SOURCE, T> {
+) : YawnScopeWithJoin<SOURCE, T> {
     override fun <F : Any, D : YawnTableDef<SOURCE, F>> join(
         column: YawnTableDef<SOURCE, *>.JoinColumnDef<F, D>,
         joinType: JoinType,
-        lambda: JoinTypeSafeCriteriaQuery<SOURCE, F, D>.(tableDef: D) -> Unit,
+        lambda: JoinYawnQueryScope<SOURCE, F, D>.(tableDef: D) -> Unit,
     ): D {
         val join = query.registerJoin(column, joinType, lambda)
         return column.joinTableDef(join.parent)

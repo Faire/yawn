@@ -5,7 +5,9 @@ import com.faire.yawn.YawnTableDefParent.AssociationTableDefParent
 import org.hibernate.sql.JoinType
 
 /**
- * A type-safe wrapper for a join in a [YawnQuery].
+ * Part of an [YawnQuery] representing each join in the JOIN clause.
+ *
+ * Can be safely constructed using the `join` function on appropriate DSL query lambdas.
  */
 data class YawnQueryJoin<SOURCE : Any>(
     val columnDef: YawnTableDef<*, *>.JoinColumnDef<*, *>,

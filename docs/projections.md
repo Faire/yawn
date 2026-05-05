@@ -159,7 +159,7 @@ val authors = createBaseBookTableCriteria(yawn)
 
 fun createBaseBookTableCriteria(
   yawn: Yawn
-): TypeSafeCriteriaBuilder<BookTable, BookTableDef<BookTable>> {
+): EntityYawnQueryBuilder<BookTable, BookTableDef<BookTable>> {
   return yawn.query(BookTable) { books ->
     ...
   }

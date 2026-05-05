@@ -2,9 +2,10 @@ package com.faire.yawn.criteria.builder
 
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.YawnTableDefParent.AssociationTableDefParent
-import com.faire.yawn.criteria.query.ProjectedTypeSafeCriteriaQuery
-import com.faire.yawn.criteria.query.TypeSafeCriteriaQuery
-import com.faire.yawn.criteria.query.TypeSafeCriteriaWithJoinDelegate
+import com.faire.yawn.criteria.join.EntityCriteriaWithJoinRef
+import com.faire.yawn.criteria.query.EntityYawnQueryScope
+import com.faire.yawn.criteria.query.ProjectedYawnQueryScope
+import com.faire.yawn.criteria.query.YawnScopeWithJoinDelegate
 import com.faire.yawn.pagination.Page
 import com.faire.yawn.pagination.PaginationResult
 import com.faire.yawn.project.YawnProjections
@@ -15,21 +16,24 @@ import com.faire.yawn.query.YawnQueryOrder
 import org.hibernate.sql.JoinType
 
 /**
- * A type-safe builder for Yawn queries without projections.
+ * A builder for Yawn entity queries (i.e. without projections), specification of [YawnQueryBuilder].
  *
- * Use the method [applyFilter] to further refine the query with type-safe methods like `addEq`, etc.
+ * Use the method [applyFilter] to further refine the query with methods such as `addEq`, etc.
+ * That will give you a lambda context within [EntityYawnQueryScope] for query refinement.
+ *
+ * Use the method [applyProjection] to define a projection and switch to a [ProjectedYawnQueryBuilder].
  *
  * @param T the type of the entity being queried.
  * @param DEF the table definition of the entity being queried.
  */
-class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
+class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     tableDef: DEF,
     queryFactory: YawnQueryFactory,
     query: YawnQuery<T, T>,
-) : BaseTypeSafeCriteriaBuilder<T, DEF, T, TypeSafeCriteriaBuilder<T, DEF>>(tableDef, queryFactory, query) {
-    override fun builderReturn(): TypeSafeCriteriaBuilder<T, DEF> = this
-    override fun clone(): TypeSafeCriteriaBuilder<T, DEF> {
-        return TypeSafeCriteriaBuilder(tableDef, queryFactory, query.copy())
+) : YawnQueryBuilder<T, DEF, T, EntityYawnQueryBuilder<T, DEF>>(tableDef, queryFactory, query) {
+    override fun builderReturn(): EntityYawnQueryBuilder<T, DEF> = this
+    override fun clone(): EntityYawnQueryBuilder<T, DEF> {
+        return EntityYawnQueryBuilder(tableDef, queryFactory, query.copy())
     }
 
     inner class YawnJoinRef<F : Any, D : YawnTableDef<T, F>>(
@@ -47,14 +51,14 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         columnDef: DEF.() -> YawnTableDef<T, *>.JoinColumnDef<F, D>,
     ): YawnJoinRef<F, D> {
         val joinColumnDef = tableDef.columnDef()
-        val joinParent = TypeSafeCriteriaWithJoinDelegate(query).registerJoin(joinColumnDef, joinType = joinType)
+        val joinParent = YawnScopeWithJoinDelegate(query).registerJoin(joinColumnDef, joinType = joinType)
         return YawnJoinRef(columnDef, joinParent)
     }
 
     fun <F : Any, D : YawnTableDef<T, F>> applyJoinRef(
         joinRef: YawnJoinRef<F, D>,
-        lambda: TypeSafeCriteriaQuery<T, DEF>.(joinedTableDef: D) -> Unit,
-    ): TypeSafeCriteriaBuilder<T, DEF> {
+        lambda: EntityYawnQueryScope<T, DEF>.(joinedTableDef: D) -> Unit,
+    ): EntityYawnQueryBuilder<T, DEF> {
         return applyFilter { tableDef ->
             val joinedTableDef = joinRef.get(tableDef)
             lambda(joinedTableDef)
@@ -64,8 +68,8 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     fun <F1 : Any, D1 : YawnTableDef<T, F1>, F2 : Any, D2 : YawnTableDef<T, F2>> applyJoinRefs(
         ref1: YawnJoinRef<F1, D1>,
         ref2: YawnJoinRef<F2, D2>,
-        lambda: TypeSafeCriteriaQuery<T, DEF>.(table1: D1, table2: D2) -> Unit,
-    ): TypeSafeCriteriaBuilder<T, DEF> {
+        lambda: EntityYawnQueryScope<T, DEF>.(table1: D1, table2: D2) -> Unit,
+    ): EntityYawnQueryBuilder<T, DEF> {
         return applyFilter { tableDef ->
             val table1 = ref1.get(tableDef)
             val table2 = ref2.get(tableDef)
@@ -77,8 +81,8 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         ref1: YawnJoinRef<F1, D1>,
         ref2: YawnJoinRef<F2, D2>,
         ref3: YawnJoinRef<F3, D3>,
-        lambda: TypeSafeCriteriaQuery<T, DEF>.(table1: D1, table2: D2, table3: D3) -> Unit,
-    ): TypeSafeCriteriaBuilder<T, DEF> {
+        lambda: EntityYawnQueryScope<T, DEF>.(table1: D1, table2: D2, table3: D3) -> Unit,
+    ): EntityYawnQueryBuilder<T, DEF> {
         return applyFilter { tableDef ->
             val table1 = ref1.get(tableDef)
             val table2 = ref2.get(tableDef)
@@ -88,9 +92,9 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     }
 
     fun <RETURNS : Any?> applyProjection(
-        lambda: ProjectedTypeSafeCriteriaQuery<T, T, DEF, RETURNS>.(tableDef: DEF) -> YawnQueryProjection<T, RETURNS>,
-    ): ProjectedTypeSafeCriteriaBuilder<T, DEF, RETURNS> {
-        return ProjectedTypeSafeCriteriaBuilder.create(tableDef, queryFactory, query, lambda)
+        lambda: ProjectedYawnQueryScope<T, T, DEF, RETURNS>.(tableDef: DEF) -> YawnQueryProjection<T, RETURNS>,
+    ): ProjectedYawnQueryBuilder<T, DEF, RETURNS> {
+        return ProjectedYawnQueryBuilder.create(tableDef, queryFactory, query, lambda)
     }
 
     fun countDistinct(
@@ -149,21 +153,21 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
 
     fun orderAsc(
         column: DEF.() -> YawnTableDef<T, *>.ColumnDef<*>,
-    ): TypeSafeCriteriaBuilder<T, DEF> {
+    ): EntityYawnQueryBuilder<T, DEF> {
         applyOrder { YawnQueryOrder.asc(tableDef.column()) }
         return this
     }
 
     fun orderDesc(
         column: DEF.() -> YawnTableDef<T, *>.ColumnDef<*>,
-    ): TypeSafeCriteriaBuilder<T, DEF> {
+    ): EntityYawnQueryBuilder<T, DEF> {
         applyOrder { YawnQueryOrder.desc(tableDef.column()) }
         return this
     }
 
     fun applyOrder(
         order: DEF.() -> YawnQueryOrder<T>,
-    ): TypeSafeCriteriaBuilder<T, DEF> {
+    ): EntityYawnQueryBuilder<T, DEF> {
         return applyOrders(listOf(order))
     }
 
@@ -193,56 +197,44 @@ class TypeSafeCriteriaBuilder<T : Any, DEF : YawnTableDef<T, T>>(
 
     companion object {
         /**
-         * Create a TypeSafeCriteria from a raw Criteria, wiring in the generics from a provided [tableDef].
+         * Create a [EntityYawnQueryBuilder] for a given [query], wiring in the generics from a provided [tableDef].
          * The lambda is optional if you want to immediately apply some filtering.
          */
         fun <T : Any, DEF : YawnTableDef<T, T>> create(
             tableDef: DEF,
             queryFactory: YawnQueryFactory,
             query: YawnQuery<T, T>,
-            lambda: TypeSafeCriteriaQuery<T, DEF>.(tableDef: DEF) -> Unit = {},
-        ): TypeSafeCriteriaBuilder<T, DEF> {
-            val typeSafeCriteria = TypeSafeCriteriaBuilder(tableDef, queryFactory, query)
-            typeSafeCriteria.applyFilter(lambda)
-            return typeSafeCriteria
+            lambda: EntityYawnQueryScope<T, DEF>.(tableDef: DEF) -> Unit = {},
+        ): EntityYawnQueryBuilder<T, DEF> {
+            val criteria = EntityYawnQueryBuilder(tableDef, queryFactory, query)
+            criteria.applyFilter(lambda)
+            return criteria
         }
     }
-}
 
-/**
- * Extension method that creates a join and returns a wrapper containing both the criteria and the join reference.
- * This is useful when you want to create a join reference that can be used multiple times later.
- *
- * Example:
- * ```
- * val result = session.query(BookTable).attachJoinRef { author }
- * result.criteria.applyJoinRef(result.joinRef) { authors ->
- *     addLike(authors.name, "J.%")
- * }
- * ```
- *
- * @param joinType the type of join to perform (defaults to INNER_JOIN)
- * @param columnDef a lambda that returns the join column definition
- * @return a TypeSafeCriteriaWithJoinRef containing both the criteria and the join reference
- */
-fun <T : Any, DEF : YawnTableDef<T, T>, F : Any, D : YawnTableDef<T, F>> TypeSafeCriteriaBuilder<T, DEF>.attachJoinRef(
-    joinType: JoinType = JoinType.INNER_JOIN,
-    columnDef: DEF.() -> YawnTableDef<T, *>.JoinColumnDef<F, D>,
-): TypeSafeCriteriaWithJoinRef<T, DEF, F, D> {
-    val joinRef = getOrCreateJoinRef(joinType, columnDef)
-    return TypeSafeCriteriaWithJoinRef(this, joinRef)
+    /**
+     * Helper to create a join and return a wrapper containing both the criteria and the join reference.
+     * This is useful when you want to create a join reference to be reused later.
+     *
+     * Example:
+     * ```
+     * val result = session.query(BookTable).attachJoinRef { author }
+     * result.criteria.applyJoinRef(result.joinRef) { authors ->
+     *     addLike(authors.name, "J.%")
+     * }
+     * ```
+     *
+     * Note that is equivalent to using the `joinRef` method directly and managing your own references.
+     *
+     * @param joinType the type of join to perform (defaults to INNER_JOIN)
+     * @param columnDef a lambda that returns the join column definition
+     * @return a [EntityCriteriaWithJoinRef] containing both the criteria and the join reference
+     */
+    fun <F : Any, D : YawnTableDef<T, F>> attachJoinRef(
+        joinType: JoinType = JoinType.INNER_JOIN,
+        columnDef: DEF.() -> YawnTableDef<T, *>.JoinColumnDef<F, D>,
+    ): EntityCriteriaWithJoinRef<T, DEF, F, D> {
+        val joinRef = getOrCreateJoinRef(joinType, columnDef)
+        return EntityCriteriaWithJoinRef(this, joinRef)
+    }
 }
-
-/**
- * Wrapper class that holds a TypeSafeCriteriaBuilder along with a specific join reference.
- * This allows for a fluent API where both the criteria and join reference are returned together.
- *
- * @param T the type of the entity being queried.
- * @param DEF the table definition of the entity being queried.
- * @param F the type of the joined entity.
- * @param D the table definition of the joined entity.
- */
-data class TypeSafeCriteriaWithJoinRef<T : Any, DEF : YawnTableDef<T, T>, F : Any, D : YawnTableDef<T, F>>(
-    val criteria: TypeSafeCriteriaBuilder<T, DEF>,
-    val joinRef: TypeSafeCriteriaBuilder<T, DEF>.YawnJoinRef<F, D>,
-)

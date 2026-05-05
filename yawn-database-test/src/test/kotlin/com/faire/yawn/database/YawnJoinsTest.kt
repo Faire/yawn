@@ -1,7 +1,6 @@
 package com.faire.yawn.database
 
 import com.faire.yawn.Yawn
-import com.faire.yawn.criteria.builder.attachJoinRef
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.setup.entities.Book.Language.ENGLISH

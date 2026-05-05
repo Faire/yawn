@@ -6,9 +6,14 @@ import org.hibernate.NullPrecedence.NONE
 import org.hibernate.criterion.Order
 
 /**
- * A type-safe wrapper around [Order].
+ * Part of an [YawnQuery] representing each single ORDER BY clause.
  *
- * It is type safe by restricting construction of this class by requiring the [SOURCE] of the query.
+ * Compiles into a Hibernate's [Order].
+ * It restricts construction of this class by requiring the [SOURCE] of the query.
+ *
+ * @property property the property by which to order
+ * @property direction the direction by which to order, either ascending or descending
+ * @property nullPrecedence the precedence of null values, either first, last, or none
  */
 data class YawnQueryOrder<SOURCE : Any>(
     val property: YawnTableDef<SOURCE, *>.ColumnDef<*>,

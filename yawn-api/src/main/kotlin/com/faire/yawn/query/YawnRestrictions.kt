@@ -28,11 +28,9 @@ import com.faire.yawn.query.YawnQueryRestriction.NotEqualsProperty
 import com.faire.yawn.query.YawnQueryRestriction.NotIn
 import com.faire.yawn.query.YawnQueryRestriction.Or
 import org.hibernate.criterion.MatchMode
-import org.hibernate.criterion.Restrictions
 
 /**
- * Helper to create [YawnQueryCriterion]s.
- * Yawn's equivalent to Hibernate's [Restrictions].
+ * Helpers to create each type of [YawnQueryCriterion] ensuring `SOURCE`-safety and readability.
  */
 object YawnRestrictions {
     fun <SOURCE : Any, F> eq(

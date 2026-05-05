@@ -1,8 +1,8 @@
 package com.faire.yawn.pagination
 
 /**
- * A type-safe wrapper over a page number, standardizing it as an Int and making it indexing-agnostic, validated, and
- * adding some helper and convenience methods.
+ * A wrapper over a page number, standardizing it as a validated, index-agnostic Int.
+ * Adds convenient helpers and transformations for all your needs.
  */
 @JvmInline
 value class PageNumber private constructor(val zeroIndexedPageNumber: Int) {
@@ -10,6 +10,10 @@ value class PageNumber private constructor(val zeroIndexedPageNumber: Int) {
         check(zeroIndexedPageNumber >= 0) { "$zeroIndexedPageNumber is not a valid zero-indexed page number" }
     }
 
+    /**
+     * Returns the subsequent page number to this.
+     * NOTE: does not validate existence - see [PaginationResult.hasNext] for that.
+     */
     fun next(): PageNumber = PageNumber(zeroIndexedPageNumber = zeroIndexedPageNumber + 1)
 
     val oneIndexedPageNumber: Int

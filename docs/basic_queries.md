@@ -28,7 +28,7 @@ operation, you get other instances to access the new joined columns.
 
 ## Other Available Criteria
 
-The rest of the criteria can be found in `TypeSafeCriteriaWithWhere` such as:
+The rest of the criteria can be found in `YawnScopeWithWhere` such as:
 
 - `addEq`
 - `addGt`
@@ -137,7 +137,7 @@ Available lock modes:
 ## Terminal Operations
 
 Terminal operations such as `uniqueResult` or `list` can only be called outside the lambda, and they do not return the builder as they terminate the query.
-These operations are defined in `BaseTypeSafeCriteriaBuilder` , such as:
+These operations are defined in `YawnQueryBuilder`, such as:
 
 - `list`
 - `uniqueResult`
@@ -159,20 +159,20 @@ fun mainQuery(): List<DbBook> {
 }
 
 private fun applyFilters(
-    criteria: TypeSafeCriteriaBuilder<Book, BookTable>,
+    criteria: EntityYawnQueryBuilder<Book, BookTable>,
 ) {
     criteria.applyAuthorFilters()
     criteria.applyPublisherFilters()
 }
 
-private fun TypeSafeCriteriaBuilder<Book, BookTable>.applyAuthorFilters() { 
+private fun EntityYawnQueryBuilder<Book, BookTable>.applyAuthorFilters() { 
     applyFilter { books ->
         val authors = join(books.author)
         addEq(authors.name, "J.K. Rowling")
     }
 }
 
-private fun TypeSafeCriteriaBuilder<Book, BookTable>.applyPublisherFilters() {
+private fun EntityYawnQueryBuilder<Book, BookTable>.applyPublisherFilters() {
     applyFilter { books ->
         val publishers = join(books.publisher)
         addEq(publishers.name, "HarperCollins")

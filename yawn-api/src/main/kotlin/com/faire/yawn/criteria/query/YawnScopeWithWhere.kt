@@ -2,19 +2,19 @@ package com.faire.yawn.criteria.query
 
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnTableDef
-import com.faire.yawn.criteria.builder.DetachedProjectedTypeSafeCriteriaBuilder
-import com.faire.yawn.query.YawnCriteriaQuery
+import com.faire.yawn.criteria.builder.DetachedProjectedYawnBuilder
 import com.faire.yawn.query.YawnQueryCriterion
+import com.faire.yawn.query.YawnQueryWithCriterion
 import com.faire.yawn.query.YawnRestrictions
 import com.faire.yawn.query.YawnSubQueryRestrictions
 import org.hibernate.criterion.MatchMode
 
 /**
- * A type-safe Yawn queries DSL that supports where filters (addEq, etc.).
- * This serves for all implementations of [BaseTypeSafeCriteriaQuery] (just extracted for organization).
+ * A delegatable interface for Query DSL classes supporting WHERE clauses (via [addEq], etc.).
+ * This serves for all implementations of [BaseYawnQueryScope] (just extracted for organization purposes).
  */
-sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
-    fun provideQuery(): YawnCriteriaQuery<SOURCE, T>
+sealed interface YawnScopeWithWhere<SOURCE : Any, T : Any> {
+    fun provideQuery(): YawnQueryWithCriterion<SOURCE, T>
 
     fun add(criterion: YawnQueryCriterion<SOURCE>)
 
@@ -51,16 +51,16 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
      */
     fun <F> addEq(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.eq(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.eq(column, detachedBuilder))
     }
 
     fun <F> addEq(
         column: YawnTableDef<SOURCE, *>.JoinColumnDefWithForeignKey<*, *, F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.eq(column.foreignKey, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.eq(column.foreignKey, detachedBuilder))
     }
 
     fun <F> addGt(
@@ -82,9 +82,9 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
      */
     fun <F> addGt(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.gt(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.gt(column, detachedBuilder))
     }
 
     fun <F> addGe(
@@ -106,9 +106,9 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
      */
     fun <F> addGe(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.ge(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.ge(column, detachedBuilder))
     }
 
     fun <F> addLe(
@@ -130,9 +130,9 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
      */
     fun <F> addLe(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.le(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.le(column, detachedBuilder))
     }
 
     fun <F> addLt(
@@ -154,9 +154,9 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
      */
     fun <F> addLt(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.lt(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.lt(column, detachedBuilder))
     }
 
     fun <F> addBetween(
@@ -244,9 +244,9 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
      */
     fun <F> addNotEq(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.ne(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.ne(column, detachedBuilder))
     }
 
     fun <F> addNotEq(
@@ -342,16 +342,16 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
 
     fun <F> addIn(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.`in`(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.`in`(column, detachedBuilder))
     }
 
     fun <F : Any> addIn(
         column: YawnTableDef<SOURCE, *>.JoinColumnDefWithForeignKey<*, *, F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.`in`(column.foreignKey, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.`in`(column.foreignKey, detachedBuilder))
     }
 
     fun <F> addNotIn(
@@ -370,84 +370,84 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
 
     fun <F> addNotIn(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.notIn(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.notIn(column, detachedBuilder))
     }
 
     fun <F> addExists(
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.exists(detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.exists(detachedBuilder))
     }
 
     fun <F> addNotExists(
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.notExists(detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.notExists(detachedBuilder))
     }
 
     fun <F> addEqAll(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.eqAll(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.eqAll(column, detachedBuilder))
     }
 
     fun <F> addGeAll(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.geAll(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.geAll(column, detachedBuilder))
     }
 
     fun <F> addGeSome(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.geSome(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.geSome(column, detachedBuilder))
     }
 
     fun <F> addGtAll(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.gtAll(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.gtAll(column, detachedBuilder))
     }
 
     fun <F> addGtSome(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.gtSome(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.gtSome(column, detachedBuilder))
     }
 
     fun <F> addLeAll(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.leAll(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.leAll(column, detachedBuilder))
     }
 
     fun <F> addLeSome(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.leSome(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.leSome(column, detachedBuilder))
     }
 
     fun <F> addLtAll(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.ltAll(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.ltAll(column, detachedBuilder))
     }
 
     fun <F> addLtSome(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        detachedProjectedTypeSafeCriteriaBuilder: DetachedProjectedTypeSafeCriteriaBuilder<*, *, *, F>,
+        detachedBuilder: DetachedProjectedYawnBuilder<*, *, *, F>,
     ) {
-        add(YawnSubQueryRestrictions.ltSome(column, detachedProjectedTypeSafeCriteriaBuilder))
+        add(YawnSubQueryRestrictions.ltSome(column, detachedBuilder))
     }
 
     fun addIsEmpty(
@@ -463,10 +463,10 @@ sealed interface TypeSafeCriteriaWithWhere<SOURCE : Any, T : Any> {
     }
 }
 
-internal class TypeSafeCriteriaWithWhereDelegate<SOURCE : Any, T : Any>(
-    private val query: YawnCriteriaQuery<SOURCE, T>,
-) : TypeSafeCriteriaWithWhere<SOURCE, T> {
-    override fun provideQuery(): YawnCriteriaQuery<SOURCE, T> = query
+internal class YawnScopeWithWhereDelegate<SOURCE : Any, T : Any>(
+    private val query: YawnQueryWithCriterion<SOURCE, T>,
+) : YawnScopeWithWhere<SOURCE, T> {
+    override fun provideQuery(): YawnQueryWithCriterion<SOURCE, T> = query
 
     override fun add(criterion: YawnQueryCriterion<SOURCE>) {
         query.addCriterion(criterion)
