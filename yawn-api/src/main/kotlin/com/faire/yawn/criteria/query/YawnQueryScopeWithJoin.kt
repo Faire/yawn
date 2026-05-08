@@ -9,7 +9,7 @@ import org.hibernate.sql.JoinType
  * A delegatable interface for Query DSL classes supporting JOIN clauses (via [join]).
  * This serves for both [EntityYawnQueryScope] and [ProjectionYawnQueryScope].
  */
-sealed interface YawnScopeWithJoin<SOURCE : Any, T : Any> {
+sealed interface YawnQueryScopeWithJoin<SOURCE : Any, T : Any> {
     fun <F : Any, D : YawnTableDef<SOURCE, F>> join(
         column: YawnTableDef<SOURCE, *>.JoinColumnDef<F, D>,
         joinType: JoinType = JoinType.INNER_JOIN,
@@ -17,9 +17,9 @@ sealed interface YawnScopeWithJoin<SOURCE : Any, T : Any> {
     ): D
 }
 
-internal class YawnScopeWithJoinDelegate<SOURCE : Any, T : Any>(
+internal class YawnQueryScopeWithJoinDelegate<SOURCE : Any, T : Any>(
     private val query: YawnQuery<SOURCE, T>,
-) : YawnScopeWithJoin<SOURCE, T> {
+) : YawnQueryScopeWithJoin<SOURCE, T> {
     override fun <F : Any, D : YawnTableDef<SOURCE, F>> join(
         column: YawnTableDef<SOURCE, *>.JoinColumnDef<F, D>,
         joinType: JoinType,

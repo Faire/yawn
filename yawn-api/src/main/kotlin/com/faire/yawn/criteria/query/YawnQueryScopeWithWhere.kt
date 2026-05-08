@@ -13,7 +13,7 @@ import org.hibernate.criterion.MatchMode
  * A delegatable interface for Query DSL classes supporting WHERE clauses (via [addEq], etc.).
  * This serves for all implementations of [BaseYawnQueryScope] (just extracted for organization purposes).
  */
-sealed interface YawnScopeWithWhere<SOURCE : Any, T : Any> {
+sealed interface YawnQueryScopeWithWhere<SOURCE : Any, T : Any> {
     fun provideQuery(): YawnQueryWithCriterion<SOURCE, T>
 
     fun add(criterion: YawnQueryCriterion<SOURCE>)
@@ -463,9 +463,9 @@ sealed interface YawnScopeWithWhere<SOURCE : Any, T : Any> {
     }
 }
 
-internal class YawnScopeWithWhereDelegate<SOURCE : Any, T : Any>(
+internal class YawnQueryScopeWithWhereDelegate<SOURCE : Any, T : Any>(
     private val query: YawnQueryWithCriterion<SOURCE, T>,
-) : YawnScopeWithWhere<SOURCE, T> {
+) : YawnQueryScopeWithWhere<SOURCE, T> {
     override fun provideQuery(): YawnQueryWithCriterion<SOURCE, T> = query
 
     override fun add(criterion: YawnQueryCriterion<SOURCE>) {

@@ -5,7 +5,7 @@ import com.faire.yawn.YawnTableDefParent.AssociationTableDefParent
 import com.faire.yawn.criteria.join.EntityCriteriaWithJoinRef
 import com.faire.yawn.criteria.query.EntityYawnQueryScope
 import com.faire.yawn.criteria.query.ProjectedYawnQueryScope
-import com.faire.yawn.criteria.query.YawnScopeWithJoinDelegate
+import com.faire.yawn.criteria.query.YawnQueryScopeWithJoinDelegate
 import com.faire.yawn.pagination.Page
 import com.faire.yawn.pagination.PaginationResult
 import com.faire.yawn.project.YawnProjections
@@ -51,7 +51,7 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         columnDef: DEF.() -> YawnTableDef<T, *>.JoinColumnDef<F, D>,
     ): YawnJoinRef<F, D> {
         val joinColumnDef = tableDef.columnDef()
-        val joinParent = YawnScopeWithJoinDelegate(query).registerJoin(joinColumnDef, joinType = joinType)
+        val joinParent = YawnQueryScopeWithJoinDelegate(query).registerJoin(joinColumnDef, joinType = joinType)
         return YawnJoinRef(columnDef, joinParent)
     }
 

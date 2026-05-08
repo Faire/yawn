@@ -19,9 +19,9 @@ class ProjectedYawnQueryScope<SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, 
 private constructor(
     query: YawnQuery<SOURCE, T>,
 ) : BaseYawnQueryScope<SOURCE, T, DEF>(query),
-    YawnScopeWithWhere<SOURCE, T> by YawnScopeWithWhereDelegate(query),
-    YawnScopeWithJoin<SOURCE, T> by YawnScopeWithJoinDelegate(query),
-    YawnScopeWithOrder<SOURCE, T> by YawnScopeWithOrderDelegate(query) {
+    YawnQueryScopeWithWhere<SOURCE, T> by YawnQueryScopeWithWhereDelegate(query),
+    YawnQueryScopeWithJoin<SOURCE, T> by YawnQueryScopeWithJoinDelegate(query),
+    YawnQueryScopeWithOrder<SOURCE, T> by YawnQueryScopeWithOrderDelegate(query) {
 
     private var projectionCalled: Boolean = false
 

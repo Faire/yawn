@@ -8,15 +8,15 @@ import com.faire.yawn.query.YawnQueryOrder
  * A delegatable interface for Query DSL classes supporting ORDER clauses (via [order], etc.).
  * This serves [EntityYawnQueryScope], [ProjectionYawnQueryScope] and [ProjectedYawnQueryScope].
  */
-sealed interface YawnScopeWithOrder<SOURCE : Any, T : Any> {
+sealed interface YawnQueryScopeWithOrder<SOURCE : Any, T : Any> {
     fun order(vararg orders: YawnQueryOrder<SOURCE>)
     fun orderAsc(property: YawnTableDef<SOURCE, *>.ColumnDef<*>)
     fun orderDesc(property: YawnTableDef<SOURCE, *>.ColumnDef<*>)
 }
 
-internal class YawnScopeWithOrderDelegate<SOURCE : Any, T : Any>(
+internal class YawnQueryScopeWithOrderDelegate<SOURCE : Any, T : Any>(
     private val query: YawnQuery<SOURCE, T>,
-) : YawnScopeWithOrder<SOURCE, T> {
+) : YawnQueryScopeWithOrder<SOURCE, T> {
     override fun order(vararg orders: YawnQueryOrder<SOURCE>) {
         for (order in orders) {
             query.orders.add(order)

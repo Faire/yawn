@@ -14,8 +14,8 @@ import com.faire.yawn.query.YawnQuery
 class ProjectionYawnQueryScope<T : Any, DEF : YawnProjectionDef<T, T>> private constructor(
     query: YawnQuery<T, T>,
 ) : BaseYawnQueryScope<T, T, DEF>(query),
-    YawnScopeWithWhere<T, T> by YawnScopeWithWhereDelegate(query),
-    YawnScopeWithOrder<T, T> by YawnScopeWithOrderDelegate(query) {
+    YawnQueryScopeWithWhere<T, T> by YawnQueryScopeWithWhereDelegate(query),
+    YawnQueryScopeWithOrder<T, T> by YawnQueryScopeWithOrderDelegate(query) {
     companion object {
         @Suppress("unused")
         fun <T : Any, DEF : YawnProjectionDef<T, T>> create(

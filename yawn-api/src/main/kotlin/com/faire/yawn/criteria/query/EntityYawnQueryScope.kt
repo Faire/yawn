@@ -14,9 +14,9 @@ import com.faire.yawn.query.YawnQuery
 class EntityYawnQueryScope<SOURCE : Any, DEF : YawnTableDef<SOURCE, SOURCE>> private constructor(
     query: YawnQuery<SOURCE, SOURCE>,
 ) : BaseYawnQueryScope<SOURCE, SOURCE, DEF>(query),
-    YawnScopeWithWhere<SOURCE, SOURCE> by YawnScopeWithWhereDelegate(query),
-    YawnScopeWithJoin<SOURCE, SOURCE> by YawnScopeWithJoinDelegate(query),
-    YawnScopeWithOrder<SOURCE, SOURCE> by YawnScopeWithOrderDelegate(query) {
+    YawnQueryScopeWithWhere<SOURCE, SOURCE> by YawnQueryScopeWithWhereDelegate(query),
+    YawnQueryScopeWithJoin<SOURCE, SOURCE> by YawnQueryScopeWithJoinDelegate(query),
+    YawnQueryScopeWithOrder<SOURCE, SOURCE> by YawnQueryScopeWithOrderDelegate(query) {
     companion object {
         internal fun <T : Any, DEF : YawnTableDef<T, T>> applyLambda(
             query: YawnQuery<T, T>,
