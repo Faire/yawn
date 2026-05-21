@@ -1,7 +1,6 @@
 package com.faire.yawn.database
 
 import com.faire.yawn.Yawn
-import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.query.YawnSubQueryRestrictions
 import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PersonTable
@@ -54,11 +53,11 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
     }
 
     @Test
-    fun `yawn query with a sub query using detached criteria projected to a collection`() {
+    fun `yawn query with a sub query using detached criteria with query-level distinct`() {
         val detachedCriteria = Yawn.createProjectedDetachedCriteria(PersonTable) { person ->
             addLike(person.name, "J.%")
-            project(YawnProjections.distinct(person.name))
-        }
+            project(person.name)
+        }.distinct()
 
         transactor.open { session ->
             val books = session.query(BookTable) { books ->

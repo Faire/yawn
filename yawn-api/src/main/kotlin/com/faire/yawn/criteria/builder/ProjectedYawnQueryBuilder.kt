@@ -24,8 +24,14 @@ class ProjectedYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>, RETURNS : Any
     tableDef,
     queryFactory,
     query,
-) {
+),
+    YawnBuilderWithDistinct<ProjectedYawnQueryBuilder<T, DEF, RETURNS>> {
     override fun builderReturn(): ProjectedYawnQueryBuilder<T, DEF, RETURNS> = this
+
+    override fun distinct(distinct: Boolean): ProjectedYawnQueryBuilder<T, DEF, RETURNS> {
+        query.distinct = distinct
+        return builderReturn()
+    }
 
     override fun clone(): ProjectedYawnQueryBuilder<T, DEF, RETURNS> {
         return ProjectedYawnQueryBuilder(tableDef, queryFactory, query.copy())

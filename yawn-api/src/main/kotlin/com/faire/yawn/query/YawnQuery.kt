@@ -5,6 +5,8 @@ import com.faire.yawn.YawnTableDefParent.AssociationTableDefParent
 import com.faire.yawn.criteria.query.JoinYawnQueryScope
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnQueryRestriction.YawnQueryRestrictionWithNestedRestriction
+import org.hibernate.criterion.Projection
+import org.hibernate.criterion.Projections
 import org.hibernate.sql.JoinType
 
 /**
@@ -22,6 +24,7 @@ data class YawnQuery<SOURCE : Any, T : Any>(
     var offset: Int? = null,
     var maxResults: Int? = null,
     var lockMode: YawnLockMode? = null,
+    var distinct: Boolean = false,
 ) : YawnQueryWithCriterion<SOURCE, T> {
 
     override fun addCriterion(criterion: YawnQueryCriterion<SOURCE>) {
@@ -73,6 +76,15 @@ data class YawnQuery<SOURCE : Any, T : Any>(
             orders = MutableList(orders.size) { orders[it].copy() },
             queryHints = MutableList(queryHints.size) { queryHints[it] },
         )
+    }
+
+    fun compileProjection(context: YawnCompilationContext): Projection? {
+        val compiled = projection?.compile(context)
+        if (compiled == null) {
+            check(!distinct) { "distinct() requires a projection to be set." }
+            return null
+        }
+        return if (distinct) Projections.distinct(compiled) else compiled
     }
 
     fun hasSubQuery(): Boolean {

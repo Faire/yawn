@@ -17,10 +17,20 @@ import org.hibernate.criterion.DetachedCriteria
  * @param DEF the table definition of the entity being queried
  * @param RETURNS the type being projected to
  */
-class DetachedProjectedYawnBuilder<SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>, RETURNS : Any?>(
+class DetachedProjectedYawnBuilder<SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>, RETURNS>(
     val query: YawnQuery<SOURCE, T>,
     private val tableDef: DEF,
-) {
+) : BaseYawnBuilder<DetachedProjectedYawnBuilder<SOURCE, T, DEF, RETURNS>>(),
+    YawnBuilderWithDistinct<DetachedProjectedYawnBuilder<SOURCE, T, DEF, RETURNS>> {
+
+    override fun builderReturn(): DetachedProjectedYawnBuilder<SOURCE, T, DEF, RETURNS> {
+        return this
+    }
+
+    override fun distinct(distinct: Boolean): DetachedProjectedYawnBuilder<SOURCE, T, DEF, RETURNS> {
+        query.distinct = distinct
+        return builderReturn()
+    }
 
     fun compile(context: YawnCompilationContext): DetachedCriteria {
         return buildDetachedCriteria(context)
@@ -69,7 +79,7 @@ class DetachedProjectedYawnBuilder<SOURCE : Any, T : Any, DEF : YawnTableDef<SOU
             detachedCriteria.addOrder(order.compile(context))
         }
 
-        val hibernateProjection = query.projection?.compile(context)
+        val hibernateProjection = query.compileProjection(context)
         if (hibernateProjection != null) {
             detachedCriteria.setProjection(hibernateProjection)
         }

@@ -21,6 +21,11 @@ object YawnProjections {
         override fun project(value: Any?): TO = projection.project(value)
     }
 
+    @Deprecated(
+        message = "For query-level SELECT DISTINCT, use the .distinct() method on the projected builder. " +
+            "For aggregate-level COUNT(DISTINCT col), use countDistinct() instead.",
+        replaceWith = ReplaceWith("distinct()"),
+    )
     fun <SOURCE : Any, TO> distinct(
         projection: YawnQueryProjection<SOURCE, TO>,
     ): YawnQueryProjection<SOURCE, TO> {

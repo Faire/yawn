@@ -180,17 +180,29 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     }
 
     @Test
-    fun `yawn query with projection function - distinct`() {
+    fun `yawn query with query-level distinct`() {
         transactor.open { session ->
             val authors = session.project(BookTable) { books ->
                 val authors = join(books.author)
-                project(YawnProjections.distinct(authors.name))
-            }.list()
+                project(authors.name)
+            }.distinct().list()
             assertThat(authors).containsExactlyInAnyOrder(
                 "J.R.R. Tolkien",
                 "J.K. Rowling",
                 "Hans Christian Andersen",
             )
+        }
+    }
+
+    @Test
+    fun `yawn query with query-level distinct false is a no-op`() {
+        transactor.open { session ->
+            val authors = session.project(BookTable) { books ->
+                val authors = join(books.author)
+                project(authors.name)
+            }.distinct(distinct = false).list()
+            // Without distinct, we get duplicates (one per book, not per author)
+            assertThat(authors).hasSizeGreaterThan(3)
         }
     }
 

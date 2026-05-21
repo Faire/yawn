@@ -57,7 +57,7 @@ internal class YawnTestQueryFactory(
             rawQuery.setFirstResult(offset)
         }
 
-        val hibernateProjection = query.projection?.compile(context)
+        val hibernateProjection = query.compileProjection(context)
         if (hibernateProjection != null) {
             rawQuery.setProjection(hibernateProjection)
         }
