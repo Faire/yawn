@@ -17,9 +17,9 @@ interface YawnBuilderWithDistinct<CRITERIA : BaseYawnBuilder<*>> {
     /**
      * Applies query-level `SELECT DISTINCT` to this projected query.
      *
-     * Unlike [com.faire.yawn.project.YawnProjections.distinct], which wraps a projection
-     * and relies on Hibernate's string-concatenation hack, this method sets a query-level flag
-     * that wraps the entire compiled projection with `Projections.distinct(...)` at compilation time.
+     * This sets a query-level flag that wraps the entire compiled projection with
+     * `Projections.distinct(...)` at compilation time. For aggregate-level distinct
+     * (e.g. `COUNT(DISTINCT col)`), use [com.faire.yawn.project.YawnProjections.countDistinct] instead.
      *
      * @param distinct whether to apply DISTINCT. Defaults to `true`. Pass `false` to turn off
      *   distinct for queries built piecemeal or to set from a variable.

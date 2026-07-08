@@ -11,27 +11,6 @@ import org.hibernate.type.StandardBasicTypes
  * A utility object to create type-safe [YawnQueryProjection].
  */
 object YawnProjections {
-    internal class Distinct<SOURCE : Any, TO>(
-        private val projection: YawnQueryProjection<SOURCE, TO>,
-    ) : YawnQueryProjection<SOURCE, TO> {
-        override fun compile(
-            context: YawnCompilationContext,
-        ): Projection = Projections.distinct(projection.compile(context))
-
-        override fun project(value: Any?): TO = projection.project(value)
-    }
-
-    @Deprecated(
-        message = "For query-level SELECT DISTINCT, use the .distinct() method on the projected builder. " +
-            "For aggregate-level COUNT(DISTINCT col), use countDistinct() instead.",
-        replaceWith = ReplaceWith("distinct()"),
-    )
-    fun <SOURCE : Any, TO> distinct(
-        projection: YawnQueryProjection<SOURCE, TO>,
-    ): YawnQueryProjection<SOURCE, TO> {
-        return Distinct(projection)
-    }
-
     internal class Count<SOURCE : Any, FROM>(
         private val columnDef: YawnDef<SOURCE, *>.YawnColumnDef<FROM>,
     ) : YawnQueryProjection<SOURCE, Long> {
