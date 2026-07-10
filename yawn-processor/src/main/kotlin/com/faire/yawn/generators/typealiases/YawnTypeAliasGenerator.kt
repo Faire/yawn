@@ -8,7 +8,7 @@ import com.squareup.kotlinpoet.TypeAliasSpec
  *
  * For example,
  * ```
- * typealias DbBookCriteriaQuery = TypeSafeCriteriaQuery<DbBook, DbBookTableDef<DbBook>>
+ * typealias DbBookEntityQueryScope = EntityYawnQueryScope<DbBook, DbBookTableDefType>
  * ```
  */
 internal interface YawnTypeAliasGenerator {

@@ -13,10 +13,10 @@ import com.faire.yawn.generators.properties.EmbeddedIdDefGenerator
 import com.faire.yawn.generators.properties.JoinColumnDefGenerator
 import com.faire.yawn.generators.properties.JoinColumnDefWithCompositeKeyGenerator
 import com.faire.yawn.generators.properties.JoinColumnDefWithForeignKeyGenerator
-import com.faire.yawn.generators.typealiases.JoinTypeSafeCriteriaQueryTypeAliasGenerator
-import com.faire.yawn.generators.typealiases.ProjectedTypeSafeCriteriaQueryTypeAliasGenerator
+import com.faire.yawn.generators.typealiases.EntityYawnQueryScopeTypeAliasGenerator
+import com.faire.yawn.generators.typealiases.JoinYawnQueryScopeTypeAliasGenerator
+import com.faire.yawn.generators.typealiases.ProjectedYawnQueryScopeTypeAliasGenerator
 import com.faire.yawn.generators.typealiases.TableDefTypeAliasGenerator
-import com.faire.yawn.generators.typealiases.TypeSafeCriteriaQueryTypeAliasGenerator
 import com.faire.yawn.generators.types.EmbeddedIdTypeGenerator
 import com.faire.yawn.generators.types.EmbeddedTypeGenerator
 import com.faire.yawn.util.YawnContext
@@ -102,14 +102,16 @@ internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProce
     }
 
     override fun generateTypeAliases(yawnContext: YawnContext): List<TypeAliasSpec> {
-        val generators = listOf(
-            TableDefTypeAliasGenerator,
-            TypeSafeCriteriaQueryTypeAliasGenerator,
-            ProjectedTypeSafeCriteriaQueryTypeAliasGenerator,
-            JoinTypeSafeCriteriaQueryTypeAliasGenerator,
-        )
+        return ENTITY_TYPE_ALIAS_GENERATORS.map { it.generate(yawnContext) }
+    }
 
-        return generators.map { it.generate(yawnContext) }
+    companion object {
+        private val ENTITY_TYPE_ALIAS_GENERATORS = listOf(
+            TableDefTypeAliasGenerator,
+            EntityYawnQueryScopeTypeAliasGenerator,
+            ProjectedYawnQueryScopeTypeAliasGenerator,
+            JoinYawnQueryScopeTypeAliasGenerator,
+        )
     }
 
     /**

@@ -1,9 +1,9 @@
 package com.faire.yawn
 
 import com.faire.yawn.YawnTestUtils.assertGeneratedFile
-import com.faire.yawn.criteria.query.JoinTypeSafeCriteriaQuery
-import com.faire.yawn.criteria.query.ProjectedTypeSafeCriteriaQuery
-import com.faire.yawn.criteria.query.TypeSafeCriteriaQuery
+import com.faire.yawn.criteria.query.EntityYawnQueryScope
+import com.faire.yawn.criteria.query.JoinYawnQueryScope
+import com.faire.yawn.criteria.query.ProjectedYawnQueryScope
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KVisibility
@@ -18,10 +18,10 @@ internal class YawnEntityProcessorTypeAliasesTest {
     }
 
     @Test
-    fun `generates type aliases for TypeSafeCriteriaQuery`() {
-        assertThat(typeOf<EntityWithElementCollectionCriteriaQuery>()).isEqualTo(
+    fun `generates type aliases for EntityYawnQueryScope`() {
+        assertThat(typeOf<EntityWithElementCollectionEntityQueryScope>()).isEqualTo(
             typeOf<
-                TypeSafeCriteriaQuery<
+                EntityYawnQueryScope<
                     EntityWithElementCollection,
                     EntityWithElementCollectionTableDef<EntityWithElementCollection>,
                     >,
@@ -30,26 +30,26 @@ internal class YawnEntityProcessorTypeAliasesTest {
     }
 
     @Test
-    fun `generates type aliases for JoinTypeSafeCriteriaQuery`() {
-        assertThat(typeOf<EntityWithElementCollectionJoinCriteriaQuery>()).isEqualTo(
+    fun `generates type aliases for JoinYawnQueryScope`() {
+        assertThat(typeOf<EntityWithElementCollectionJoinQueryScope>()).isEqualTo(
             typeOf<
-                JoinTypeSafeCriteriaQuery<
+                JoinYawnQueryScope<
+                    *,
                     EntityWithElementCollection,
-                    EntityWithElementCollection,
-                    EntityWithElementCollectionTableDef<EntityWithElementCollection>,
+                    *,
                     >,
                 >(),
         )
     }
 
     @Test
-    fun `generates type aliases for ProjectedTypeSafeCriteriaQuery`() {
-        assertThat(typeOf<EntityWithElementCollectionProjectedCriteriaQuery<String>>()).isEqualTo(
-            typeOf<ProjectedTypeSafeCriteriaQuery<EntityWithElementCollection, *, *, String>>(),
+    fun `generates type aliases for ProjectedYawnQueryScope`() {
+        assertThat(typeOf<EntityWithElementCollectionProjectedQueryScope<String>>()).isEqualTo(
+            typeOf<ProjectedYawnQueryScope<*, EntityWithElementCollection, *, String>>(),
         )
 
-        assertThat(typeOf<EntityWithElementCollectionProjectedCriteriaQuery<Boolean>>()).isEqualTo(
-            typeOf<ProjectedTypeSafeCriteriaQuery<EntityWithElementCollection, *, *, Boolean>>(),
+        assertThat(typeOf<EntityWithElementCollectionProjectedQueryScope<Boolean>>()).isEqualTo(
+            typeOf<ProjectedYawnQueryScope<*, EntityWithElementCollection, *, Boolean>>(),
         )
     }
 
@@ -57,16 +57,16 @@ internal class YawnEntityProcessorTypeAliasesTest {
     fun `visibility of type aliases is correct`() {
         assertGeneratedFile<InternalEmptyEntityTable> {
             containsTypeAlias("InternalEmptyEntityTableDefType", KVisibility.INTERNAL)
-            containsTypeAlias("InternalEmptyEntityCriteriaQuery", KVisibility.INTERNAL)
-            containsTypeAlias("InternalEmptyEntityJoinCriteriaQuery", KVisibility.INTERNAL)
-            containsTypeAlias("InternalEmptyEntityProjectedCriteriaQuery", KVisibility.INTERNAL)
+            containsTypeAlias("InternalEmptyEntityEntityQueryScope", KVisibility.INTERNAL)
+            containsTypeAlias("InternalEmptyEntityJoinQueryScope", KVisibility.INTERNAL)
+            containsTypeAlias("InternalEmptyEntityProjectedQueryScope", KVisibility.INTERNAL)
         }
 
         assertGeneratedFile<PublicEmptyEntityTable> {
             containsTypeAlias("PublicEmptyEntityTableDefType", KVisibility.PUBLIC)
-            containsTypeAlias("PublicEmptyEntityCriteriaQuery", KVisibility.PUBLIC)
-            containsTypeAlias("PublicEmptyEntityJoinCriteriaQuery", KVisibility.PUBLIC)
-            containsTypeAlias("PublicEmptyEntityProjectedCriteriaQuery", KVisibility.PUBLIC)
+            containsTypeAlias("PublicEmptyEntityEntityQueryScope", KVisibility.PUBLIC)
+            containsTypeAlias("PublicEmptyEntityJoinQueryScope", KVisibility.PUBLIC)
+            containsTypeAlias("PublicEmptyEntityProjectedQueryScope", KVisibility.PUBLIC)
         }
     }
 }
