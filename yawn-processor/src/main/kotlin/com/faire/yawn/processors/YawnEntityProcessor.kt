@@ -46,6 +46,13 @@ import com.squareup.kotlinpoet.TypeAliasSpec
 import com.squareup.kotlinpoet.TypeSpec
 import kotlin.reflect.KClass
 
+private val entityTypeAliasGenerators = listOf(
+    TableDefTypeAliasGenerator,
+    EntityYawnQueryScopeTypeAliasGenerator,
+    ProjectedYawnQueryScopeTypeAliasGenerator,
+    JoinYawnQueryScopeTypeAliasGenerator,
+)
+
 /**
  * Implementation of [BaseYawnProcessor] for [YawnEntity] annotated classes.
  */
@@ -102,16 +109,7 @@ internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProce
     }
 
     override fun generateTypeAliases(yawnContext: YawnContext): List<TypeAliasSpec> {
-        return ENTITY_TYPE_ALIAS_GENERATORS.map { it.generate(yawnContext) }
-    }
-
-    companion object {
-        private val ENTITY_TYPE_ALIAS_GENERATORS = listOf(
-            TableDefTypeAliasGenerator,
-            EntityYawnQueryScopeTypeAliasGenerator,
-            ProjectedYawnQueryScopeTypeAliasGenerator,
-            JoinYawnQueryScopeTypeAliasGenerator,
-        )
+        return entityTypeAliasGenerators.map { it.generate(yawnContext) }
     }
 
     /**

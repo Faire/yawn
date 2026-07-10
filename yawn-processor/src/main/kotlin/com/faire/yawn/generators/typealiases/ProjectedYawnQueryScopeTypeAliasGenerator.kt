@@ -29,7 +29,9 @@ internal object ProjectedYawnQueryScopeTypeAliasGenerator : YawnTableDefTypeAlia
         )
     }
 
-    override fun TypeAliasSpec.Builder.additionalTypeAliasBuilder(yawnContext: YawnContext): TypeAliasSpec.Builder {
-        return addTypeVariable(projectionTypeVariable)
+    override fun getAdditionalTypeAliasBuilder(
+        yawnContext: YawnContext,
+    ): TypeAliasSpec.Builder.() -> TypeAliasSpec.Builder = {
+        addTypeVariable(projectionTypeVariable)
     }
 }

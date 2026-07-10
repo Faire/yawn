@@ -22,7 +22,7 @@ internal interface YawnTableDefTypeAliasGenerator : YawnTypeAliasGenerator {
 
         return TypeAliasSpec.builder(typeAliasName, typeAliasType)
             .addModifiers(visibility)
-            .additionalTypeAliasBuilder(yawnContext)
+            .let(getAdditionalTypeAliasBuilder(yawnContext))
             .build()
     }
 
@@ -30,5 +30,7 @@ internal interface YawnTableDefTypeAliasGenerator : YawnTypeAliasGenerator {
 
     fun getType(entityType: ClassName, tableDefType: ParameterizedTypeName): ParameterizedTypeName
 
-    fun TypeAliasSpec.Builder.additionalTypeAliasBuilder(yawnContext: YawnContext): TypeAliasSpec.Builder = this
+    fun getAdditionalTypeAliasBuilder(
+        yawnContext: YawnContext,
+    ): TypeAliasSpec.Builder.() -> TypeAliasSpec.Builder = { this }
 }
