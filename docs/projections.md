@@ -44,7 +44,8 @@ Note that this is fully type-safe! The query now returns `String` instead of `Bo
 
 ### Project to Entity
 
-You can also project an entire entity instead of an individual column. For example, the following query returns the publishers of books whose names start with `The`:
+You can also project an entire entity instead of an individual column.
+For example, the following query returns the publishers of books whose names start with `The`:
 
 ```kotlin
 val publishers = yawn.project(BookTable) { books ->
