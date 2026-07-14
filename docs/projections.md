@@ -27,7 +27,7 @@ Each projected **Yawn** lambda *must* return a projection, and can only call `pr
 
 ## Types of Projections
 
-Now you have to choose what to project to. There are **3 kinds of projections** supported by Yawn/Hibernate. All 3 are done by calling the `project` method with
+Now you have to choose what to project to. There are **4 kinds of projections** supported by Yawn/Hibernate. All 4 are done by calling the `project` method with
 a different type of argument.
 
 ### Project to Column
@@ -41,6 +41,23 @@ project(books.author)
 ```
 
 Note that this is fully type-safe! The query now returns `String` instead of `Book` because **Yawn** knows that `author` is a String.
+
+### Project to Entity
+
+You can also project an entire entity instead of an individual column.
+For example, the following query returns the publishers of books whose names start with `The`:
+
+```kotlin
+val publishers = yawn.project(BookTable) { books ->
+    addLike(books.name, "The %")
+    addIsNotNull(books.publisher.foreignKey)
+
+    project(books.publisher)
+}.set()
+```
+
+This returns `Publisher` entities rather than `Book` entities. If you only need the identifier of the referenced entity, project
+`books.publisher.foreignKey` instead.
 
 ### Project to Function
 
