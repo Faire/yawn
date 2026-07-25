@@ -1,9 +1,8 @@
 package com.faire.yawn
 
-import com.faire.yawn.project.YawnPathProvider
 import com.faire.yawn.project.ProjectionNode
+import com.faire.yawn.project.YawnPathProvider
 import com.faire.yawn.project.YawnValueProjector
-import com.faire.yawn.query.YawnCompilationContext
 
 /**
  * A Yawn definition that can be queried, i.e. either a [YawnTableDef] or a [com.faire.yawn.project.YawnProjectionDef].

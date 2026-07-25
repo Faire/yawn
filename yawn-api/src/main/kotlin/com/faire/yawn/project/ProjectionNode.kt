@@ -108,8 +108,8 @@ sealed interface ProjectionNode<SOURCE : Any, TO> {
         }
 
         fun <SOURCE : Any, R> composite(
-            children: List<YawnProjector<SOURCE, *>>,
+            children: List<YawnQueryProjection<SOURCE, *>>,
             mapper: (List<Any?>) -> R,
-        ): Composite<SOURCE, R> = Composite(children, mapper)
+        ): Composite<SOURCE, R> = Composite(children.map { it.asProjector() }, mapper)
     }
 }

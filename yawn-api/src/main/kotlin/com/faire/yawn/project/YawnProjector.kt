@@ -10,15 +10,11 @@ import org.hibernate.criterion.Projection
  * [ProjectorResolver] resolution engine then walks this tree, flattening composites, eliminating constants and mapped
  * transforms, deduplicating identical leaves, and producing a [ResolvedProjection] that the query factory can compile.
  *
- * Extends [YawnQueryProjection] so that projectors can be used anywhere a legacy projection is
- * expected. The default [compile] and [project] implementations resolve through the v2 pipeline.
- * In the query pipeline, [ProjectedTypeSafeCriteriaQuery.project] detects projectors and wraps
- * them in a [ResolvedProjectionAdapter] once, avoiding repeated resolution.
- *
- * Note: this is a `fun interface` for ergonomic lambda syntax, but JVM SAM lambdas do NOT
- * inherit default method implementations from super-interfaces. Production code that needs
- * `compile()` or `project()` to work must use the [YawnValueProjector] or [YawnProjector]
- * factory functions instead of SAM conversion.
+ * Extends [YawnQueryProjection] so a projector can be used anywhere the older interface is expected, which is what
+ * lets the two coexist while everything migrates. Queries never rely on the [compile]/[project] implementations
+ * here: [com.faire.yawn.criteria.query.ProjectedYawnQueryScope.project] resolves a projector once, up front, and
+ * hands the query a [ResolvedProjectionAdapter]. These exist only so a projector handed to some other API that
+ * still speaks [YawnQueryProjection] behaves correctly, and they resolve the tree on every call to do it.
  *
  * @param SOURCE the type of the entity being queried.
  * @param TO the result type of this projection.
@@ -42,35 +38,10 @@ fun interface YawnProjector<SOURCE : Any, TO> : YawnQueryProjection<SOURCE, TO> 
 /**
  * A [YawnProjector] that is guaranteed to produce a [ProjectionNode.Value].
  *
- * This subtype enforces at compile time that a projector resolves to a single-value leaf,
- * not a composite. This is used by [YawnDef.YawnColumnDef] (which implements it directly),
- * by factory methods in [YawnProjections] such as `alias`, and by any API that requires
- * a single-column projection.
+ * This subtype exists mostly so that modifiers like distinct can enforce at compile time that they only wrap
+ * single-value projections, not composites. It is also what [com.faire.yawn.YawnDef.YawnColumnDef] implements,
+ * since a column is always exactly one value.
  */
 fun interface YawnValueProjector<SOURCE : Any, TO> : YawnProjector<SOURCE, TO> {
     override fun projection(): ProjectionNode.Value<SOURCE, TO>
-}
-
-/**
- * Factory function for [YawnProjector] that creates a concrete anonymous object
- * instead of a SAM lambda. Avoids the JVM SAM default-method inheritance limitation.
- */
-fun <SOURCE : Any, TO> YawnProjector(
-    projection: () -> ProjectionNode<SOURCE, TO>,
-): YawnProjector<SOURCE, TO> {
-    return object : YawnProjector<SOURCE, TO> {
-        override fun projection() = projection()
-    }
-}
-
-/**
- * Factory function for [YawnValueProjector] that creates a concrete anonymous object
- * instead of a SAM lambda. Avoids the JVM SAM default-method inheritance limitation.
- */
-fun <SOURCE : Any, TO> YawnValueProjector(
-    projection: () -> ProjectionNode.Value<SOURCE, TO>,
-): YawnValueProjector<SOURCE, TO> {
-    return object : YawnValueProjector<SOURCE, TO> {
-        override fun projection() = projection()
-    }
 }

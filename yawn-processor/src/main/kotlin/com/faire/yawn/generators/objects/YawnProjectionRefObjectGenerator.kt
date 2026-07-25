@@ -6,6 +6,7 @@ import com.faire.yawn.generators.addGeneratedAnnotation
 import com.faire.yawn.project.ProjectionNode
 import com.faire.yawn.project.YawnProjectionRef
 import com.faire.yawn.project.YawnProjector
+import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.util.YawnContext
 import com.faire.yawn.util.YawnNamesGenerator.generateProjectionObjectName
 import com.faire.yawn.util.isConstructorProperty
@@ -21,6 +22,7 @@ import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 
 private val yawnProjector = YawnProjector::class.asClassName()
+private val yawnQueryProjection = YawnQueryProjection::class.asClassName()
 private val projectionNodeClass = ProjectionNode::class.asClassName()
 
 internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator {
@@ -83,8 +85,8 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
         var extraTypeParametersIdx = 0
         for (property in properties) {
             // if the type is nullable, we want to accept both nullable and non-nullable projections
-            // so we add an extra type parameter `Tx : Type?`, so that YawnProjector<SOURCE, Tx> can be either
-            // YawnProjector<SOURCE, Type> or YawnProjector<SOURCE, Type?>.
+            // so we add an extra type parameter `Tx : Type?`, so that YawnQueryProjection<SOURCE, Tx> can be
+            // either YawnQueryProjection<SOURCE, Type> or YawnQueryProjection<SOURCE, Type?>.
             val projectionType = if (property.type.isNullable) {
                 val typeVariable = TypeVariableName("T$extraTypeParametersIdx", property.type)
                 extraTypeParametersIdx++
@@ -94,7 +96,7 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
             } else {
                 property.type
             }
-            create.addParameter(property.name, yawnProjector.parameterizedBy(source, projectionType))
+            create.addParameter(property.name, yawnQueryProjection.parameterizedBy(source, projectionType))
         }
 
         val propertyProjections = properties.joinToString(separator = ", ") { it.name }

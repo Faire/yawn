@@ -7,15 +7,9 @@ import com.faire.yawn.project.AggregateKind.GROUP_BY
 import com.faire.yawn.project.AggregateKind.MAX
 import com.faire.yawn.project.AggregateKind.MIN
 import com.faire.yawn.project.AggregateKind.SUM
-import com.faire.yawn.project.ModifierKind.DISTINCT
-import com.faire.yawn.project.ProjectionLeaf
 import com.faire.yawn.project.ProjectionNode
-<<<<<<< HEAD
-import com.faire.yawn.project.ProjectorResolver
-import com.faire.yawn.project.ResolvedProjectionAdapter
 import com.faire.yawn.project.YawnProjection
-=======
->>>>>>> 5beba20 (feat: Implementation using the new projection structure [example])
+import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.project.YawnProjector
 import com.faire.yawn.project.YawnValueProjector
 import com.faire.yawn.query.YawnQueryOrder
@@ -137,13 +131,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             val authors = session.project(BookTable) { books ->
                 val authors = join(books.author)
-                project(
-                    YawnValueProjector<Book, String> {
-                        ProjectionNode.Value(
-                            ProjectionLeaf.Modifier(DISTINCT, ProjectionLeaf.Property(authors.name)),
-                        )
-                    },
-                )
+                project(YawnProjections.distinct(authors.name))
             }.list()
 
             assertThat(authors).containsExactlyInAnyOrder(
@@ -246,25 +234,13 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             val results = session.project(BookTable) {
                 project(
-<<<<<<< HEAD
-                    adapt(
-                        YawnValueProjector<Book, Long> {
-                            ProjectionNode.sql(
-                                sqlExpression = "COUNT(*) AS total",
-                                columnAlias = "total",
-                                resultType = Long::class,
-                            )
-                        },
-                    ),
-=======
                     YawnValueProjector<Book, Long> {
                         ProjectionNode.sql(
                             sqlExpression = "COUNT(*) AS total",
-                            aliases = listOf("total"),
-                            resultTypes = listOf(Long::class),
+                            columnAlias = "total",
+                            resultType = Long::class,
                         )
                     },
->>>>>>> 5beba20 (feat: Implementation using the new projection structure [example])
                 )
             }.uniqueResult()!!
 
@@ -383,13 +359,8 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
 
             val publisherWithThe = session.project(BookTable) { books ->
                 addLike(books.name, "The %")
-<<<<<<< HEAD
                 addIsNotNull(books.publisher)
-                project(adapt(YawnValueProjector { ProjectionNode.property(books.publisher.foreignKey) }))
-=======
-                addIsNotNull(books.publisher.foreignKey)
                 project(YawnValueProjector { ProjectionNode.property(books.publisher.foreignKey) })
->>>>>>> 5beba20 (feat: Implementation using the new projection structure [example])
             }.set()
             assertThat(publisherWithThe)
                 .containsExactlyInAnyOrder(
@@ -405,7 +376,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val publishers = session.project(BookTable) { books ->
                 addLike(books.name, "The %")
                 addIsNotNull(books.publisher)
-                project(adapt(books.publisher))
+                project(books.publisher)
             }.set()
 
             assertThat(publishers.map { it.name })
@@ -679,7 +650,6 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             )
         }
     }
-<<<<<<< HEAD
 
     @Test
     fun `sql date projection`() {
@@ -688,7 +658,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val hobbit = session.project(BookTable) { books ->
                 addEq(books.name, "The Hobbit")
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.createdAt) },
                             sqlDate<Book, Date>(CREATED_ON_SQL, CREATED_ON_ALIAS),
@@ -702,7 +672,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             // list mapping
             val all = session.project(BookTable) { books ->
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.name) },
                             YawnValueProjector { ProjectionNode.property(books.createdAt) },
@@ -728,7 +698,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 addIn(books.name, setOf("The Hobbit", "Harry Potter"))
                 orderAsc(books.name)
                 project(
-                    adapt {
+                    YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.createdAt) },
                             sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS),
@@ -745,7 +715,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             // uniqueResult mapping of a null date
             val nullDate = session.project(BookTable) { books ->
                 addEq(books.name, "Harry Potter")
-                project(adapt(sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS)))
+                project(sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS))
             }.uniqueResult()
 
             assertThat(nullDate).isNull()
@@ -768,15 +738,15 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 project(
                     ResolvedProjectionAdapterTest_BookDatesProjection.create(
                         name = books.name,
-                        createdOn = adapt(sqlDate<Book, Date>(CREATED_ON_SQL, CREATED_ON_ALIAS)),
-                        ratedOn = adapt(sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS)),
+                        createdOn = sqlDate<Book, Date>(CREATED_ON_SQL, CREATED_ON_ALIAS),
+                        ratedOn = sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS),
                     ),
                 )
             }
 
             val today = session.project(BookTable) { books ->
                 addEq(books.name, "The Hobbit")
-                project(adapt(YawnValueProjector { ProjectionNode.property(books.createdAt) }))
+                project(YawnValueProjector { ProjectionNode.property(books.createdAt) })
             }.uniqueResult()!!.toUtcSqlDate()
 
             // uniqueResult mapping
@@ -790,13 +760,6 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 BookDates(name = "The Hobbit", createdOn = today, ratedOn = today),
             )
         }
-    }
-
-    private fun <SOURCE : Any, TO> adapt(
-        projector: YawnProjector<SOURCE, TO>,
-    ): ResolvedProjectionAdapter<SOURCE, TO> {
-        val resolved = ProjectorResolver<SOURCE>().resolve(projector)
-        return ResolvedProjectionAdapter(resolved)
     }
 
     /**
@@ -826,6 +789,4 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
         private const val RATED_ON_SQL =
             "CASE WHEN {alias}.rating IS NULL THEN NULL ELSE CAST({alias}.createdAt AS DATE) END"
     }
-=======
->>>>>>> 5beba20 (feat: Implementation using the new projection structure [example])
 }

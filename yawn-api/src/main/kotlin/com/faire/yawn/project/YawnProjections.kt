@@ -77,38 +77,24 @@ object YawnProjections {
         return YawnValueProjector { ProjectionNode.rowCount() }
     }
 
-<<<<<<< HEAD
-    fun <SOURCE : Any> rowCount(): YawnQueryProjection<SOURCE, Long> {
-        return RowCount()
-    }
-
-    internal class SelectConstant<SOURCE : Any>(
-        private val constant: String,
-    ) : YawnQueryProjection<SOURCE, String> {
-        override fun compile(context: YawnCompilationContext): Projection {
-            val alias = context.generateResultAlias()
-            return Projections.sqlProjection(
-                "'$constant' as $alias",
-                arrayOf(alias),
-                arrayOf(StandardBasicTypes.STRING),
-=======
     fun <SOURCE : Any> selectConstant(constant: String): YawnProjector<SOURCE, String> {
         return YawnValueProjector {
-            ProjectionNode.sql(
-                sqlExpression = "'$constant' as $CONSTANT_ALIAS",
-                aliases = listOf(CONSTANT_ALIAS),
-                resultTypes = listOf(String::class),
->>>>>>> 5beba20 (feat: Implementation using the new projection structure [example])
+            ProjectionNode.Value(
+                ProjectionLeaf.SqlValue(
+                    render = { "'$constant'" },
+                    resultType = String::class,
+                ),
             )
         }
     }
 
     fun <SOURCE : Any, T : Any> `null`(): YawnProjector<SOURCE, T?> {
         return YawnValueProjector {
-            ProjectionNode.sql(
-                sqlExpression = "null as $CONSTANT_ALIAS",
-                aliases = listOf(CONSTANT_ALIAS),
-                resultTypes = listOf(String::class),
+            ProjectionNode.Value(
+                ProjectionLeaf.SqlValue(
+                    render = { "null" },
+                    resultType = String::class,
+                ),
             )
         }
     }
@@ -124,66 +110,34 @@ object YawnProjections {
     }
 
     fun <SOURCE : Any, FROM : Any> coalesce(
-        projection: YawnProjector<SOURCE, FROM?>,
+        projection: YawnQueryProjection<SOURCE, FROM?>,
         defaultValue: FROM,
-<<<<<<< HEAD
-    ): YawnQueryProjection<SOURCE, FROM> {
-        return Coalesce(projection, defaultValue)
-    }
-
-    internal class Null<SOURCE : Any, FROM : Any> : YawnQueryProjection<SOURCE, FROM?> {
-        override fun compile(context: YawnCompilationContext): Projection {
-            val alias = context.generateResultAlias()
-            return Projections.sqlProjection(
-                "null as $alias",
-                arrayOf(alias),
-                arrayOf(StandardBasicTypes.STRING),
-            )
-        }
-
-        override fun project(value: Any?): FROM? = null
-    }
-
-    fun <SOURCE : Any, T : Any> `null`(): YawnQueryProjection<SOURCE, T?> {
-        return Null()
-    }
-
-    internal class PairProjection<SOURCE : Any, A, B>(
-        private val firstProjection: YawnQueryProjection<SOURCE, A>,
-        private val secondProjection: YawnQueryProjection<SOURCE, B>,
-    ) : YawnQueryProjection<SOURCE, Pair<A, B>> {
-        override fun compile(context: YawnCompilationContext): Projection {
-            return Projections.projectionList()
-                .add(firstProjection.compile(context))
-                .add(secondProjection.compile(context))
-        }
-
-        override fun project(value: Any?): Pair<A, B> {
-            val queryResult = value as Array<*>
-            return Pair(firstProjection.project(queryResult[0]), secondProjection.project(queryResult[1]))
-        }
-=======
     ): YawnProjector<SOURCE, FROM> {
-        return YawnProjector { ProjectionNode.mapped(projection) { it ?: defaultValue } }
->>>>>>> 5beba20 (feat: Implementation using the new projection structure [example])
+        return YawnProjector { ProjectionNode.mapped(projection.asProjector()) { it ?: defaultValue } }
     }
 
     fun <SOURCE : Any, A, B> pair(
-        firstProjection: YawnProjector<SOURCE, A>,
-        secondProjection: YawnProjector<SOURCE, B>,
+        firstProjection: YawnQueryProjection<SOURCE, A>,
+        secondProjection: YawnQueryProjection<SOURCE, B>,
     ): YawnProjector<SOURCE, Pair<A, B>> {
         return YawnProjector {
-            ProjectionNode.composite(firstProjection, secondProjection) { a, b -> a to b }
+            ProjectionNode.composite(firstProjection.asProjector(), secondProjection.asProjector()) { a, b ->
+                a to b
+            }
         }
     }
 
     fun <SOURCE : Any, A, B, C> triple(
-        firstProjection: YawnProjector<SOURCE, A>,
-        secondProjection: YawnProjector<SOURCE, B>,
-        thirdProjection: YawnProjector<SOURCE, C>,
+        firstProjection: YawnQueryProjection<SOURCE, A>,
+        secondProjection: YawnQueryProjection<SOURCE, B>,
+        thirdProjection: YawnQueryProjection<SOURCE, C>,
     ): YawnProjector<SOURCE, Triple<A, B, C>> {
         return YawnProjector {
-            ProjectionNode.composite(firstProjection, secondProjection, thirdProjection) { a, b, c ->
+            ProjectionNode.composite(
+                firstProjection.asProjector(),
+                secondProjection.asProjector(),
+                thirdProjection.asProjector(),
+            ) { a, b, c ->
                 Triple(a, b, c)
             }
         }

@@ -87,4 +87,41 @@ sealed interface ProjectionLeaf<SOURCE : Any> {
         val kind: ModifierKind,
         val inner: ProjectionLeaf<SOURCE>,
     ) : ProjectionLeaf<SOURCE>
+
+    /**
+     * A bridge that lets a hand-written [YawnQueryProjection] participate in a projection tree.
+     *
+     * This is the one leaf that is *not* ORM-agnostic: [YawnQueryProjection.compile] hands back the ORM's own
+     * projection type, so this leaf can only ever be compiled by the ORM that produced it. That is a deliberate
+     * trade for migration - it lets a v2 tree contain projections Yawn does not know how to describe yet, so
+     * composing (`pair`, `triple`, a generated `create(...)`) keeps working for the escape hatch users already
+     * have. It should be deleted once nothing implements [YawnQueryProjection] by hand.
+     *
+     * As with [Sql], the wrapped projection must select **exactly one** column, since it occupies exactly one
+     * slot in the resolved result row. This is not checkable here; it was equally the caller's responsibility
+     * before, as the older composite projections indexed their results the same way.
+     *
+     * Uses identity equality (no two distinct instances deduplicate), because an arbitrary implementation
+     * carries no structure to compare.
+     */
+    class Legacy<SOURCE : Any>(
+        val projection: YawnQueryProjection<SOURCE, *>,
+    ) : ProjectionLeaf<SOURCE>
+}
+
+/**
+ * Views any [YawnQueryProjection] as a [YawnProjector], so it can be nested inside a projection tree.
+ *
+ * A projection that already describes itself as a tree is returned as-is; anything else is wrapped in a
+ * [ProjectionLeaf.Legacy] bridge.
+ */
+fun <SOURCE : Any, TO> YawnQueryProjection<SOURCE, TO>.asProjector(): YawnProjector<SOURCE, TO> {
+    if (this is YawnProjector<SOURCE, TO>) return this
+
+    return YawnValueProjector {
+        ProjectionNode.Value(
+            leaf = ProjectionLeaf.Legacy(this),
+            mapper = { project(it) },
+        )
+    }
 }

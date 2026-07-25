@@ -48,6 +48,7 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
         is ProjectionLeaf.Sql -> HibernateYawnSqlProjection(leaf)
         is ProjectionLeaf.SqlValue -> ScopedYawnSqlProjection(context, leaf)
         is ProjectionLeaf.Modifier -> compileModifier(context, leaf)
+        is ProjectionLeaf.Legacy -> leaf.projection.compile(context)
     }
 
     private fun compileAggregate(
