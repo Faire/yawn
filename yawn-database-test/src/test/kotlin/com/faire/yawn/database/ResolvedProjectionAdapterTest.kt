@@ -379,7 +379,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             val publishers = session.project(BookTable) { books ->
                 addLike(books.name, "The %")
                 addIsNotNull(books.publisher.foreignKey)
-                project(adapt(books.publisher))
+                project(books.publisher)
             }.set()
 
             assertThat(publishers.map { it.name })
