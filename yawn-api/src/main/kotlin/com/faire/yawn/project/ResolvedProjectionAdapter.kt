@@ -7,6 +7,7 @@ import org.hibernate.type.StandardBasicTypes
 import org.hibernate.type.Type
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.sql.Date
 import kotlin.reflect.KClass
 
 /**
@@ -97,6 +98,8 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
             Byte::class -> StandardBasicTypes.BYTE
             BigDecimal::class -> StandardBasicTypes.BIG_DECIMAL
             BigInteger::class -> StandardBasicTypes.BIG_INTEGER
+            // SQL `date(...)` expressions (and friends) come back from the database as [java.sql.Date].
+            Date::class -> StandardBasicTypes.DATE
             else -> error("Unsupported SQL projection result type: $this")
         }
     }

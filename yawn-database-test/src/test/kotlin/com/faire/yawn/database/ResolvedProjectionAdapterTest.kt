@@ -12,6 +12,7 @@ import com.faire.yawn.project.ProjectionLeaf
 import com.faire.yawn.project.ProjectionNode
 import com.faire.yawn.project.ProjectorResolver
 import com.faire.yawn.project.ResolvedProjectionAdapter
+import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjector
 import com.faire.yawn.project.YawnValueProjector
 import com.faire.yawn.query.YawnQueryOrder
@@ -21,6 +22,9 @@ import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PublisherTable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.sql.Date
+import java.time.Instant
+import java.time.ZoneOffset
 
 /**
  * Integration tests for [ResolvedProjectionAdapter], verifying that the new projection system
@@ -656,10 +660,149 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
         }
     }
 
+    @Test
+    fun `sql date projection`() {
+        transactor.open { session ->
+            // uniqueResult mapping
+            val hobbit = session.project(BookTable) { books ->
+                addEq(books.name, "The Hobbit")
+                project(
+                    adapt {
+                        ProjectionNode.composite(
+                            YawnValueProjector { ProjectionNode.property(books.createdAt) },
+                            sqlDate<Book, Date>(CREATED_ON_SQL, CREATED_ON_ALIAS),
+                        ) { createdAt, createdOn -> createdAt to createdOn }
+                    },
+                )
+            }.uniqueResult()!!
+
+            assertThat(hobbit.second).isEqualTo(hobbit.first.toUtcSqlDate())
+
+            // list mapping
+            val all = session.project(BookTable) { books ->
+                project(
+                    adapt {
+                        ProjectionNode.composite(
+                            YawnValueProjector { ProjectionNode.property(books.name) },
+                            YawnValueProjector { ProjectionNode.property(books.createdAt) },
+                            sqlDate<Book, Date>(CREATED_ON_SQL, CREATED_ON_ALIAS),
+                        ) { name, createdAt, createdOn -> Triple(name, createdAt, createdOn) }
+                    },
+                )
+            }.list()
+
+            assertThat(all).hasSize(6)
+            assertThat(all.map { it.third }).allSatisfy { assertThat(it).isInstanceOf(Date::class.java) }
+            for ((name, createdAt, createdOn) in all) {
+                assertThat(createdOn).describedAs(name).isEqualTo(createdAt.toUtcSqlDate())
+            }
+        }
+    }
+
+    @Test
+    fun `nullable sql date projection`() {
+        transactor.open { session ->
+            // Harry Potter has no rating, so `RATED_ON_SQL` evaluates to a null date for it.
+            val results = session.project(BookTable) { books ->
+                addIn(books.name, setOf("The Hobbit", "Harry Potter"))
+                orderAsc(books.name)
+                project(
+                    adapt {
+                        ProjectionNode.composite(
+                            YawnValueProjector { ProjectionNode.property(books.createdAt) },
+                            sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS),
+                        ) { createdAt, ratedOn -> createdAt to ratedOn }
+                    },
+                )
+            }.list()
+
+            assertThat(results).hasSize(2)
+            // "Harry Potter" sorts first, and has a null rating
+            assertThat(results[0].second).isNull()
+            assertThat(results[1].second).isEqualTo(results[1].first.toUtcSqlDate())
+
+            // uniqueResult mapping of a null date
+            val nullDate = session.project(BookTable) { books ->
+                addEq(books.name, "Harry Potter")
+                project(adapt(sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS)))
+            }.uniqueResult()
+
+            assertThat(nullDate).isNull()
+        }
+    }
+
+    @YawnProjection
+    internal data class BookDates(
+        val name: String,
+        val createdOn: Date,
+        val ratedOn: Date?,
+    )
+
+    @Test
+    fun `sql date nested in a generated projection`() {
+        transactor.open { session ->
+            fun projectBookDates(vararg names: String) = session.project(BookTable) { books ->
+                addIn(books.name, names.toSet())
+                orderAsc(books.name)
+                project(
+                    ResolvedProjectionAdapterTest_BookDatesProjection.create(
+                        name = books.name,
+                        createdOn = adapt(sqlDate<Book, Date>(CREATED_ON_SQL, CREATED_ON_ALIAS)),
+                        ratedOn = adapt(sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS)),
+                    ),
+                )
+            }
+
+            val today = session.project(BookTable) { books ->
+                addEq(books.name, "The Hobbit")
+                project(adapt(YawnValueProjector { ProjectionNode.property(books.createdAt) }))
+            }.uniqueResult()!!.toUtcSqlDate()
+
+            // uniqueResult mapping
+            val hobbit = projectBookDates("The Hobbit").uniqueResult()!!
+            assertThat(hobbit).isEqualTo(BookDates(name = "The Hobbit", createdOn = today, ratedOn = today))
+
+            // list mapping, mixing a null and a non-null date
+            val results = projectBookDates("The Hobbit", "Harry Potter").list()
+            assertThat(results).containsExactly(
+                BookDates(name = "Harry Potter", createdOn = today, ratedOn = null),
+                BookDates(name = "The Hobbit", createdOn = today, ratedOn = today),
+            )
+        }
+    }
+
     private fun <SOURCE : Any, TO> adapt(
         projector: YawnProjector<SOURCE, TO>,
     ): ResolvedProjectionAdapter<SOURCE, TO> {
         val resolved = ProjectorResolver<SOURCE>().resolve(projector)
         return ResolvedProjectionAdapter(resolved)
+    }
+
+    /**
+     * A raw SQL projection whose result is a [java.sql.Date]; [TO] may be nullable or not.
+     */
+    private fun <SOURCE : Any, TO : Date?> sqlDate(
+        expression: String,
+        alias: String,
+    ): YawnValueProjector<SOURCE, TO> = YawnValueProjector {
+        ProjectionNode.sql(
+            sqlExpression = "$expression AS $alias",
+            aliases = listOf(alias),
+            resultTypes = listOf(Date::class),
+        )
+    }
+
+    private fun Instant.toUtcSqlDate(): Date = Date.valueOf(atZone(ZoneOffset.UTC).toLocalDate())
+
+    private companion object {
+        private const val CREATED_ON_ALIAS = "created_on"
+        private const val RATED_ON_ALIAS = "rated_on"
+
+        /** H2 has no `date(...)` function; `CAST(x AS DATE)` is the portable equivalent. */
+        private const val CREATED_ON_SQL = "CAST({alias}.createdAt AS DATE)"
+
+        /** Yields a null date for books without a rating. */
+        private const val RATED_ON_SQL =
+            "CASE WHEN {alias}.rating IS NULL THEN NULL ELSE CAST({alias}.createdAt AS DATE) END"
     }
 }
