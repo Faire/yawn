@@ -3,7 +3,7 @@
 Yawn query builders are mutable. This makes it possible to start a query in one function, pass it to other functions to add filters, joins, ordering,
 or pagination, and execute it only after all of the pieces have been applied.
 
-Prefer a single query lambda when all of the query logic belongs together. Piecemeal construction is useful when several callers share filters or when
+Usually having a single query lambda is preferred when all of the query logic belongs together, but piecemeal construction is possible when several callers share filters or when
 optional filters are selected at runtime.
 
 ## Passing a query builder around
@@ -23,13 +23,15 @@ fun findBooks(filters: BookFilters): List<Book> {
 private fun EntityYawnQueryBuilder<Book, BookTableDefType>.applyBookFilters(
     filters: BookFilters,
 ) {
-    filters.title?.let { title ->
+    if (filters.title != null) {
+        val title = filters.title
         applyFilter { books ->
             addLike(books.name, "%$title%")
         }
     }
 
-    filters.minimumPages?.let { minimumPages ->
+    if (filters.minimumPages != null) {
+        val minimumPages = filters.minimumPages
         applyFilter { books ->
             addGe(books.numberOfPages, minimumPages)
         }
@@ -40,8 +42,8 @@ private fun EntityYawnQueryBuilder<Book, BookTableDefType>.applyBookFilters(
 Each call mutates and returns the same builder, so calls can also be chained. Do not call `list`, `uniqueResult`, or another terminal operation in a helper
 that is only meant to contribute part of a query.
 
-If a base query will be used to execute more than one variation, create a new base builder for each variation. Mutations accumulate on a builder;
-executing it does not reset it.
+If a base query will be used to execute more than one variation, create a new base builder for each variation or call `clone()` before diverging.
+Mutations accumulate on a builder; executing it does not reset it.
 
 ## Choosing a type for a helper
 
