@@ -3,8 +3,8 @@
 Yawn query builders are mutable. This makes it possible to start a query in one function, pass it to other functions to add filters, joins, ordering,
 or pagination, and execute it only after all of the pieces have been applied.
 
-Usually having a single query lambda is preferred when all of the query logic belongs together, but piecemeal construction is possible when several callers share filters or when
-optional filters are selected at runtime.
+Usually having a single query lambda is preferred when all of the query logic belongs together.
+Piecemeal construction is useful when several callers share filters or when optional filters are selected at runtime.
 
 ## Passing a query builder around
 
