@@ -28,7 +28,7 @@ operation, you get other instances to access the new joined columns.
 
 ## Other Available Criteria
 
-The rest of the criteria can be found in `YawnScopeWithWhere` such as:
+The rest of the criteria can be found in `YawnQueryScopeWithWhere` such as:
 
 - `addEq`
 - `addGt`
@@ -147,6 +147,8 @@ These operations are defined in `YawnQueryBuilder`, such as:
 
 ## Pass/Modify Queries Around
 
+For a complete guide to choosing helper types and sharing joins between query pieces, see [Building Queries Piecemeal](piecemeal_queries.md).
+
 If you want to “pass” a query object around, you can just call `applyFilter` multiple times.
 
 For example:
@@ -159,20 +161,20 @@ fun mainQuery(): List<DbBook> {
 }
 
 private fun applyFilters(
-    criteria: EntityYawnQueryBuilder<Book, BookTable>,
+    criteria: EntityYawnQueryBuilder<Book, BookTableDefType>,
 ) {
     criteria.applyAuthorFilters()
     criteria.applyPublisherFilters()
 }
 
-private fun EntityYawnQueryBuilder<Book, BookTable>.applyAuthorFilters() { 
+private fun EntityYawnQueryBuilder<Book, BookTableDefType>.applyAuthorFilters() {
     applyFilter { books ->
         val authors = join(books.author)
         addEq(authors.name, "J.K. Rowling")
     }
 }
 
-private fun EntityYawnQueryBuilder<Book, BookTable>.applyPublisherFilters() {
+private fun EntityYawnQueryBuilder<Book, BookTableDefType>.applyPublisherFilters() {
     applyFilter { books ->
         val publishers = join(books.publisher)
         addEq(publishers.name, "HarperCollins")
