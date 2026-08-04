@@ -354,8 +354,8 @@ internal class ProjectorResolverTest {
         val projector = YawnValueProjector<Any, Long> {
             ProjectionNode.sql(
                 sqlExpression = "LENGTH({alias}.name) AS name_length",
-                aliases = listOf("name_length"),
-                resultTypes = listOf(Long::class),
+                columnAlias = "name_length",
+                resultType = Long::class,
             )
         }
 
@@ -365,6 +365,29 @@ internal class ProjectorResolverTest {
         assertThat(leaf.sqlExpression).isEqualTo("LENGTH({alias}.name) AS name_length")
 
         assertThat(resolved.mapRow(listOf(10L))).isEqualTo(10L)
+    }
+
+    @Test
+    fun `sql leaf occupies exactly one result slot, between other values`() {
+        val projector = YawnProjector<Any, Triple<String, Long, Long>> {
+            ProjectionNode.composite(
+                YawnValueProjector<Any, String> { ProjectionNode.property(nameCol) },
+                YawnValueProjector<Any, Long> {
+                    ProjectionNode.sql(
+                        sqlExpression = "111 AS sentinel",
+                        columnAlias = "sentinel",
+                        resultType = Long::class,
+                    )
+                },
+                YawnValueProjector<Any, Long> { ProjectionNode.property(pagesCol) },
+            ) { name, sentinel, pages -> Triple(name, sentinel, pages) }
+        }
+
+        val resolved = resolve(projector)
+
+        assertThat(resolved.nodes).hasSize(3)
+        assertThat(resolved.mapRow(listOf("The Hobbit", 111L, 300L)))
+            .isEqualTo(Triple("The Hobbit", 111L, 300L))
     }
 
     data class AuthorSummary(

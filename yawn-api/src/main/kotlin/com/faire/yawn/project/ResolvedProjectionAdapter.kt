@@ -72,10 +72,11 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
     }
 
     private fun compileSql(leaf: ProjectionLeaf.Sql<SOURCE>): Projection {
+        // A leaf is always a single column; Hibernate wants parallel arrays, so wrap it here at the ORM boundary.
         return Projections.sqlProjection(
             leaf.sqlExpression,
-            leaf.aliases.toTypedArray(),
-            leaf.resultTypes.map { it.toHibernateType() }.toTypedArray(),
+            arrayOf(leaf.columnAlias),
+            arrayOf(leaf.resultType.toHibernateType()),
         )
     }
 
