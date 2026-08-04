@@ -647,7 +647,7 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
                 project(
                     YawnProjectionTest_NullabilityAllowanceProjection.create(
                         name = books.name,
-                        // TODO(yawn): support selectConstant for non-String types and multiple different values
+                        // TODO(yawn): support selectConstant for non-String types
                         aLong = books.numberOfPages,
                         aNullableLong = YawnProjections.`null`(),
                         aString = authors.name,
@@ -669,6 +669,77 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
                     aLong = 100,
                     aNullableLong = null,
                     aString = "Hans Christian Andersen",
+                    aNullableString = null,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `multiple distinct constants in one projection do not collide`() {
+        transactor.open { session ->
+            val pair = session.project(BookTable) { books ->
+                addEq(books.name, "The Hobbit")
+                project(
+                    YawnProjections.pair(
+                        YawnProjections.selectConstant("one"),
+                        YawnProjections.selectConstant("two"),
+                    ),
+                )
+            }.uniqueResult()!!
+
+            assertThat(pair).isEqualTo("one" to "two")
+        }
+    }
+
+    @Test
+    fun `constants and nulls in one projection each get their own slot`() {
+        transactor.open { session ->
+            val triple = session.project(BookTable) { books ->
+                addEq(books.name, "The Hobbit")
+                project(
+                    YawnProjections.triple(
+                        YawnProjections.selectConstant("first"),
+                        YawnProjections.`null`<Book, Long>(),
+                        YawnProjections.selectConstant("third"),
+                    ),
+                )
+            }.uniqueResult()!!
+
+            assertThat(triple).isEqualTo(Triple("first", null, "third"))
+        }
+    }
+
+    @Test
+    fun `constants compose with real columns without shifting slots`() {
+        transactor.open { session ->
+            val results = session.project(BookTable) { books ->
+                addIn(books.name, setOf("The Hobbit", "The Little Mermaid"))
+                orderAsc(books.name)
+                project(
+                    YawnProjectionTest_NullabilityAllowanceProjection.create(
+                        name = books.name,
+                        aLong = books.numberOfPages,
+                        aNullableLong = YawnProjections.`null`(),
+                        aString = YawnProjections.selectConstant("constant"),
+                        aNullableString = YawnProjections.`null`(),
+                    ),
+                )
+            }.list()
+
+            assertThat(results).containsExactly(
+                NullabilityAllowance(
+                    name = "The Hobbit",
+                    aLong = 300,
+                    aNullableLong = null,
+                    aString = "constant",
+                    aNullableString = null,
+                ),
+                NullabilityAllowance(
+                    name = "The Little Mermaid",
+                    aLong = 100,
+                    aNullableLong = null,
+                    aString = "constant",
                     aNullableString = null,
                 ),
             )
