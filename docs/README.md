@@ -28,6 +28,7 @@ transactor.callPrimaryReadOnly {
 
 - [Getting Started](getting_started.md)
 - [Basic Queries](basic_queries.md)
+- [Building Queries Piecemeal](piecemeal_queries.md)
 - [Joins](joins.md)
 - [Projections](projections.md)
 - [Sub-queries](sub_queries.md)

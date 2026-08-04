@@ -137,8 +137,10 @@ criteria.applyFilter { books ->
 val results = criteria.list() // The Hobbit, Lord of the Rings
 ```
 
-Note that join references are for rare cases in which you want to pass a query around to be build piecemeal.
-Ideally, you can put all your query within a single lambda.
+Join references are useful when you want to pass a query around and build it piecemeal.
+Ideally, keep all related query logic within a single lambda.
+
+For more guidance on sharing joins between query pieces, see [Building Queries Piecemeal](piecemeal_queries.md).
 
 ### Join Types
 
