@@ -245,8 +245,8 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                         YawnValueProjector<Book, Long> {
                             ProjectionNode.sql(
                                 sqlExpression = "COUNT(*) AS total",
-                                aliases = listOf("total"),
-                                resultTypes = listOf(Long::class),
+                                columnAlias = "total",
+                                resultType = Long::class,
                             )
                         },
                     ),
@@ -787,8 +787,8 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
     ): YawnValueProjector<SOURCE, TO> = YawnValueProjector {
         ProjectionNode.sql(
             sqlExpression = "$expression AS $alias",
-            aliases = listOf(alias),
-            resultTypes = listOf(Date::class),
+            columnAlias = alias,
+            resultType = Date::class,
         )
     }
 

@@ -41,16 +41,27 @@ sealed interface ProjectionLeaf<SOURCE : Any> {
     }
 
     /**
-     * A raw SQL projection for custom expressions.
+     * A raw SQL projection of a single computed value.
      *
      * The [sqlExpression] may use `{alias}` placeholders for table alias substitution.
-     * [resultTypes] are used by the query factory to map SQL results to Kotlin types.
+     * [columnAlias] is the name the projected column is selected as, which the query factory uses to read
+     * the value back out of the result set. [resultType] is used to map that SQL result to a Kotlin type.
      * It is up to the user to guarantee type-safety when using raw SQL projections!
+     *
+     * A leaf projects **exactly one** column, because it occupies exactly one slot in the resolved result
+     * row (see [ProjectionNode.Value], whose mapper receives a single value). To project several values,
+     * combine several leaves under a [ProjectionNode.Composite] instead.
+     *
+     * Note that this describes the projection in ORM-agnostic terms; adapting a single column to whatever
+     * arity the underlying ORM expects is the query factory's job. Note also that the single-column shape
+     * can only be enforced for what is *declared*: a [sqlExpression] that in fact selects two columns
+     * would still shift every subsequent result slot, and validating the implementation of custom
+     * projections remains the caller's responsibility.
      */
     data class Sql<SOURCE : Any>(
         val sqlExpression: String,
-        val aliases: List<String>,
-        val resultTypes: List<KClass<*>>,
+        val columnAlias: String,
+        val resultType: KClass<*>,
     ) : ProjectionLeaf<SOURCE>
 
     /**

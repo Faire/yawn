@@ -72,11 +72,14 @@ sealed interface ProjectionNode<SOURCE : Any, TO> {
         fun <SOURCE : Any> rowCount(): Value<SOURCE, Long> =
             Value(ProjectionLeaf.RowCount())
 
+        /**
+         * A raw SQL projection of a single computed value; see [ProjectionLeaf.Sql].
+         */
         fun <SOURCE : Any, TO> sql(
             sqlExpression: String,
-            aliases: List<String>,
-            resultTypes: List<kotlin.reflect.KClass<*>>,
-        ): Value<SOURCE, TO> = Value(ProjectionLeaf.Sql(sqlExpression, aliases, resultTypes))
+            columnAlias: String,
+            resultType: kotlin.reflect.KClass<*>,
+        ): Value<SOURCE, TO> = Value(ProjectionLeaf.Sql(sqlExpression, columnAlias, resultType))
 
         fun <SOURCE : Any, TO> constant(value: TO): Constant<SOURCE, TO> = Constant(value)
 
