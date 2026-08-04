@@ -29,7 +29,7 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
          *
          * Example:
          *     SELECT
-         *         '1' as _yawn_ct
+         *         '1' as _yawn_ct0
          *     FROM
          *         books this_
          *     WHERE

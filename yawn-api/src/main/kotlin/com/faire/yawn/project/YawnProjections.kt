@@ -174,9 +174,10 @@ object YawnProjections {
         private val constant: String,
     ) : YawnQueryProjection<SOURCE, String> {
         override fun compile(context: YawnCompilationContext): Projection {
+            val alias = context.generateResultAlias()
             return Projections.sqlProjection(
-                "'$constant' as $CONSTANT_ALIAS",
-                arrayOf(CONSTANT_ALIAS),
+                "'$constant' as $alias",
+                arrayOf(alias),
                 arrayOf(StandardBasicTypes.STRING),
             )
         }
@@ -209,9 +210,10 @@ object YawnProjections {
 
     internal class Null<SOURCE : Any, FROM : Any> : YawnQueryProjection<SOURCE, FROM?> {
         override fun compile(context: YawnCompilationContext): Projection {
+            val alias = context.generateResultAlias()
             return Projections.sqlProjection(
-                "null as $CONSTANT_ALIAS",
-                arrayOf(CONSTANT_ALIAS),
+                "null as $alias",
+                arrayOf(alias),
                 arrayOf(StandardBasicTypes.STRING),
             )
         }
@@ -276,5 +278,3 @@ object YawnProjections {
         return TripleProjection(firstProjection, secondProjection, thirdProjection)
     }
 }
-
-private const val CONSTANT_ALIAS = "_yawn_ct"
