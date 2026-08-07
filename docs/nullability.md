@@ -68,6 +68,26 @@ addEq(nullable(image.url), images.originalUrl)
 That could also be useful for custom projections, though we have special code baked in the projection generated code to automatically support both nullable and
 non-nullable columns.
 
+## Comparing two columns of different nullability
+
+For the ordering comparisons (`lt`, `le`, `gt` and `ge`), `YawnRestrictions` also accepts a nullable column against a non-nullable column of the same underlying
+type, in either position, so no `nullable` call is needed:
+
+```kotlin
+// in a Yawn lambda; `books.notes` is a `ColumnDef<String?>` while `books.name` is a `ColumnDef<String>`
+add(lt(books.notes, books.name)) // ok!
+add(lt(books.name, books.notes)) // ok as well!
+```
+
+This is not the loose typing rejected above: both columns must still share the same underlying type, so comparing a `ColumnDef<String?>` against a
+`ColumnDef<Long>` remains a compile error.
+
+These comparisons follow plain SQL semantics: a row where the nullable column is `NULL` never matches, since the comparison evaluates to `NULL` and not to
+`TRUE`. If you want such rows to match, combine the criterion with an explicit `isNull` check using `or`.
+
+Note that the `addLt`/`addLe`/`addGt`/`addGe` shorthands of the query DSL only take columns of the exact same type; inside a Yawn lambda you can either wrap the
+non-nullable column with `nullable(...)` or use `add(lt(...))` with the `YawnRestrictions` function directly.
+
 ## Custom Projections
 
 There are also some considerations regarding custom projections (i.e., with a data class and `@YawnProjection`).

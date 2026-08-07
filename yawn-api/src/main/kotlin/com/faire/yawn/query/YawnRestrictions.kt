@@ -75,6 +75,30 @@ object YawnRestrictions {
         return YawnQueryCriterion(GreaterThanProperty(column, otherColumn))
     }
 
+    /**
+     * Compares a nullable column against a non-nullable column of the same underlying type.
+     * See the note on nullable comparisons on [lt].
+     */
+    @JvmName("gtNullableToNonNullProperty")
+    fun <SOURCE : Any, F : Any> gt(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F?>,
+        otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanProperty<SOURCE, F?>(column, otherColumn))
+    }
+
+    /**
+     * Compares a non-nullable column against a nullable column of the same underlying type.
+     * See the note on nullable comparisons on [lt].
+     */
+    @JvmName("gtNonNullToNullableProperty")
+    fun <SOURCE : Any, F : Any> gt(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F?>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanProperty<SOURCE, F?>(column, otherColumn))
+    }
+
     fun <SOURCE : Any, F> ge(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
@@ -87,6 +111,30 @@ object YawnRestrictions {
         otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F>,
     ): YawnQueryCriterion<SOURCE> {
         return YawnQueryCriterion(GreaterThanOrEqualToProperty(column, otherColumn))
+    }
+
+    /**
+     * Compares a nullable column against a non-nullable column of the same underlying type.
+     * See the note on nullable comparisons on [lt].
+     */
+    @JvmName("geNullableToNonNullProperty")
+    fun <SOURCE : Any, F : Any> ge(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F?>,
+        otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanOrEqualToProperty<SOURCE, F?>(column, otherColumn))
+    }
+
+    /**
+     * Compares a non-nullable column against a nullable column of the same underlying type.
+     * See the note on nullable comparisons on [lt].
+     */
+    @JvmName("geNonNullToNullableProperty")
+    fun <SOURCE : Any, F : Any> ge(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F?>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(GreaterThanOrEqualToProperty<SOURCE, F?>(column, otherColumn))
     }
 
     fun <SOURCE : Any, F> lt(
@@ -103,6 +151,32 @@ object YawnRestrictions {
         return YawnQueryCriterion(LessThanProperty(column, otherColumn))
     }
 
+    /**
+     * Compares a nullable column against a non-nullable column of the same underlying type.
+     *
+     * Note that this follows plain SQL semantics: a row where the nullable column is `NULL` never matches
+     * (the comparison evaluates to `NULL`, not to `TRUE`), so such rows are filtered out of the results.
+     */
+    @JvmName("ltNullableToNonNullProperty")
+    fun <SOURCE : Any, F : Any> lt(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F?>,
+        otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanProperty<SOURCE, F?>(column, otherColumn))
+    }
+
+    /**
+     * Compares a non-nullable column against a nullable column of the same underlying type.
+     * See the note on nullable comparisons on [lt].
+     */
+    @JvmName("ltNonNullToNullableProperty")
+    fun <SOURCE : Any, F : Any> lt(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F?>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanProperty<SOURCE, F?>(column, otherColumn))
+    }
+
     fun <SOURCE : Any, F> le(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
@@ -115,6 +189,30 @@ object YawnRestrictions {
         otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F>,
     ): YawnQueryCriterion<SOURCE> {
         return YawnQueryCriterion(LessThanOrEqualToProperty(column, otherColumn))
+    }
+
+    /**
+     * Compares a nullable column against a non-nullable column of the same underlying type.
+     * See the note on nullable comparisons on [lt].
+     */
+    @JvmName("leNullableToNonNullProperty")
+    fun <SOURCE : Any, F : Any> le(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F?>,
+        otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanOrEqualToProperty<SOURCE, F?>(column, otherColumn))
+    }
+
+    /**
+     * Compares a non-nullable column against a nullable column of the same underlying type.
+     * See the note on nullable comparisons on [lt].
+     */
+    @JvmName("leNonNullToNullableProperty")
+    fun <SOURCE : Any, F : Any> le(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        otherColumn: YawnDef<SOURCE, *>.YawnColumnDef<F?>,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(LessThanOrEqualToProperty<SOURCE, F?>(column, otherColumn))
     }
 
     fun <SOURCE : Any, F> between(

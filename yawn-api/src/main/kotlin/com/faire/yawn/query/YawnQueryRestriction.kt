@@ -58,9 +58,15 @@ interface YawnQueryRestriction<SOURCE : Any> {
         ): Criterion = Restrictions.gt(property.generatePath(context), property.adaptValue(value))
     }
 
+    /**
+     * @param F the common type of both columns being compared; the columns are accepted covariantly so that two
+     * columns of the same underlying type but different nullability can be compared (e.g. a `YawnColumnDef<Instant?>`
+     * against a `YawnColumnDef<Instant>`, with `F = Instant?`). Comparing two unrelated types is prevented by the
+     * [YawnRestrictions] factory functions, which is where type-safety is enforced.
+     */
     class GreaterThanProperty<SOURCE : Any, F>(
-        private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        private val otherProperty: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        private val property: YawnDef<SOURCE, *>.YawnColumnDef<out F>,
+        private val otherProperty: YawnDef<SOURCE, *>.YawnColumnDef<out F>,
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
@@ -76,9 +82,12 @@ interface YawnQueryRestriction<SOURCE : Any> {
         ): Criterion = Restrictions.ge(property.generatePath(context), property.adaptValue(value))
     }
 
+    /**
+     * @param F see [GreaterThanProperty].
+     */
     class GreaterThanOrEqualToProperty<SOURCE : Any, F>(
-        private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        private val otherProperty: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        private val property: YawnDef<SOURCE, *>.YawnColumnDef<out F>,
+        private val otherProperty: YawnDef<SOURCE, *>.YawnColumnDef<out F>,
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
@@ -94,9 +103,12 @@ interface YawnQueryRestriction<SOURCE : Any> {
         ): Criterion = Restrictions.lt(property.generatePath(context), property.adaptValue(value))
     }
 
+    /**
+     * @param F see [GreaterThanProperty].
+     */
     class LessThanProperty<SOURCE : Any, F>(
-        private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        private val otherProperty: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        private val property: YawnDef<SOURCE, *>.YawnColumnDef<out F>,
+        private val otherProperty: YawnDef<SOURCE, *>.YawnColumnDef<out F>,
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
@@ -112,9 +124,12 @@ interface YawnQueryRestriction<SOURCE : Any> {
         ): Criterion = Restrictions.le(property.generatePath(context), property.adaptValue(value))
     }
 
+    /**
+     * @param F see [GreaterThanProperty].
+     */
     class LessThanOrEqualToProperty<SOURCE : Any, F>(
-        private val property: YawnDef<SOURCE, *>.YawnColumnDef<F>,
-        private val otherProperty: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        private val property: YawnDef<SOURCE, *>.YawnColumnDef<out F>,
+        private val otherProperty: YawnDef<SOURCE, *>.YawnColumnDef<out F>,
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,

@@ -384,6 +384,183 @@ internal class YawnCriterionTest : BaseYawnDatabaseTest() {
         }
     }
 
+    /**
+     * `notes` is a nullable column and `name` is not, but they share the same underlying type, so they can be
+     * compared against each other. Only the three books that have notes can ever match, as a comparison against
+     * `NULL` is never true.
+     *
+     * The three books with notes compare as follows:
+     * * "Note for Lord of the Rings" > "Lord of the Rings"
+     * * "Note for The Hobbit and Harry Potter" < "The Hobbit"
+     * * "Note for The Hobbit and Harry Potter" > "Harry Potter"
+     */
+    @Test
+    fun `lt nullable column against non-nullable column`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                add(
+                    lt(books.notes, books.name),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder("The Hobbit")
+        }
+    }
+
+    @Test
+    fun `lt non-nullable column against nullable column`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                add(
+                    lt(books.name, books.notes),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder(
+                    "Lord of the Rings",
+                    "Harry Potter",
+                )
+        }
+    }
+
+    @Test
+    fun `gt nullable column against non-nullable column`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                add(
+                    gt(books.notes, books.name),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder(
+                    "Lord of the Rings",
+                    "Harry Potter",
+                )
+        }
+    }
+
+    @Test
+    fun `gt non-nullable column against nullable column`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                add(
+                    gt(books.name, books.notes),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder("The Hobbit")
+        }
+    }
+
+    @Test
+    fun `le nullable column against non-nullable column`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                add(
+                    le(books.notes, books.name),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder("The Hobbit")
+        }
+    }
+
+    @Test
+    fun `le non-nullable column against nullable column`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                add(
+                    le(books.name, books.notes),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder(
+                    "Lord of the Rings",
+                    "Harry Potter",
+                )
+        }
+    }
+
+    @Test
+    fun `ge nullable column against non-nullable column`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                add(
+                    ge(books.notes, books.name),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder(
+                    "Lord of the Rings",
+                    "Harry Potter",
+                )
+        }
+    }
+
+    @Test
+    fun `ge non-nullable column against nullable column`() {
+        transactor.open { session ->
+            val results = session.query(BookTable) { books ->
+                add(
+                    ge(books.name, books.notes),
+                )
+            }.list()
+
+            assertThat(results)
+                .extracting("name")
+                .containsExactlyInAnyOrder("The Hobbit")
+        }
+    }
+
+    /**
+     * Comparing a nullable column against the very same column (made non-nullable by [addIsNotNull]) isolates the
+     * behavior on equal values: only `le` and `ge` match, while `lt` and `gt` never do.
+     */
+    @Test
+    fun `nullable column comparisons against non-nullable column with equal values`() {
+        transactor.open { session ->
+            val booksWithNotes = listOf(
+                "Lord of the Rings",
+                "The Hobbit",
+                "Harry Potter",
+            )
+
+            val leResults = session.query(BookTable) { books ->
+                add(le(books.notes, addIsNotNull(books.notes)))
+            }.list()
+            assertThat(leResults).extracting("name").containsExactlyInAnyOrderElementsOf(booksWithNotes)
+
+            val geResults = session.query(BookTable) { books ->
+                add(ge(addIsNotNull(books.notes), books.notes))
+            }.list()
+            assertThat(geResults).extracting("name").containsExactlyInAnyOrderElementsOf(booksWithNotes)
+
+            val ltResults = session.query(BookTable) { books ->
+                add(lt(books.notes, addIsNotNull(books.notes)))
+            }.list()
+            assertThat(ltResults).isEmpty()
+
+            val gtResults = session.query(BookTable) { books ->
+                add(gt(addIsNotNull(books.notes), books.notes))
+            }.list()
+            assertThat(gtResults).isEmpty()
+        }
+    }
+
     @Test
     fun `between column with low and high values`() {
         transactor.open { session ->
