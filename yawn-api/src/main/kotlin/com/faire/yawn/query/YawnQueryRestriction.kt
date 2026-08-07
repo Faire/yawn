@@ -59,10 +59,10 @@ interface YawnQueryRestriction<SOURCE : Any> {
     }
 
     /**
-     * @param F the common type of both columns being compared; the columns are accepted covariantly so that two
-     * columns of the same underlying type but different nullability can be compared (e.g. a `YawnColumnDef<Instant?>`
-     * against a `YawnColumnDef<Instant>`, with `F = Instant?`). Comparing two unrelated types is prevented by the
-     * [YawnRestrictions] factory functions, which is where type-safety is enforced.
+     * @param F the common type of both columns being compared; each column is accepted as a `YawnColumnDef<out F>`,
+     * so that two columns of the same underlying type but different nullability can be compared (e.g. a
+     * `YawnColumnDef<Instant?>` against a `YawnColumnDef<Instant>`, with `F = Instant?`). Comparing two unrelated
+     * types is prevented by the [YawnRestrictions] factory functions, which is where type-safety is enforced.
      */
     class GreaterThanProperty<SOURCE : Any, F>(
         private val property: YawnDef<SOURCE, *>.YawnColumnDef<out F>,
