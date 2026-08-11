@@ -114,6 +114,42 @@ sorting in Kotlin. The value returned by `orderDescBy`/`orderAscBy` must be pass
 inside a `pair`/`triple`/`@YawnProjection` data class is fine): the expression can only be ordered by once it's also
 selected, so if the returned value isn't projected, resolving the order will fail at query time.
 
+### Project to Custom SQL
+
+When the value you want isn’t expressible with the built-in functions, project a single raw SQL expression with `sqlValue`, instead of implementing
+`YawnQueryProjection` by hand:
+
+```kotlin
+project(YawnProjections.sqlValue<Long> { "SUM(${books.quantity.sql} * ${books.priceMinor.sql})" })
+```
+
+Reference columns through `.sql`, which **Yawn** substitutes with the physical column backing that property, already qualified by its table’s alias. This works
+for joined tables and embedded types too. Prefer it over writing column names by hand: a property’s name and its column’s name coincide only until someone maps
+one explicitly, and `.sql` keeps working when they don’t.
+
+The type argument decides how the result is mapped, and should be nullable when the expression can evaluate to `NULL`:
+
+```kotlin
+project(YawnProjections.sqlValue<Int?> { "NULLIF(${books.rating.sql}, 0)" })
+```
+
+The result composes anywhere an ordinary column does — inside `pair`, `triple`, or a data class projection:
+
+```kotlin
+project(
+  BookSummaryProjection.create(
+    author = YawnProjections.groupBy(authors.name),
+    totalPages = YawnProjections.sqlValue<Long> { "SUM(${books.numberOfPages.sql})" },
+  ),
+)
+```
+
+Do not name the result yourself (no `AS total`): **Yawn** selects it under an alias it generates, so two SQL values in one query can never collide.
+
+> [!WARNING]
+> 🥱 Raw SQL projections cannot bind parameters, so anything you interpolate into the expression is inlined into the statement verbatim. Never build one out of
+> untrusted input. And as with any raw SQL, the result type is a claim **Yawn** takes at face value — it cannot verify that your expression really produces it.
+
 ### Project to Data Class
 
 Sometimes you want to return more than a single field. For that, you can project to a data class with any assortment of columns you desire, built off of other

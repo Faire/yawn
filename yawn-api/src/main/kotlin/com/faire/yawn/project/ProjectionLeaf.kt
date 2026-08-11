@@ -65,6 +65,22 @@ sealed interface ProjectionLeaf<SOURCE : Any> {
     ) : ProjectionLeaf<SOURCE>
 
     /**
+     * A raw SQL projection of a single computed value, assembled at render time.
+     *
+     * Unlike [Sql], the expression is built by [render] rather than supplied up front, because the ORM will only
+     * resolve an entity property to its physical column while it is rendering the query. That is what makes
+     * [YawnSqlScope.sql] possible. The expression is bare: the query factory selects it under an alias it
+     * generates, so two SQL values in the same query can never be read from the same column.
+     *
+     * Note that this cannot use structural equality the way the other leaves do, since [render] is a function.
+     * Two of these therefore never deduplicate onto one result slot, even when they would render identically.
+     */
+    class SqlValue<SOURCE : Any>(
+        val render: YawnSqlScope<SOURCE>.() -> String,
+        val resultType: KClass<*>,
+    ) : ProjectionLeaf<SOURCE>
+
+    /**
      * Wraps another leaf with a SQL modifier (e.g. DISTINCT).
      */
     data class Modifier<SOURCE : Any>(

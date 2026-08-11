@@ -3,12 +3,6 @@ package com.faire.yawn.project
 import com.faire.yawn.query.YawnCompilationContext
 import org.hibernate.criterion.Projection
 import org.hibernate.criterion.Projections
-import org.hibernate.type.StandardBasicTypes
-import org.hibernate.type.Type
-import java.math.BigDecimal
-import java.math.BigInteger
-import java.sql.Date
-import kotlin.reflect.KClass
 
 /**
  * Bridges a [ResolvedProjection] into the existing [YawnQueryProjection] pipeline.
@@ -24,12 +18,12 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
         check(nodes.isNotEmpty()) { "Cannot compile an empty projection." }
 
         if (nodes.size == 1) {
-            return compileLeaf(nodes[0].leaf, context)
+            return compileLeaf(context, nodes[0].leaf)
         }
 
         return Projections.projectionList().apply {
             for (node in nodes) {
-                add(compileLeaf(node.leaf, context))
+                add(compileLeaf(context, node.leaf))
             }
         }
     }
@@ -45,19 +39,20 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
     }
 
     private fun compileLeaf(
-        leaf: ProjectionLeaf<SOURCE>,
         context: YawnCompilationContext,
+        leaf: ProjectionLeaf<SOURCE>,
     ): Projection = when (leaf) {
         is ProjectionLeaf.Property -> Projections.property(leaf.column.generatePath(context))
-        is ProjectionLeaf.Aggregate -> compileAggregate(leaf, context)
+        is ProjectionLeaf.Aggregate -> compileAggregate(context, leaf)
         is ProjectionLeaf.RowCount -> Projections.rowCount()
-        is ProjectionLeaf.Sql -> compileSql(leaf)
-        is ProjectionLeaf.Modifier -> compileModifier(leaf, context)
+        is ProjectionLeaf.Sql -> HibernateYawnSqlProjection(leaf)
+        is ProjectionLeaf.SqlValue -> ScopedYawnSqlProjection(context, leaf)
+        is ProjectionLeaf.Modifier -> compileModifier(context, leaf)
     }
 
     private fun compileAggregate(
-        leaf: ProjectionLeaf.Aggregate<SOURCE>,
         context: YawnCompilationContext,
+        leaf: ProjectionLeaf.Aggregate<SOURCE>,
     ): Projection {
         val path = leaf.column.generatePath(context)
         return when (leaf.kind) {
@@ -71,37 +66,10 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
         }
     }
 
-    private fun compileSql(leaf: ProjectionLeaf.Sql<SOURCE>): Projection {
-        // A leaf is always a single column, so this renders as a single aliased value.
-        return YawnSqlProjection(
-            sqlExpression = leaf.sqlExpression,
-            columnAlias = leaf.columnAlias,
-            type = leaf.resultType.toHibernateType(),
-        )
-    }
-
     private fun compileModifier(
-        leaf: ProjectionLeaf.Modifier<SOURCE>,
         context: YawnCompilationContext,
+        leaf: ProjectionLeaf.Modifier<SOURCE>,
     ): Projection = when (leaf.kind) {
-        ModifierKind.DISTINCT -> Projections.distinct(compileLeaf(leaf.inner, context))
-    }
-
-    companion object {
-        private fun KClass<*>.toHibernateType(): Type = when (this) {
-            String::class -> StandardBasicTypes.STRING
-            Long::class -> StandardBasicTypes.LONG
-            Int::class -> StandardBasicTypes.INTEGER
-            Double::class -> StandardBasicTypes.DOUBLE
-            Float::class -> StandardBasicTypes.FLOAT
-            Boolean::class -> StandardBasicTypes.BOOLEAN
-            Short::class -> StandardBasicTypes.SHORT
-            Byte::class -> StandardBasicTypes.BYTE
-            BigDecimal::class -> StandardBasicTypes.BIG_DECIMAL
-            BigInteger::class -> StandardBasicTypes.BIG_INTEGER
-            // SQL `date(...)` expressions (and friends) come back from the database as [java.sql.Date].
-            Date::class -> StandardBasicTypes.DATE
-            else -> error("Unsupported SQL projection result type: $this")
-        }
+        ModifierKind.DISTINCT -> Projections.distinct(compileLeaf(context, leaf.inner))
     }
 }
