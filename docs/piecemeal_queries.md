@@ -53,12 +53,12 @@ The type to use depends on whether the helper receives a builder or runs inside 
 | --- | --- | --- |
 | A query being assembled | `EntityYawnQueryBuilder<Entity, TableDef>` | Add filters, projections, ordering, pagination, and terminal operations |
 | The receiver inside a root entity-query lambda | The generated `EntityEntityQueryScope` alias | Add filters and joins |
-| The receiver inside a join lambda | The generated `EntityJoinQueryScope` alias | Add filters relative to that join |
 | The receiver inside a projection lambda | The generated `EntityProjectedQueryScope<Result>` alias | Add filters and define a projection |
+| The receiver inside a join lambda, or any scope at all | `YawnQueryScopeWithWhere<SOURCE, Entity>` | Add filters |
 
-KSP generates the scope aliases and a `TableDefType` alias for every `@YawnEntity`. For example, an entity named `Book` produces
-`BookEntityQueryScope`, `BookJoinQueryScope`, `BookProjectedQueryScope<Result>`, and `BookTableDefType`. Prefer these aliases for lambda helpers because
-they hide the internal `SOURCE`, table-definition, and projection generics:
+KSP generates the scope aliases and a `TableDefType` alias for every `@YawnEntity`. For example, an entity named `Book` produces `BookEntityQueryScope`,
+`BookProjectedQueryScope<Result>`, and `BookTableDefType`. Prefer these aliases for lambda helpers because they hide the internal `SOURCE`,
+table-definition, and projection generics:
 
 ```kotlin
 private fun BookEntityQueryScope.addPublishedFilter(
@@ -66,20 +66,29 @@ private fun BookEntityQueryScope.addPublishedFilter(
 ) {
     addEq(books.published, true)
 }
+```
 
-private fun BookJoinQueryScope.addLongBookFilter(
-    books: BookTableDefType,
+There is deliberately no alias for a join lambda. A join's source is the entity of the *enclosing* query rather than the joined one, so it cannot be pinned
+by an alias — and the same is true of the table definition the lambda receives, which is a `BookTableDef<SOURCE>` rather than a `BookTableDefType`. Since
+filtering is all a join scope can do, write such a helper against `YawnQueryScopeWithWhere` instead, which every scope implements:
+
+```kotlin
+private fun <SOURCE : Any> YawnQueryScopeWithWhere<SOURCE, Book>.addLongBookFilter(
+    books: BookTableDef<SOURCE>,
 ) {
     addGt(books.numberOfPages, 500)
 }
 ```
 
+That form has a useful side effect: leaving the source open means the same helper also works in a root entity query and in a projected query, which a
+per-scope alias cannot do.
+
 Use the concrete `EntityYawnQueryBuilder` type when a helper needs to own a larger piece of construction or decide which lambdas to apply. Use a generated
 scope alias when the helper only needs DSL operations such as `addEq` or `join`.
 
 `BaseYawnBuilder` and `BaseYawnQueryScope` are common implementation types, not the types to expose in application helpers. Prefer the concrete builder or
-generated aliases such as `BookEntityQueryScope` and `BookJoinQueryScope`, which preserve useful table-definition context. If direct generic types are
-unavoidable, `SOURCE` is the root entity
+generated aliases such as `BookEntityQueryScope` and `BookProjectedQueryScope<Result>`, which preserve useful table-definition context. If direct generic
+types are unavoidable, `SOURCE` is the root entity
 of the whole query, `T` is the entity at the current scope, `DEF` is its generated definition, and a projected builder's `RETURNS` type is the terminal
 result type.
 

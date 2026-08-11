@@ -2,7 +2,6 @@ package com.faire.yawn
 
 import com.faire.yawn.YawnTestUtils.assertGeneratedFile
 import com.faire.yawn.criteria.query.EntityYawnQueryScope
-import com.faire.yawn.criteria.query.JoinYawnQueryScope
 import com.faire.yawn.criteria.query.ProjectedYawnQueryScope
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -30,26 +29,27 @@ internal class YawnEntityProcessorTypeAliasesTest {
     }
 
     @Test
-    fun `generates type aliases for JoinYawnQueryScope`() {
-        assertThat(typeOf<EntityWithElementCollectionJoinQueryScope>()).isEqualTo(
+    fun `generates type aliases for ProjectedYawnQueryScope`() {
+        assertThat(typeOf<EntityWithElementCollectionProjectedQueryScope<String>>()).isEqualTo(
             typeOf<
-                JoinYawnQueryScope<
-                    *,
+                ProjectedYawnQueryScope<
                     EntityWithElementCollection,
-                    *,
+                    EntityWithElementCollection,
+                    EntityWithElementCollectionTableDef<EntityWithElementCollection>,
+                    String,
                     >,
                 >(),
         )
-    }
-
-    @Test
-    fun `generates type aliases for ProjectedYawnQueryScope`() {
-        assertThat(typeOf<EntityWithElementCollectionProjectedQueryScope<String>>()).isEqualTo(
-            typeOf<ProjectedYawnQueryScope<*, EntityWithElementCollection, *, String>>(),
-        )
 
         assertThat(typeOf<EntityWithElementCollectionProjectedQueryScope<Boolean>>()).isEqualTo(
-            typeOf<ProjectedYawnQueryScope<*, EntityWithElementCollection, *, Boolean>>(),
+            typeOf<
+                ProjectedYawnQueryScope<
+                    EntityWithElementCollection,
+                    EntityWithElementCollection,
+                    EntityWithElementCollectionTableDef<EntityWithElementCollection>,
+                    Boolean,
+                    >,
+                >(),
         )
     }
 
@@ -58,14 +58,12 @@ internal class YawnEntityProcessorTypeAliasesTest {
         assertGeneratedFile<InternalEmptyEntityTable> {
             containsTypeAlias("InternalEmptyEntityTableDefType", KVisibility.INTERNAL)
             containsTypeAlias("InternalEmptyEntityEntityQueryScope", KVisibility.INTERNAL)
-            containsTypeAlias("InternalEmptyEntityJoinQueryScope", KVisibility.INTERNAL)
             containsTypeAlias("InternalEmptyEntityProjectedQueryScope", KVisibility.INTERNAL)
         }
 
         assertGeneratedFile<PublicEmptyEntityTable> {
             containsTypeAlias("PublicEmptyEntityTableDefType", KVisibility.PUBLIC)
             containsTypeAlias("PublicEmptyEntityEntityQueryScope", KVisibility.PUBLIC)
-            containsTypeAlias("PublicEmptyEntityJoinQueryScope", KVisibility.PUBLIC)
             containsTypeAlias("PublicEmptyEntityProjectedQueryScope", KVisibility.PUBLIC)
         }
     }

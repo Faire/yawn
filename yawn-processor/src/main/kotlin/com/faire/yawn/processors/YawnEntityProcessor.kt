@@ -14,7 +14,6 @@ import com.faire.yawn.generators.properties.JoinColumnDefGenerator
 import com.faire.yawn.generators.properties.JoinColumnDefWithCompositeKeyGenerator
 import com.faire.yawn.generators.properties.JoinColumnDefWithForeignKeyGenerator
 import com.faire.yawn.generators.typealiases.EntityYawnQueryScopeTypeAliasGenerator
-import com.faire.yawn.generators.typealiases.JoinYawnQueryScopeTypeAliasGenerator
 import com.faire.yawn.generators.typealiases.ProjectedYawnQueryScopeTypeAliasGenerator
 import com.faire.yawn.generators.typealiases.TableDefTypeAliasGenerator
 import com.faire.yawn.generators.types.EmbeddedIdTypeGenerator
@@ -50,7 +49,6 @@ private val entityTypeAliasGenerators = listOf(
     TableDefTypeAliasGenerator,
     EntityYawnQueryScopeTypeAliasGenerator,
     ProjectedYawnQueryScopeTypeAliasGenerator,
-    JoinYawnQueryScopeTypeAliasGenerator,
 )
 
 /**
