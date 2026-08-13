@@ -105,22 +105,76 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         }.uniqueResult() ?: 0
     }
 
-    fun listPaginatedWithTotalResults(
+    /**
+     * @param avoidEagerFetchFanout If the entity being queried (or one of the entities joined into it) has an
+     * eager `@OneToMany`/`@ManyToMany` association, Hibernate's join fetch fans a single logical row out into one
+     * SQL row per associated row. Applying `LIMIT`/`OFFSET` directly on top of that fanned-out join truncates at
+     * the SQL row level rather than the distinct-entity level: a single entity with many associated rows can
+     * consume the entire page's row budget by itself, so a page that should contain [Page.pageSize] distinct
+     * entities can silently come back with fewer.
+     *
+     * Setting this to `true` avoids that by paginating in two phases: first querying for just the ordered
+     * [uniqueColumn] values for this page (a projection query, so no entity hydration and thus no fan-out), then
+     * re-fetching the full entities for those ids in a second, unpaginated query (which can safely eager-fetch,
+     * since it is not the query being paginated).
+     *
+     * Defaults to `false` to preserve existing behavior for callers whose entities have no eager collection
+     * associations, since the two-phase approach costs an extra query.
+     */
+    fun <ID : Any> listPaginatedWithTotalResults(
         page: Page,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
-        uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<*>,
+        uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<ID>,
         forceAnsiCompliance: Boolean = false,
+        avoidEagerFetchFanout: Boolean = false,
     ): PaginationResult<T> {
         if (forceAnsiCompliance) {
             throw UnsupportedOperationException("forceAnsiCompliance=true is not supported yet in Yawn")
         }
         val totalResults = clone().countDistinct(uniqueColumn)
-        val entities = listPaginated(
-            page = page,
-            orders = orders,
-        )
+        val entities = if (avoidEagerFetchFanout) {
+            listPaginatedByIdToAvoidEagerFetchFanout(page, orders, uniqueColumn)
+        } else {
+            listPaginated(
+                page = page,
+                orders = orders,
+            )
+        }
 
         return page.toResults(totalResults, entities)
+    }
+
+    /**
+     * See the `avoidEagerFetchFanout` doc on [listPaginatedWithTotalResults] for why this two-phase fetch exists.
+     * Do not "simplify" this back into a single paginated entity query: that reintroduces silent truncation for
+     * any entity with an eager `@OneToMany`/`@ManyToMany` association.
+     */
+    private fun <ID : Any> listPaginatedByIdToAvoidEagerFetchFanout(
+        page: Page,
+        orders: List<DEF.() -> YawnQueryOrder<T>>,
+        uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<ID>,
+    ): List<T> {
+        val pagedIds = clone()
+            .applyProjection { table -> project(table.uniqueColumn()) }
+            .paginate(page = page, orders = orders)
+            .list()
+
+        if (pagedIds.isEmpty()) {
+            return listOf()
+        }
+
+        // No offset/maxResults matching the page size here: the IN clause below already restricts the query to
+        // exactly this page's entities, so re-applying pagination on top of the (possibly fanned-out) join would
+        // reintroduce the same truncation bug this method exists to avoid. maxResults is instead a generous safety
+        // cap on raw SQL rows, since an eager collection join can still fan a handful of entities out to many rows.
+        // The re-applied `orders` reproduce the correct relative order among this page's entities, and `distinct()`
+        // collapses the duplicate root-entity references Hibernate returns for fanned-out join rows.
+        return clone()
+            .applyFilter { table -> addIn(table.uniqueColumn(), pagedIds) }
+            .applyOrders(orders)
+            .maxResults(EAGER_FETCH_FANOUT_REFETCH_MAX_RESULTS)
+            .list()
+            .distinct()
     }
 
     fun rowCount(): Long {
@@ -196,6 +250,13 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     }
 
     companion object {
+        /**
+         * A generous cap on raw SQL rows for the id-based re-fetch in [listPaginatedByIdToAvoidEagerFetchFanout].
+         * This is not a pagination limit - the query is already restricted to a single page's worth of ids via an
+         * IN clause - it only needs to be large enough that an eager collection join's fan-out never truncates it.
+         */
+        private const val EAGER_FETCH_FANOUT_REFETCH_MAX_RESULTS = 100_000
+
         /**
          * Create a [EntityYawnQueryBuilder] for a given [query], wiring in the generics from a provided [tableDef].
          * The lambda is optional if you want to immediately apply some filtering.

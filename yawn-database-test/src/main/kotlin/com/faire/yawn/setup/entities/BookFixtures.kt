@@ -221,6 +221,18 @@ internal class BookFixtures(
                 ranking = 2
                 judgesComments = "Good construction and solid line work"
             }
+
+            // "Widget A" is deliberately given more parts than any tested page size, so it alone can fan out
+            // enough SQL rows to exhaust a page's LIMIT budget - see YawnPaginationQueriesTest.
+            val widgetA = createWidget { name = "Widget A" }
+            createWidgetPart(widgetA) { name = "Widget A - Part 1" }
+            createWidgetPart(widgetA) { name = "Widget A - Part 2" }
+            createWidgetPart(widgetA) { name = "Widget A - Part 3" }
+            createWidgetPart(widgetA) { name = "Widget A - Part 4" }
+            createWidgetPart(widgetA) { name = "Widget A - Part 5" }
+
+            createWidget { name = "Widget B" }
+            createWidget { name = "Widget C" }
         }
     }
 
@@ -260,6 +272,20 @@ internal class BookFixtures(
 
         fun createBookReview(setup: BookReview.() -> Unit): BookReview {
             return update(BookReview(), setup)
+        }
+
+        fun createWidget(setup: Widget.() -> Unit): Widget {
+            return update(Widget(), setup)
+        }
+
+        fun createWidgetPart(
+            widget: Widget,
+            setup: WidgetPart.() -> Unit,
+        ): WidgetPart {
+            return update(WidgetPart()) {
+                this.widget = widget
+                setup()
+            }
         }
 
         fun createBook(
@@ -311,6 +337,8 @@ internal class BookFixtures(
             BookCover::class,
             BookCoverRanking::class,
             BookReview::class,
+            Widget::class,
+            WidgetPart::class,
         )
     }
 }
