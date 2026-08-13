@@ -5,6 +5,7 @@ import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.pagination.PaginationResult
 import com.faire.yawn.query.YawnQueryOrder
 import com.faire.yawn.setup.entities.BookTable
+import com.faire.yawn.setup.entities.WidgetTable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -135,6 +136,76 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
             val (totalHuge, hugePage) = paginate(PageNumber.zeroIndexed(2) / 100)
             assertThat(totalHuge).isEqualTo(6)
             assertThat(hugePage).isEmpty()
+        }
+    }
+
+    @Test
+    fun `list with total results - eager collection fan-out truncates without avoidEagerFetchFanout`() {
+        transactor.open { session ->
+            // "Widget A" has 5 parts (see BookFixtures) - more than the page size below - so the eager
+            // `parts` collection's join fetch fans it out into enough SQL rows to exhaust the page's LIMIT
+            // budget by itself. Without avoidEagerFetchFanout, "Widget B" is starved off this page even
+            // though it should be the 2nd of 3 distinct widgets, ordered ascending by name.
+            val (total, widgets) = session.query(WidgetTable)
+                .listPaginatedWithTotalResults(
+                    page = PageNumber.zeroIndexed(0) / 2,
+                    orders = listOf { YawnQueryOrder.asc(name) },
+                    uniqueColumn = { id },
+                )
+
+            assertThat(total).isEqualTo(3)
+            assertThat(widgets.map { it.name }.distinct()).containsExactly("Widget A")
+        }
+    }
+
+    @Test
+    fun `list with total results - avoidEagerFetchFanout paginates by distinct entity, not fanned row`() {
+        transactor.open { session ->
+            fun paginate(page: Page): PaginationResult<String> {
+                return session.query(WidgetTable)
+                    .listPaginatedWithTotalResults(
+                        page = page,
+                        orders = listOf { YawnQueryOrder.asc(name) },
+                        uniqueColumn = { id },
+                        avoidEagerFetchFanout = true,
+                    )
+                    .map { it.name }
+            }
+
+            val (total1, page1) = paginate(PageNumber.zeroIndexed(0) / 2)
+            assertThat(total1).isEqualTo(3)
+            assertThat(page1).containsExactly("Widget A", "Widget B")
+
+            val (total2, page2) = paginate(PageNumber.zeroIndexed(1) / 2)
+            assertThat(total2).isEqualTo(3)
+            assertThat(page2).containsExactly("Widget C")
+
+            val (total3, page3) = paginate(PageNumber.zeroIndexed(2) / 2)
+            assertThat(total3).isEqualTo(3)
+            assertThat(page3).isEmpty()
+        }
+    }
+
+    @Test
+    fun `list with total results - avoidEagerFetchFanout preserves all fanned-out rows for the returned entity`() {
+        transactor.open { session ->
+            val (_, widgets) = session.query(WidgetTable)
+                .listPaginatedWithTotalResults(
+                    page = PageNumber.zeroIndexed(0) / 1,
+                    orders = listOf { YawnQueryOrder.asc(name) },
+                    uniqueColumn = { id },
+                    avoidEagerFetchFanout = true,
+                )
+
+            val widgetA = widgets.single()
+            assertThat(widgetA.name).isEqualTo("Widget A")
+            assertThat(widgetA.parts.map { it.name }).containsExactlyInAnyOrder(
+                "Widget A - Part 1",
+                "Widget A - Part 2",
+                "Widget A - Part 3",
+                "Widget A - Part 4",
+                "Widget A - Part 5",
+            )
         }
     }
 
