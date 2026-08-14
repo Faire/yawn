@@ -9,6 +9,13 @@ import com.squareup.kotlinpoet.asClassName
 
 /**
  * Generates: `typealias DbBookEntityQueryScope = EntityYawnQueryScope<DbBook, DbBookTableDefType>`
+ *
+ * For sharing a fragment of an entity query:
+ * ```
+ * private fun DbBookEntityQueryScope.filterShortBooks(books: DbBookTableDefType) {
+ *     addLt(books.numberOfPages, 500)
+ * }
+ * ```
  */
 internal object EntityYawnQueryScopeTypeAliasGenerator : YawnTableDefTypeAliasGenerator {
     override fun getName(entityType: ClassName): String = "${entityType.getUniqueSimpleName()}EntityQueryScope"
