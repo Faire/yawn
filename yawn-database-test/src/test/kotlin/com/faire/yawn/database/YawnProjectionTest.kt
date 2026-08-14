@@ -544,6 +544,36 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `yawn query with group by ordered by an aggregate via orderAsc-orderDesc`() {
+        transactor.open { session ->
+            // Same as `yawn query with group by ordered by an aggregate`, but through the orderAsc/orderDesc DSL
+            // sugar instead of `order(YawnQueryOrder...)`, since both were widened to accept an orderable
+            // projection alongside a plain ColumnDef.
+            val resultsDesc = session.project(BookTable) { books ->
+                val maxPages = YawnProjections.max(books.numberOfPages).orderable()
+                orderDesc(maxPages)
+                project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
+            }.list()
+
+            assertThat(resultsDesc).containsExactly(
+                ENGLISH to 1_000L,
+                DANISH to 120L,
+            )
+
+            val resultsAsc = session.project(BookTable) { books ->
+                val maxPages = YawnProjections.max(books.numberOfPages).orderable()
+                orderAsc(maxPages)
+                project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
+            }.list()
+
+            assertThat(resultsAsc).containsExactly(
+                DANISH to 120L,
+                ENGLISH to 1_000L,
+            )
+        }
+    }
+
+    @Test
     fun `yawn query with group by ordered by one aggregate field among several`() {
         transactor.open { session ->
             // Group by author, projecting *two* aggregates per group (book count and total page count), but only
