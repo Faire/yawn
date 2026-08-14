@@ -543,13 +543,6 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
         }
     }
 
-    @YawnProjection
-    internal data class AuthorBookStats(
-        val author: String,
-        val numberOfBooks: Long,
-        val totalPages: Long,
-    )
-
     @Test
     fun `yawn query with group by ordered by one aggregate field among several`() {
         transactor.open { session ->
@@ -982,5 +975,12 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     internal data class BookNameAndNotes(
         val name: String,
         val notes: String,
+    )
+
+    @YawnProjection
+    internal data class AuthorBookStats(
+        val author: String,
+        val numberOfBooks: Long,
+        val totalPages: Long,
     )
 }
