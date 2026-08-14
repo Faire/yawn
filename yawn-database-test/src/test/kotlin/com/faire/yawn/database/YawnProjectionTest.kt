@@ -543,6 +543,43 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
         }
     }
 
+    @YawnProjection
+    internal data class AuthorBookStats(
+        val author: String,
+        val numberOfBooks: Long,
+        val totalPages: Long,
+    )
+
+    @Test
+    fun `yawn query with group by ordered by one aggregate field among several`() {
+        transactor.open { session ->
+            // Group by author, projecting *two* aggregates per group (book count and total page count), but only
+            // order by one of them (totalPages) - the other aggregate (numberOfBooks) is along for the ride and
+            // plays no part in the alias/ordering machinery.
+            val results = session.project(BookTable) { books ->
+                val authors = join(books.author)
+                val totalPages = YawnProjections.sum(books.numberOfPages).orderable()
+                order(YawnQueryOrder.desc(totalPages))
+                project(
+                    YawnProjectionTest_AuthorBookStatsProjection.create(
+                        author = YawnProjections.groupBy(authors.name),
+                        numberOfBooks = YawnProjections.count(books.name),
+                        totalPages = totalPages,
+                    ),
+                )
+            }.list()
+
+            assertThat(results).containsExactly(
+                // Tolkien: Lord of the Rings (1000) + The Hobbit (300)
+                AuthorBookStats("J.R.R. Tolkien", numberOfBooks = 2, totalPages = 1_300),
+                // Rowling: Harry Potter (500)
+                AuthorBookStats("J.K. Rowling", numberOfBooks = 1, totalPages = 500),
+                // Andersen: The Little Mermaid (100) + The Ugly Duckling (110) + The Emperor's New Clothes (120)
+                AuthorBookStats("Hans Christian Andersen", numberOfBooks = 3, totalPages = 330),
+            )
+        }
+    }
+
     @Test
     fun `yawn query with projection and join`() {
         transactor.open { session ->
