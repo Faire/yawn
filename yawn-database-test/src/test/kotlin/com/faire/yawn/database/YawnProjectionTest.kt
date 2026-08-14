@@ -3,9 +3,11 @@ package com.faire.yawn.database
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.project.YawnQueryProjection
+import com.faire.yawn.project.orderable
 import com.faire.yawn.query.YawnCompilationContext
 import com.faire.yawn.query.YawnQueryOrder
 import com.faire.yawn.setup.entities.Book
+import com.faire.yawn.setup.entities.Book.Language.DANISH
 import com.faire.yawn.setup.entities.Book.Language.ENGLISH
 import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PublisherTable
@@ -507,6 +509,36 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
                 AuthorAndBooks("J.R.R. Tolkien", 2),
                 AuthorAndBooks("J.K. Rowling", 1),
                 AuthorAndBooks("Hans Christian Andersen", 3),
+            )
+        }
+    }
+
+    @Test
+    fun `yawn query with group by ordered by an aggregate`() {
+        transactor.open { session ->
+            // "top-N per group": group books by language, then order the *groups* by their own max(numberOfPages),
+            // pushing the sort to SQL instead of fetching every row and sorting in Kotlin.
+            val resultsDesc = session.project(BookTable) { books ->
+                val maxPages = YawnProjections.max(books.numberOfPages).orderable()
+                order(YawnQueryOrder.desc(maxPages))
+                project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
+            }.list()
+
+            // ENGLISH's max (Lord of the Rings, 1000) outranks DANISH's max (The Emperor's New Clothes, 120)
+            assertThat(resultsDesc).containsExactly(
+                ENGLISH to 1_000L,
+                DANISH to 120L,
+            )
+
+            val resultsAsc = session.project(BookTable) { books ->
+                val maxPages = YawnProjections.max(books.numberOfPages).orderable()
+                order(YawnQueryOrder.asc(maxPages))
+                project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
+            }.list()
+
+            assertThat(resultsAsc).containsExactly(
+                DANISH to 120L,
+                ENGLISH to 1_000L,
             )
         }
     }
