@@ -98,23 +98,22 @@ val authorNames = yawn.project(BookTable) { books ->
 #### Ordering by an aggregate
 
 A plain column can be ordered directly (`orderAsc`/`orderDesc`, or `YawnQueryOrder.asc`/`.desc`), but an aggregate or
-other projected expression has no property name of its own to order by. Wrap it with `.orderable()` to give it one,
-then pass that *same* wrapped instance to both `order(...)` and `project(...)`:
+other projected expression has no property name of its own to order by. `orderAscBy`/`orderDescBy` handle this for
+you: pass them the projection, and use the *returned* value in `project(...)`:
 
 ```kotlin
-val mostRecentVisit = YawnProjections.max(visits.createdAt).orderable()
-
 yawn.project(VisitTable) { visits ->
-    order(YawnQueryOrder.desc(mostRecentVisit))
+    val mostRecentVisit = orderDescBy(YawnProjections.max(visits.createdAt))
     project(YawnProjections.pair(YawnProjections.groupBy(visits.brandId), mostRecentVisit))
 }.list()
 ```
 
 This groups visits by brand and returns each brand's most recent visit time, sorted with the most-recently-visited
 brands first - a "top-N per group" query expressed as a single SQL-side query instead of fetching every row and
-sorting in Kotlin. The wrapped instance must be passed to `project(...)` too (nesting it inside a `pair`/`triple`/
-`@YawnProjection` data class is fine): Hibernate can only order by an alias that is actually present in the query's
-SELECT list, so if it isn't projected, resolving the order will fail at query time.
+sorting in Kotlin. The value returned by `orderDescBy`/`orderAscBy` must be passed to `project(...)` (nesting it
+inside a `pair`/`triple`/`@YawnProjection` data class is fine): Hibernate can only order by an alias that is actually
+present in the query's SELECT list, so if the returned value isn't projected, resolving the order will fail at query
+time.
 
 ### Project to Data Class
 

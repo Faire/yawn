@@ -12,9 +12,10 @@ import org.hibernate.criterion.Order
  * Compiles into a Hibernate's [Order].
  * It restricts construction of this class by requiring the [SOURCE] of the query.
  *
- * @property property the property by which to order. Usually a [YawnTableDef.ColumnDef], but can also be an
- * [com.faire.yawn.project.AliasedYawnQueryProjection] to order by a projected/aggregate expression (e.g. ordering
- * grouped rows by `max(createdAt)`) - see [com.faire.yawn.project.orderable].
+ * @property property the property by which to order. Usually a [YawnTableDef.ColumnDef]; to order by a projected/
+ * aggregate expression instead (e.g. ordering grouped rows by `max(createdAt)`), use the
+ * [com.faire.yawn.criteria.query.orderAsc]/[com.faire.yawn.criteria.query.orderDesc] extension functions rather
+ * than constructing a [YawnQueryOrder] directly.
  * @property direction the direction by which to order, either ascending or descending
  * @property nullPrecedence the precedence of null values, either first, last, or none
  */

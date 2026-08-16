@@ -1,9 +1,10 @@
 package com.faire.yawn.database
 
+import com.faire.yawn.criteria.query.orderAscBy
+import com.faire.yawn.criteria.query.orderDescBy
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.project.YawnQueryProjection
-import com.faire.yawn.project.orderable
 import com.faire.yawn.query.YawnCompilationContext
 import com.faire.yawn.query.YawnQueryOrder
 import com.faire.yawn.setup.entities.Book
@@ -519,8 +520,7 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
             // "top-N per group": group books by language, then order the *groups* by their own max(numberOfPages),
             // pushing the sort to SQL instead of fetching every row and sorting in Kotlin.
             val resultsDesc = session.project(BookTable) { books ->
-                val maxPages = YawnProjections.max(books.numberOfPages).orderable()
-                order(YawnQueryOrder.desc(maxPages))
+                val maxPages = orderDescBy(YawnProjections.max(books.numberOfPages))
                 project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
             }.list()
 
@@ -531,38 +531,7 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
             )
 
             val resultsAsc = session.project(BookTable) { books ->
-                val maxPages = YawnProjections.max(books.numberOfPages).orderable()
-                order(YawnQueryOrder.asc(maxPages))
-                project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
-            }.list()
-
-            assertThat(resultsAsc).containsExactly(
-                DANISH to 120L,
-                ENGLISH to 1_000L,
-            )
-        }
-    }
-
-    @Test
-    fun `yawn query with group by ordered by an aggregate via orderAsc-orderDesc`() {
-        transactor.open { session ->
-            // Same as `yawn query with group by ordered by an aggregate`, but through the orderAsc/orderDesc DSL
-            // sugar instead of `order(YawnQueryOrder...)`, since both were widened to accept an orderable
-            // projection alongside a plain ColumnDef.
-            val resultsDesc = session.project(BookTable) { books ->
-                val maxPages = YawnProjections.max(books.numberOfPages).orderable()
-                orderDesc(maxPages)
-                project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
-            }.list()
-
-            assertThat(resultsDesc).containsExactly(
-                ENGLISH to 1_000L,
-                DANISH to 120L,
-            )
-
-            val resultsAsc = session.project(BookTable) { books ->
-                val maxPages = YawnProjections.max(books.numberOfPages).orderable()
-                orderAsc(maxPages)
+                val maxPages = orderAscBy(YawnProjections.max(books.numberOfPages))
                 project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
             }.list()
 
@@ -581,8 +550,7 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
             // plays no part in the alias/ordering machinery.
             val results = session.project(BookTable) { books ->
                 val authors = join(books.author)
-                val totalPages = YawnProjections.sum(books.numberOfPages).orderable()
-                order(YawnQueryOrder.desc(totalPages))
+                val totalPages = orderDescBy(YawnProjections.sum(books.numberOfPages))
                 project(
                     YawnProjectionTest_AuthorBookStatsProjection.create(
                         author = YawnProjections.groupBy(authors.name),
