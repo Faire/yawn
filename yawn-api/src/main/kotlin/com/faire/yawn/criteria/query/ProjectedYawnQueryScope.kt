@@ -2,7 +2,10 @@ package com.faire.yawn.criteria.query
 
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.project.YawnQueryProjection
+import com.faire.yawn.project.YawnRawSqlProjection
+import com.faire.yawn.project.YawnSqlScope
 import com.faire.yawn.query.YawnQuery
+import kotlin.reflect.typeOf
 
 /**
  * A context providing the DSL for Yawn projected queries.
@@ -39,6 +42,39 @@ private constructor(
         ensureUniqueProjection()
         return projection
     }
+
+    /**
+     * Projects a single value computed by a raw SQL [expression], e.g. `SUM(quantity * price)`.
+     *
+     * Use this instead of implementing [YawnQueryProjection] by hand when all you need is one custom SQL value.
+     * The result composes anywhere an ordinary column does; see [YawnSingleValueProjection].
+     *
+     * Reference columns through [YawnSqlScope.sql], which substitutes the physical column backing a property,
+     * already qualified by its table's alias:
+     *
+     * ```
+     * project(sqlValue<Long> { "SUM(${books.numberOfPages.sql} * 2)" })
+     * ```
+     *
+     * The type argument decides how the result is mapped, and should be nullable if the expression can evaluate
+     * to `NULL`. As with any raw SQL projection, this is a claim Yawn takes at face value rather than something
+     * it can verify: it is up to you to ensure the expression really does produce that type.
+     *
+     * Do not name the result yourself (no `AS total`): Yawn selects it under an alias it generates, unique within
+     * the query. Note also that raw SQL cannot bind parameters, so any value in [expression] is inlined verbatim;
+     * never interpolate untrusted input into it.
+     *
+     * To share one across queries, write a helper on this scope taking the table definition as a parameter, so that
+     * nothing is captured from the query it was written in:
+     *
+     * ```
+     * private fun BookProjectedQueryScope<Long>.doubledPages(books: BookTableDefType) =
+     *     sqlValue<Long> { "SUM(${books.numberOfPages.sql} * 2)" }
+     * ```
+     */
+    inline fun <reified TO> sqlValue(
+        noinline expression: YawnSqlScope<SOURCE>.() -> String,
+    ): YawnRawSqlProjection<SOURCE, TO> = YawnRawSqlProjection(expression, typeOf<TO>())
 
     companion object {
         internal fun <SOURCE : Any, T : Any, DEF : YawnTableDef<SOURCE, T>, PROJECTION : Any?> applyLambda(

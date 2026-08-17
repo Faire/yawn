@@ -2,10 +2,10 @@ package com.faire.yawn.database
 
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
-import com.faire.yawn.setup.entities.Book
-import com.faire.yawn.setup.entities.BookCover
 import com.faire.yawn.setup.entities.BookCoverTable
+import com.faire.yawn.setup.entities.BookProjectedQueryScope
 import com.faire.yawn.setup.entities.BookTable
+import com.faire.yawn.setup.entities.BookTableDefType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.hibernate.HibernateException
@@ -26,7 +26,7 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
                 project(
                     YawnSqlValueProjectionTest_AuthorPagesProjection.create(
                         author = YawnProjections.groupBy(authors.name),
-                        doubledPages = YawnProjections.sqlValue { "SUM(${books.numberOfPages.sql} * 2)" },
+                        doubledPages = sqlValue { "SUM(${books.numberOfPages.sql} * 2)" },
                     ),
                 )
             }.list()
@@ -44,7 +44,7 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             // Book.callNumber is @Column(name = "call_number"): naming the property would not resolve.
             val prefixes = session.project(BookTable) { books ->
-                project(YawnProjections.sqlValue<Book, String?> { "LEFT(${books.callNumber.sql}, 2)" })
+                project(sqlValue<String?> { "LEFT(${books.callNumber.sql}, 2)" })
             }.list()
 
             assertThat(prefixes.toSet()).containsExactlyInAnyOrder("PR", "PZ", null)
@@ -60,9 +60,9 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
                 project(
                     YawnProjections.pair(
                         // joined table: resolves with the join's own alias
-                        YawnProjections.sqlValue<Book, Long> { "LENGTH(${authors.name.sql})" },
+                        sqlValue<Long> { "LENGTH(${authors.name.sql})" },
                         // embedded property
-                        YawnProjections.sqlValue<Book, Long> { "${books.sales.paperBacksSold.sql} / 1000" },
+                        sqlValue<Long> { "${books.sales.paperBacksSold.sql} / 1000" },
                     ),
                 )
             }.uniqueResult()!!
@@ -81,7 +81,7 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
                 project(
                     YawnProjections.pair(
                         books.name,
-                        YawnProjections.sqlValue<Book, Int?> { "${books.rating.sql} * 10" },
+                        sqlValue<Int?> { "${books.rating.sql} * 10" },
                     ),
                 )
             }.list()
@@ -94,7 +94,7 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
             // and through uniqueResult()
             val nullRating = session.project(BookTable) { books ->
                 addEq(books.name, "Harry Potter")
-                project(YawnProjections.sqlValue<Book, Int?> { "${books.rating.sql} * 10" })
+                project(sqlValue<Int?> { "${books.rating.sql} * 10" })
             }.uniqueResult()
 
             assertThat(nullRating).isNull()
@@ -111,7 +111,7 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
                     YawnProjections.triple(
                         YawnProjections.groupBy(authors.name),
                         YawnProjections.count(books.id),
-                        YawnProjections.sqlValue<Book, Long> { "SUM(${books.numberOfPages.sql} * 2)" },
+                        sqlValue<Long> { "SUM(${books.numberOfPages.sql} * 2)" },
                     ),
                 )
             }.uniqueResult()!!
@@ -138,8 +138,8 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
                 project(
                     YawnSqlValueProjectionTest_QuadProjection.create(
                         books.name,
-                        YawnProjections.sqlValue { "111" },
-                        YawnProjections.sqlValue { "222" },
+                        sqlValue { "111" },
+                        sqlValue { "222" },
                         books.numberOfPages,
                     ),
                 )
@@ -149,25 +149,27 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
         }
     }
 
-    @Test
-    fun `an instance that captures no columns can be reused across queries`() {
-        transactor.open { session ->
-            // An expression that captures nothing is freely reusable. Note that one referencing a *joined*
-            // table's columns is not: the join's alias is baked into the resolved path, and belongs to the
-            // query that created the join, so reusing it elsewhere fails to resolve.
-            val rowCount = YawnProjections.sqlValue<Book, Long> { "COUNT(*)" }
+    /**
+     * Share one across queries by writing a helper on the scope. Taking the table definition as a parameter is what
+     * keeps it portable: an expression that captured a *joined* table's definition would bake in that query's alias.
+     */
+    private fun BookProjectedQueryScope<Long>.pagesPerBook(books: BookTableDefType) =
+        sqlValue<Long> { "SUM(${books.numberOfPages.sql}) / COUNT(*)" }
 
+    @Test
+    fun `a projection can be shared across queries via a scope helper`() {
+        transactor.open { session ->
             val tolkien = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 addEq(authors.name, "J.R.R. Tolkien")
-                project(rowCount)
+                project(pagesPerBook(books))
             }.uniqueResult()!!
-            assertThat(tolkien).isEqualTo(2L)
+            assertThat(tolkien).isEqualTo(650L)
 
-            val all = session.project(BookTable) {
-                project(rowCount)
+            val everyone = session.project(BookTable) { books ->
+                project(pagesPerBook(books))
             }.uniqueResult()!!
-            assertThat(all).isEqualTo(6L)
+            assertThat(everyone).isEqualTo(355L)
         }
     }
 
@@ -176,11 +178,11 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             assertThatThrownBy {
                 session.project(BookCoverTable) { covers ->
-                    project(YawnProjections.sqlValue<BookCover, Long> { "LENGTH(${covers.cid.sql})" })
+                    project(sqlValue<Long> { "LENGTH(${covers.cid.sql})" })
                 }.list()
             }
                 .isInstanceOf(IllegalStateException::class.java)
-                .hasMessageContaining("Path \"cid\" is a multi-column mapping backend by columns")
+                .hasMessageContaining("Path \"cid\" is a multi-column mapping backed by columns")
                 .hasMessageContaining("(this_.book_id, this_.owner_id)")
                 .hasMessageContaining("and thus has no single-value substitute into a SQL projection.")
                 .hasMessageContaining("Reference one of its columns individually instead.")
@@ -191,7 +193,7 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
     fun `an individual column of a composite key can be a single value`() {
         transactor.open { session ->
             val bookTokens = session.project(BookCoverTable) { covers ->
-                project(YawnProjections.sqlValue<BookCover, String> { "CONCAT('book_', ${covers.cid.bookId.sql})" })
+                project(sqlValue<String> { "CONCAT('book_', ${covers.cid.bookId.sql})" })
             }.list()
 
             assertThat(bookTokens).containsExactlyInAnyOrder("book_1", "book_3")
@@ -206,7 +208,7 @@ internal class YawnSqlValueProjectionTest : BaseYawnDatabaseTest() {
             assertThatThrownBy {
                 session.project(BookTable) { books ->
                     // bad: must call `.sql` to resolve column name in context!
-                    project(YawnProjections.sqlValue<Book, Long> { "SUM(${books.numberOfPages})" })
+                    project(sqlValue<Long> { "SUM(${books.numberOfPages})" })
                 }.uniqueResult()
             }.isInstanceOf(HibernateException::class.java)
         }

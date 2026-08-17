@@ -5,8 +5,6 @@ import com.faire.yawn.query.YawnCompilationContext
 import org.hibernate.criterion.Projection
 import org.hibernate.criterion.Projections
 import org.hibernate.type.StandardBasicTypes
-import kotlin.reflect.KClass
-import kotlin.reflect.typeOf
 
 /**
  * Yawn equivalent of Hibernate [Projections].
@@ -189,48 +187,6 @@ object YawnProjections {
 
     fun <SOURCE : Any> selectConstant(constant: String): YawnQueryProjection<SOURCE, String> {
         return SelectConstant(constant)
-    }
-
-    /**
-     * Projects a single value computed by a raw SQL [expression], e.g. `SUM(quantity * price)`.
-     *
-     * Use this instead of implementing [YawnQueryProjection] by hand when all you need is one custom SQL value.
-     * The result composes anywhere an ordinary column does; see [YawnSingleValueProjection].
-     *
-     * Reference columns through [YawnSqlScope.sql], which substitutes the physical column backing a property,
-     * already qualified by its table's alias:
-     *
-     * ```
-     * project(YawnProjections.sqlValue<Long> { "SUM(${books.numberOfPages.sql} * 2)" })
-     * ```
-     *
-     * The type argument decides how the result is mapped, and should be nullable if the expression can evaluate
-     * to `NULL`. As with any raw SQL projection, this is a claim Yawn takes at face value rather than something
-     * it can verify: it is up to you to ensure the expression really does produce that type.
-     *
-     * Do not name the result yourself (no `AS total`): Yawn selects it under an alias it generates, unique within
-     * the query. Note also that raw SQL cannot bind parameters, so any value in [expression] is inlined verbatim
-     * — never interpolate untrusted input into it.
-     */
-    inline fun <SOURCE : Any, reified TO> sqlValue(
-        noinline expression: YawnSqlScope<SOURCE>.() -> String,
-    ): YawnSingleValueProjection<SOURCE, TO> {
-        val type = typeOf<TO>()
-        return sqlValueOf(
-            resultType = type.classifier as? KClass<*> ?: error("Cannot project to $type"),
-            expression = expression,
-        )
-    }
-
-    @PublishedApi
-    internal fun <SOURCE : Any, TO> sqlValueOf(
-        resultType: KClass<*>,
-        expression: YawnSqlScope<SOURCE>.() -> String,
-    ): YawnSingleValueProjection<SOURCE, TO> {
-        return YawnSingleValueProjection(ProjectionLeaf.SqlValue(expression, resultType)) {
-            @Suppress("UNCHECKED_CAST")
-            it as TO
-        }
     }
 
     internal class Coalesce<SOURCE : Any, FROM>(

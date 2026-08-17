@@ -32,7 +32,7 @@ internal class CriteriaSqlScope<SOURCE : Any>(
 
             check(columns.size == 1) {
                 """
-                    Path "$path" is a multi-column mapping backend by columns (${columns.joinToString()}),
+                    Path "$path" is a multi-column mapping backed by columns (${columns.joinToString()}),
                     and thus has no single-value substitute into a SQL projection.
                     Reference one of its columns individually instead.
                 """.trimIndent()

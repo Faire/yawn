@@ -5,7 +5,8 @@ import org.hibernate.Criteria
 import org.hibernate.criterion.CriteriaQuery
 
 /**
- * A [YawnSqlProjection] whose expression is built through a [YawnSqlScope], as [YawnProjections.sqlValue] produces.
+ * A [YawnSqlProjection] whose expression is built through a [YawnSqlScope], as
+ * [com.faire.yawn.criteria.query.ProjectedYawnQueryScope.sqlValue] produces.
  *
  * This is preferred to [HibernateYawnSqlProjection]; because the expression is assembled here, while the query is
  * being rendered, it can ask the ORM to resolve entity properties to physical columns, rather than being handed a

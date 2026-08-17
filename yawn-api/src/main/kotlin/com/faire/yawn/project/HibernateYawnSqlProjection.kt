@@ -6,9 +6,9 @@ import org.hibernate.criterion.CriteriaQuery
 /**
  * A [YawnSqlProjection] that follows Hibernate's own `{alias}` convention for raw SQL projections.
  *
- * **Prefer [ProjectionLeaf.SqlValue] and [YawnProjections.sqlValue] over this.** It exists to compile the older
- * string-based [ProjectionLeaf.Sql], whose expressions were written against `Projections.sqlProjection` and so
- * expect its substitution behavior. Everything peculiar about that behavior is deliberately confined here.
+ * **Prefer [ProjectionLeaf.SqlValue], which [ProjectedYawnQueryScope.sqlValue] produces.** This exists to compile
+ * the older string-based [ProjectionLeaf.Sql], whose expressions were written against `Projections.sqlProjection`
+ * and so expect its substitution behavior. Everything peculiar about that behavior is deliberately confined here.
  *
  * The expression names its own result, so it is emitted verbatim apart from the alias substitution.
  */

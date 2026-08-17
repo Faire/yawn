@@ -1,7 +1,8 @@
 package com.faire.yawn.project
 
 /**
- * The context available while building a raw SQL expression, via [YawnProjections.sqlValue].
+ * The context available while building a raw SQL expression, via
+ * [com.faire.yawn.criteria.query.ProjectedYawnQueryScope.sqlValue].
  *
  * The SQL is assembled as the ORM renders the query, when it can be resolved to a physical backing column.
  */

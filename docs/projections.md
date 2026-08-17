@@ -120,7 +120,7 @@ When the value you want isn’t expressible with the built-in functions, project
 `YawnQueryProjection` by hand:
 
 ```kotlin
-project(YawnProjections.sqlValue<Long> { "SUM(${books.quantity.sql} * ${books.priceMinor.sql})" })
+project(sqlValue<Long> { "SUM(${books.quantity.sql} * ${books.priceMinor.sql})" })
 ```
 
 Reference columns through `.sql`, which **Yawn** substitutes with the physical column backing that property, already qualified by its table’s alias. This works
@@ -130,7 +130,7 @@ one explicitly, and `.sql` keeps working when they don’t.
 The type argument decides how the result is mapped, and should be nullable when the expression can evaluate to `NULL`:
 
 ```kotlin
-project(YawnProjections.sqlValue<Int?> { "NULLIF(${books.rating.sql}, 0)" })
+project(sqlValue<Int?> { "NULLIF(${books.rating.sql}, 0)" })
 ```
 
 The result composes anywhere an ordinary column does — inside `pair`, `triple`, or a data class projection:
@@ -139,12 +139,23 @@ The result composes anywhere an ordinary column does — inside `pair`, `triple`
 project(
   BookSummaryProjection.create(
     author = YawnProjections.groupBy(authors.name),
-    totalPages = YawnProjections.sqlValue<Long> { "SUM(${books.numberOfPages.sql})" },
+    totalPages = sqlValue<Long> { "SUM(${books.numberOfPages.sql})" },
   ),
 )
 ```
 
 Do not name the result yourself (no `AS total`): **Yawn** selects it under an alias it generates, so two SQL values in one query can never collide.
+
+`sqlValue` lives on the projected query scope, so it already knows what you are selecting from and only the result type has to be named. To share one across
+queries, write a helper on that scope, taking the table definition as a parameter:
+
+```kotlin
+private fun BookProjectedQueryScope<Long>.totalPages(
+  books: BookTableDefType,
+): YawnSingleValueProjection<Book, Long> {
+  return sqlValue<Long> { "SUM(${books.numberOfPages.sql})" }
+}
+```
 
 > [!WARNING]
 > 🥱 Raw SQL projections cannot bind parameters, so anything you interpolate into the expression is inlined into the statement verbatim. Never build one out of
@@ -203,8 +214,8 @@ internal data class AuthorAndBooks(
 yawn.project(BookTable) {
   project(
     AuthorAndBooksProjectionDef.create(
-      author = TypedProjections.groupBy(books.author),
-      numberOfBooks = TypedProjections.count(books.name),
+      author = YawnProjections.groupBy(books.author),
+      numberOfBooks = YawnProjections.count(books.name),
     ),
   )
 }
@@ -222,8 +233,8 @@ In order to further refine a projection, i.e. add conditions on top of projected
 ```kotlin
 project(
   AuthorAndBooksProjectionDef.create(
-    author = TypedProjections.groupBy(books.author),
-    numberOfBooks = TypedProjections.count(books.name),
+    author = YawnProjections.groupBy(books.author),
+    numberOfBooks = YawnProjections.count(books.name),
   ),
 ) { authorAndBooks ->
   addGe(authorAndBooks.numberOfBooks, 1)
