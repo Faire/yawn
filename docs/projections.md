@@ -120,7 +120,7 @@ When the value you want isn’t expressible with the built-in functions, project
 `YawnQueryProjection` by hand:
 
 ```kotlin
-project(sqlValue<Long> { "SUM(${books.quantity.sql} * ${books.priceMinor.sql})" })
+project(sqlValue<Long> { "SUM(${books.numberOfPages.sql} * ${books.sales.paperBacksSold.sql})" })
 ```
 
 Reference columns through `.sql`, which **Yawn** substitutes with the physical column backing that property, already qualified by its table’s alias. This works
@@ -136,12 +136,16 @@ project(sqlValue<Int?> { "NULLIF(${books.rating.sql}, 0)" })
 The result composes anywhere an ordinary column does — inside `pair`, `triple`, or a data class projection:
 
 ```kotlin
-project(
-  BookSummaryProjection.create(
-    author = YawnProjections.groupBy(authors.name),
-    totalPages = sqlValue<Long> { "SUM(${books.numberOfPages.sql})" },
-  ),
-)
+val pagesPrintedPerAuthor = yawn.project(BookTable) { books ->
+  val authors = join(books.author)
+
+  project(
+    YawnProjections.pair(
+      YawnProjections.groupBy(authors.name),
+      sqlValue<Long> { "SUM(${books.numberOfPages.sql} * ${books.sales.paperBacksSold.sql})" },
+    ),
+  )
+}.list()
 ```
 
 Do not name the result yourself (no `AS total`): **Yawn** selects it under an alias it generates, so two SQL values in one query can never collide.
@@ -150,10 +154,10 @@ Do not name the result yourself (no `AS total`): **Yawn** selects it under an al
 queries, write a helper on that scope, taking the table definition as a parameter:
 
 ```kotlin
-private fun BookProjectedQueryScope<Long>.totalPages(
+private fun BookProjectedQueryScope<Long>.pagesPrinted(
   books: BookTableDefType,
 ): YawnSingleValueProjection<Book, Long> {
-  return sqlValue<Long> { "SUM(${books.numberOfPages.sql})" }
+  return sqlValue<Long> { "SUM(${books.numberOfPages.sql} * ${books.sales.paperBacksSold.sql})" }
 }
 ```
 
@@ -213,7 +217,7 @@ internal data class AuthorAndBooks(
 // later:
 yawn.project(BookTable) {
   project(
-    AuthorAndBooksProjectionDef.create(
+    AuthorAndBooksProjection.create(
       author = YawnProjections.groupBy(books.author),
       numberOfBooks = YawnProjections.count(books.name),
     ),
@@ -232,7 +236,7 @@ In order to further refine a projection, i.e. add conditions on top of projected
 
 ```kotlin
 project(
-  AuthorAndBooksProjectionDef.create(
+  AuthorAndBooksProjection.create(
     author = YawnProjections.groupBy(books.author),
     numberOfBooks = YawnProjections.count(books.name),
   ),
