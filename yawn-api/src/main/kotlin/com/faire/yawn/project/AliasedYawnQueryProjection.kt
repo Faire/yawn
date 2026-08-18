@@ -8,12 +8,12 @@ import org.hibernate.criterion.Projections
  * Wraps a [YawnQueryProjection] with a unique SQL alias, so that it can also be used as a
  * [com.faire.yawn.query.YawnQueryOrder] target via [YawnPathProvider].
  *
- * This is an internal implementation detail of [com.faire.yawn.criteria.query.orderAsc]/
- * [com.faire.yawn.criteria.query.orderDesc] (see those for the public entry point to order by a projected/
+ * This is an internal implementation detail of [com.faire.yawn.criteria.query.orderAscBy]/
+ * [com.faire.yawn.criteria.query.orderDescBy] (see those for the public entry point to order by a projected/
  * aggregate expression) and should never be constructed directly: Hibernate can only resolve `ORDER BY` against an
  * alias that is present in the query's own SELECT list (unlike a plain mapped column, an aggregate or other
- * projected expression has no property name of its own to order by), so [orderAsc]/[orderDesc] return this same
- * instance for the caller to pass to `project(...)`, ensuring the alias is actually selected.
+ * projected expression has no property name of its own to order by), so [orderAscBy]/[orderDescBy] return this
+ * same instance for the caller to pass to `project(...)`, ensuring the alias is actually selected.
  *
  * The alias is generated lazily via [YawnCompilationContext.generateResultAlias] and cached per context - rather
  * than assigned once at construction - because the same query (and so the same instance of this class) can be
