@@ -70,7 +70,7 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
                 addLike(books.name, "The %")
 
                 // TODO(yawn): publisher should be nullable
-                addIsNotNull(nullable(books.publisher.foreignKey))
+                addIsNotNull(books.publisher)
 
                 project(books.publisher)
             }.set()

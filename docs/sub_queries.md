@@ -15,14 +15,15 @@ a restriction.
 
 ```kotlin
     // outside the transaction
-    val detachedSubQuery = Yawn.createProjectedDetachedCriteria(DbPersonTable) { person ->
-        addLike(person.name, "J.%")
-        project(YawnProjections.distinct(person.name))
-    }
+    val selectAuthorsStartingWithJ = Yawn.createProjectedDetachedCriteria(PersonTable) { people ->
+        addLike(people.name, "J.%")
+        project(people.name)
+    }.distinct()
 
     // within your transaction
-    val books = yawn.query(DbBookTable) { books ->
-        addIn(books.authorName, detachedSubQuery)
+    val books = yawn.query(BookTable) { books ->
+        val authors = join(books.author)
+        addIn(authors.name, selectAuthorsStartingWithJ)
         addLt(books.numberOfPages, 500)
     }.list()
 ```
@@ -33,13 +34,13 @@ Within a query, you can create a sub-query that can access the context of the pa
 
 ```kotlin
 val people = session.query(PersonTable) { people ->
-    val correlatedSubQuery = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
+    val selectAuthorsOfLargeBooks = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
         addEq(books.author.foreignKey, people.id) // access people from outer query
         addGt(books.numberOfPages, 500)
         project(books.author.foreignKey)
     }
 
-    addExists(correlatedSubQuery)
+    addExists(selectAuthorsOfLargeBooks)
 }.list()
 ```
 

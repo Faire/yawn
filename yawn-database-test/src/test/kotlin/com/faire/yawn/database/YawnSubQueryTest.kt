@@ -11,16 +11,16 @@ import org.junit.jupiter.api.Test
 internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
     @Test
     fun `yawn query with a sub query using detached criteria`() {
-        val detachedCriteria = Yawn.createProjectedDetachedCriteria(PersonTable) { person ->
-            addEq(person.name, "J.R.R. Tolkien")
+        val selectTolkienNames = Yawn.createProjectedDetachedCriteria(PersonTable) { people ->
+            addEq(people.name, "J.R.R. Tolkien")
 
-            project(person.name)
+            project(people.name)
         }
 
         transactor.open { session ->
             val book = session.query(BookTable) { books ->
                 val authors = join(books.author)
-                addEq(authors.name, detachedCriteria)
+                addEq(authors.name, selectTolkienNames)
 
                 addLt(books.numberOfPages, 500)
             }.uniqueResult()!!
@@ -34,14 +34,14 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn query with a sub query using detached criteria with join`() {
-        val detachedCriteria = Yawn.createProjectedDetachedCriteria(PersonTable) { person ->
-            addEq(person.name, "J.R.R. Tolkien")
-            project(person.id)
+        val selectTolkienIds = Yawn.createProjectedDetachedCriteria(PersonTable) { people ->
+            addEq(people.name, "J.R.R. Tolkien")
+            project(people.id)
         }
 
         transactor.open { session ->
             val book = session.query(BookTable) { books ->
-                addEq(books.author, detachedCriteria)
+                addEq(books.author, selectTolkienIds)
                 addLt(books.numberOfPages, 500)
             }.uniqueResult()!!
 
@@ -54,15 +54,15 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn query with a sub query using detached criteria with query-level distinct`() {
-        val detachedCriteria = Yawn.createProjectedDetachedCriteria(PersonTable) { person ->
-            addLike(person.name, "J.%")
-            project(person.name)
+        val selectAuthorsStartingWithJ = Yawn.createProjectedDetachedCriteria(PersonTable) { people ->
+            addLike(people.name, "J.%")
+            project(people.name)
         }.distinct()
 
         transactor.open { session ->
             val books = session.query(BookTable) { books ->
                 val authors = join(books.author)
-                addIn(authors.name, detachedCriteria)
+                addIn(authors.name, selectAuthorsStartingWithJ)
                 addLt(books.numberOfPages, 500)
             }.list()
 
@@ -76,7 +76,7 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn query with a sub query using detached criteria with left join`() {
-        val detachedCriteria = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
+        val selectAuthorsWithoutPublisher = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
             val publishers = join(books.publisher, joinType = JoinType.LEFT_OUTER_JOIN)
             addIsNull(publishers.id)
             project(books.author.foreignKey)
@@ -84,7 +84,7 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
         transactor.open { session ->
             val people = session.query(PersonTable) { people ->
-                addIn(people.id, detachedCriteria)
+                addIn(people.id, selectAuthorsWithoutPublisher)
             }.list()
 
             assertThat(people).hasSize(1)
@@ -94,10 +94,10 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn query with a sub query using detached criteria with join criteria`() {
-        val detachedCriteria = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
-            val publishers = join(books.publisher, joinType = JoinType.LEFT_OUTER_JOIN) { publisher ->
-                addNotLike(publisher.name, "%-%")
-                addNotLike(publisher.name, "% %")
+        val selectAuthorsWithoutSimplePublisher = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
+            val publishers = join(books.publisher, joinType = JoinType.LEFT_OUTER_JOIN) { publishers ->
+                addNotLike(publishers.name, "%-%")
+                addNotLike(publishers.name, "% %")
             }
             addIsNull(publishers.id)
             project(books.author.foreignKey)
@@ -105,7 +105,7 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
 
         transactor.open { session ->
             val people = session.query(PersonTable) { people ->
-                addIn(people.id, detachedCriteria)
+                addIn(people.id, selectAuthorsWithoutSimplePublisher)
             }.list()
 
             assertThat(people).hasSize(2)
@@ -118,20 +118,20 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             // Authors who have written a 500+ page book
             val people = session.query(PersonTable) { people ->
-                val subQuery = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
+                val selectAuthorsOfLargeBooks = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
                     addEq(books.author.foreignKey, people.id)
                     addGt(books.numberOfPages, 500)
                     project(books.author.foreignKey)
                 }
 
-                val secondSubQuery = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
+                val selectAuthorsOfRealBooks = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
                     addEq(books.author.foreignKey, people.id)
                     addNotEq(books.name, "Fake book")
                     project(books.author.foreignKey)
                 }
 
-                addExists(subQuery)
-                addExists(secondSubQuery)
+                addExists(selectAuthorsOfLargeBooks)
+                addExists(selectAuthorsOfRealBooks)
             }.list()
 
             assertThat(people.single().name).isEqualTo("J.R.R. Tolkien")
@@ -143,21 +143,21 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             // Authors who have written a 500+ page book or who have written a book < 100 pages
             val people = session.query(PersonTable) { people ->
-                val greaterThan500Pages = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
+                val selectAuthorsOfLargeBooks = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
                     addEq(books.author.foreignKey, people.id)
                     addGt(books.numberOfPages, 500)
                     project(books.author.foreignKey)
                 }
 
-                val lessThan100Pages = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
+                val selectAuthorsOfShortBooks = createProjectedSubQuery(BookTable.forSubQuery()) { books ->
                     addEq(books.author.foreignKey, people.id)
                     addLe(books.numberOfPages, 100)
                     project(books.author.foreignKey)
                 }
 
                 addOr(
-                    YawnSubQueryRestrictions.exists(greaterThan500Pages),
-                    YawnSubQueryRestrictions.exists(lessThan100Pages),
+                    YawnSubQueryRestrictions.exists(selectAuthorsOfLargeBooks),
+                    YawnSubQueryRestrictions.exists(selectAuthorsOfShortBooks),
                 )
             }.list()
 

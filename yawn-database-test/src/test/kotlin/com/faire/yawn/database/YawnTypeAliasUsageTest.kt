@@ -100,14 +100,14 @@ internal class YawnTypeAliasUsageTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `projected scope alias works for a detached criteria`() {
-        val shortBookNames = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
+        val selectAndersenBookNames = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
             filterToAuthor(books, "Hans Christian Andersen")
             project(books.name)
         }
 
         transactor.open { session ->
             val books = session.query(BookTable) { books ->
-                addIn(books.name, shortBookNames)
+                addIn(books.name, selectAndersenBookNames)
             }.list()
 
             assertThat(books.map { it.name }).containsExactlyInAnyOrder(

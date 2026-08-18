@@ -50,7 +50,7 @@ For example, the following query returns the publishers of books whose names sta
 ```kotlin
 val publishers = yawn.project(BookTable) { books ->
     addLike(books.name, "The %")
-    addIsNotNull(books.publisher.foreignKey)
+    addIsNotNull(books.publisher)
 
     project(books.publisher)
 }.set()
@@ -65,7 +65,7 @@ Sometimes you want to project to a derived value, like a count or sum. To do tha
 use our version `YawnProjections`. For example:
 
 ```kotlin
-project(YawnProjections.count(books.token))
+project(YawnProjections.count(books.id))
 ```
 
 or
@@ -76,8 +76,20 @@ project(YawnProjections.sum(books.numberOfPages))
 
 Again, **Yawn** knows that `sum` must take a numerical type, and that both `count` and `sum` return `Long`.
 
-Other projection functions include the usual suspects such as `distinct`, `countDistinct`, `avg`, `min` and `max`. You can see all currently supported
+Other projection functions include the usual suspects such as `countDistinct`, `avg`, `min` and `max`. You can see all currently supported
 projection functions on [the `YawnProjections` file][yawn-projections-file].
+
+Note that `countDistinct` is an *aggregate-level* distinct, i.e. `COUNT(DISTINCT column)`. That is a different thing from a query-level `SELECT DISTINCT`,
+which applies to the whole projection and is requested on the builder instead:
+
+```kotlin
+val authorNames = yawn.project(BookTable) { books ->
+    val authors = join(books.author)
+    project(authors.name)
+}.distinct().list()
+```
+
+`distinct()` is only available on projected queries, since Hibernate only supports `DISTINCT` through projections.
 
 > [!NOTE]
 > 🥱 If something isn’t support by **Yawn**, you can also create your own custom `YawnQueryProjection` by implementing the interface. However, in that case you
@@ -133,7 +145,7 @@ internal data class AuthorAndBooks(
 )
 
 // later:
-yawn.project(BookTable) { 
+yawn.project(BookTable) {
   project(
     AuthorAndBooksProjectionDef.create(
       author = TypedProjections.groupBy(books.author),
