@@ -1,11 +1,14 @@
 package com.faire.yawn.database
 
+import com.faire.yawn.criteria.query.orderAscBy
+import com.faire.yawn.criteria.query.orderDescBy
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnCompilationContext
 import com.faire.yawn.query.YawnQueryOrder
 import com.faire.yawn.setup.entities.Book
+import com.faire.yawn.setup.entities.Book.Language.DANISH
 import com.faire.yawn.setup.entities.Book.Language.ENGLISH
 import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PublisherTable
@@ -512,6 +515,63 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `yawn query with group by ordered by an aggregate`() {
+        transactor.open { session ->
+            // "top-N per group": group books by language, then order the *groups* by their own max(numberOfPages),
+            // pushing the sort to SQL instead of fetching every row and sorting in Kotlin.
+            val resultsDesc = session.project(BookTable) { books ->
+                val maxPages = orderDescBy(YawnProjections.max(books.numberOfPages))
+                project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
+            }.list()
+
+            // ENGLISH's max (Lord of the Rings, 1000) outranks DANISH's max (The Emperor's New Clothes, 120)
+            assertThat(resultsDesc).containsExactly(
+                ENGLISH to 1_000L,
+                DANISH to 120L,
+            )
+
+            val resultsAsc = session.project(BookTable) { books ->
+                val maxPages = orderAscBy(YawnProjections.max(books.numberOfPages))
+                project(YawnProjections.pair(YawnProjections.groupBy(books.originalLanguage), maxPages))
+            }.list()
+
+            assertThat(resultsAsc).containsExactly(
+                DANISH to 120L,
+                ENGLISH to 1_000L,
+            )
+        }
+    }
+
+    @Test
+    fun `yawn query with group by ordered by one aggregate field among several`() {
+        transactor.open { session ->
+            // Group by author, projecting *two* aggregates per group (book count and total page count), but only
+            // order by one of them (totalPages) - the other aggregate (numberOfBooks) is along for the ride and
+            // plays no part in the alias/ordering machinery.
+            val results = session.project(BookTable) { books ->
+                val authors = join(books.author)
+                val totalPages = orderDescBy(YawnProjections.sum(books.numberOfPages))
+                project(
+                    YawnProjectionTest_AuthorBookStatsProjection.create(
+                        author = YawnProjections.groupBy(authors.name),
+                        numberOfBooks = YawnProjections.count(books.name),
+                        totalPages = totalPages,
+                    ),
+                )
+            }.list()
+
+            assertThat(results).containsExactly(
+                // Tolkien: Lord of the Rings (1000) + The Hobbit (300)
+                AuthorBookStats("J.R.R. Tolkien", numberOfBooks = 2, totalPages = 1_300),
+                // Rowling: Harry Potter (500)
+                AuthorBookStats("J.K. Rowling", numberOfBooks = 1, totalPages = 500),
+                // Andersen: The Little Mermaid (100) + The Ugly Duckling (110) + The Emperor's New Clothes (120)
+                AuthorBookStats("Hans Christian Andersen", numberOfBooks = 3, totalPages = 330),
+            )
+        }
+    }
+
+    @Test
     fun `yawn query with projection and join`() {
         transactor.open { session ->
             val results1 = session.project(BookTable) { books ->
@@ -913,5 +973,12 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     internal data class BookNameAndNotes(
         val name: String,
         val notes: String,
+    )
+
+    @YawnProjection
+    internal data class AuthorBookStats(
+        val author: String,
+        val numberOfBooks: Long,
+        val totalPages: Long,
     )
 }

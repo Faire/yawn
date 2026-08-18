@@ -1,6 +1,7 @@
 package com.faire.yawn.query
 
 import com.faire.yawn.YawnTableDef
+import com.faire.yawn.project.YawnPathProvider
 import org.hibernate.NullPrecedence
 import org.hibernate.NullPrecedence.NONE
 import org.hibernate.criterion.Order
@@ -11,12 +12,15 @@ import org.hibernate.criterion.Order
  * Compiles into a Hibernate's [Order].
  * It restricts construction of this class by requiring the [SOURCE] of the query.
  *
- * @property property the property by which to order
+ * @property property the property by which to order. Usually a [YawnTableDef.ColumnDef]; to order by a projected/
+ * aggregate expression instead (e.g. ordering grouped rows by `max(createdAt)`), use the
+ * [com.faire.yawn.criteria.query.orderAscBy]/[com.faire.yawn.criteria.query.orderDescBy] extension functions
+ * rather than constructing a [YawnQueryOrder] directly.
  * @property direction the direction by which to order, either ascending or descending
  * @property nullPrecedence the precedence of null values, either first, last, or none
  */
 data class YawnQueryOrder<SOURCE : Any>(
-    val property: YawnTableDef<SOURCE, *>.ColumnDef<*>,
+    val property: YawnPathProvider<SOURCE>,
     val direction: Direction,
     val nullPrecedence: NullPrecedence,
 ) {
@@ -38,14 +42,14 @@ data class YawnQueryOrder<SOURCE : Any>(
 
     companion object {
         fun <SOURCE : Any> asc(
-            property: YawnTableDef<SOURCE, *>.ColumnDef<*>,
+            property: YawnPathProvider<SOURCE>,
             nullPrecedence: NullPrecedence = NONE,
         ): YawnQueryOrder<SOURCE> {
             return YawnQueryOrder(property, Direction.ASC, nullPrecedence)
         }
 
         fun <SOURCE : Any> desc(
-            property: YawnTableDef<SOURCE, *>.ColumnDef<*>,
+            property: YawnPathProvider<SOURCE>,
             nullPrecedence: NullPrecedence = NONE,
         ): YawnQueryOrder<SOURCE> {
             return YawnQueryOrder(property, Direction.DESC, nullPrecedence)

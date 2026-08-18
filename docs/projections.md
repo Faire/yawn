@@ -95,6 +95,25 @@ val authorNames = yawn.project(BookTable) { books ->
 > 🥱 If something isn’t support by **Yawn**, you can also create your own custom `YawnQueryProjection` by implementing the interface. However, in that case you
 > will need to guarantee the type-safety of your implementation!
 
+#### Ordering by an aggregate
+
+A plain column can be ordered directly (`orderAsc`/`orderDesc`, or `YawnQueryOrder.asc`/`.desc`), but an aggregate or
+other projected expression has no property name of its own to order by. `orderAscBy`/`orderDescBy` handle this for
+you: pass them the projection, and use the *returned* value in `project(...)`:
+
+```kotlin
+yawn.project(VisitTable) { visits ->
+    val mostRecentVisit = orderDescBy(YawnProjections.max(visits.createdAt))
+    project(YawnProjections.pair(YawnProjections.groupBy(visits.brandId), mostRecentVisit))
+}.list()
+```
+
+This groups visits by brand and returns each brand's most recent visit time, sorted with the most-recently-visited
+brands first - a "top-N per group" query expressed as a single SQL-side query instead of fetching every row and
+sorting in Kotlin. The value returned by `orderDescBy`/`orderAscBy` must be passed to `project(...)` (nesting it
+inside a `pair`/`triple`/`@YawnProjection` data class is fine): the expression can only be ordered by once it's also
+selected, so if the returned value isn't projected, resolving the order will fail at query time.
+
 ### Project to Data Class
 
 Sometimes you want to return more than a single field. For that, you can project to a data class with any assortment of columns you desire, built off of other
