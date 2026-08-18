@@ -17,14 +17,14 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
     @Test
     fun `yawn one-to-one inner join`() {
         transactor.open { session ->
-            val results1 = session.query(BookRankingTable) { ranking ->
-                val books = join(ranking.bestSeller)
+            val results1 = session.query(BookRankingTable) { rankings ->
+                val books = join(rankings.bestSeller)
                 addEq(books.name, "The Hobbit")
             }.list()
             assertThat(results1).isEmpty()
 
-            val results2 = session.query(BookRankingTable) { ranking ->
-                val books = join(ranking.bestSeller)
+            val results2 = session.query(BookRankingTable) { rankings ->
+                val books = join(rankings.bestSeller)
                 addEq(books.name, "Harry Potter")
             }.list()
             assertThat(results2.single().bestSeller.name).isEqualTo("Harry Potter")
@@ -312,17 +312,17 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `yawn deeply-nested join structure - authors who's favorite books are not their own writing'`() {
-        val authors = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
-            val author = join(books.author)
-            project(author.name)
+        val selectAllAuthorNames = Yawn.createProjectedDetachedCriteria(BookTable) { books ->
+            val authors = join(books.author)
+            project(authors.name)
         }
 
         val results = transactor.open { session ->
             session.query(PersonTable) { people ->
                 val favoriteBooks = join(people.favoriteBook)
-                val favoriteBooksAuthors = join(favoriteBooks.author)
-                addIn(people.name, authors)
-                addNotEq(people.name, favoriteBooksAuthors.name)
+                val authorsOfFavoriteBooks = join(favoriteBooks.author)
+                addIn(people.name, selectAllAuthorNames)
+                addNotEq(people.name, authorsOfFavoriteBooks.name)
             }.list()
         }
         assertThat(results.map { it.name }).containsExactlyInAnyOrder(
@@ -612,19 +612,19 @@ internal class YawnJoinsTest : BaseYawnDatabaseTest() {
     fun `use attachJoinRef to reuse reference which has been called in the query before, without creating duplicate path`() {
         transactor.open { session ->
             val criteriaAttachJoinRef = session.query(BookReviewTable) { bookReviews ->
-                val reviewer = join(bookReviews.reviewer)
-                val book = join(bookReviews.book)
+                val reviewers = join(bookReviews.reviewer)
+                val books = join(bookReviews.book)
 
-                addLike(reviewer.name, "%Doe%")
-                addEq(book.originalLanguage, ENGLISH)
+                addLike(reviewers.name, "%Doe%")
+                addEq(books.originalLanguage, ENGLISH)
             }.attachJoinRef { book }
 
             val criteria = criteriaAttachJoinRef.criteria
             val bookJoinRef = criteriaAttachJoinRef.joinRef
 
-            criteria.applyJoinRef(bookJoinRef) { book ->
-                val publisher = join(book.publisher)
-                addEq(publisher.name, "HarperCollins")
+            criteria.applyJoinRef(bookJoinRef) { books ->
+                val publishers = join(books.publisher)
+                addEq(publishers.name, "HarperCollins")
             }
 
             val results = criteria.list()

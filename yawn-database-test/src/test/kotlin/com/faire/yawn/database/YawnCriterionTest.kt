@@ -102,8 +102,8 @@ internal class YawnCriterionTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             // Find all books by J.R.R. Tolkien
             val results = session.query(BookTable) { books ->
-                val author = join(books.author)
-                add(eq(author.name, "J.R.R. Tolkien"))
+                val authors = join(books.author)
+                add(eq(authors.name, "J.R.R. Tolkien"))
             }.list()
 
             assertThat(results)
@@ -114,9 +114,9 @@ internal class YawnCriterionTest : BaseYawnDatabaseTest() {
         // Find all people who have a favorite book by J.R.R. Tolkien
         transactor.open { session ->
             val results = session.query(PersonTable) { people ->
-                val favoriteBook = join(people.favoriteBook)
-                val favoriteBookAuthor = join(favoriteBook.author)
-                add(eq(favoriteBookAuthor.name, "J.R.R. Tolkien"))
+                val favoriteBooks = join(people.favoriteBook)
+                val authorsOfFavoriteBooks = join(favoriteBooks.author)
+                add(eq(authorsOfFavoriteBooks.name, "J.R.R. Tolkien"))
             }.list()
 
             assertThat(results)

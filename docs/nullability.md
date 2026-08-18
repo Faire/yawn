@@ -105,18 +105,18 @@ to change that if there are other sub-typing use cases.
 
 There are still cases where you might need some helper functions though. So far we provide two:
 
-## `TypedProjections.coalesce`
+## `YawnProjections.coalesce`
 
 This will do a Kotlin side (not SQL side) coalesce, allowing you to provide a nullable string into a non-null column with default value:
 
 ```kotlin
     // [in a projection]
-    aString = TypedProjections.coalesce(books.notes, "fallback"),
+    aString = YawnProjections.coalesce(books.notes, "fallback"),
 ```
 
 Note that we don’t currently support a type-safe SQL-side coalesce, but we plan on implementing that soon.
 
-## `TypedProjections.null`
+## `YawnProjections.null`
 
 If you want to always set `null` to the projection field, we also provide a `null()` function. This actually works on the SQL-side, but we plan to change this
 (and its sibling `selectConstant`) to a more robust, generic, “constant” selector projection that works on the Kotlin side and pairs with the enhanced
@@ -126,7 +126,7 @@ But for now you can do:
 
 ```kotlin
     // [in a projection]
-    aNullableString = TypedProjections.`null`(),
+    aNullableString = YawnProjections.`null`(),
 ```
 
 ## `addIsNotNull` returns a non-nullable column

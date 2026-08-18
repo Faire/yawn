@@ -356,10 +356,10 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
     @Test
     fun `supports nested joins`() {
         transactor.open { session ->
-            val ranking = session.query(BookRankingTable) { ranking ->
-                val bestSeller = join(ranking.bestSeller)
-                val author = join(bestSeller.author)
-                addEq(author.name, "J.K. Rowling")
+            val ranking = session.query(BookRankingTable) { rankings ->
+                val bestSellers = join(rankings.bestSeller)
+                val authors = join(bestSellers.author)
+                addEq(authors.name, "J.K. Rowling")
             }.uniqueResult()!!
 
             assertThat(ranking.ratingYear).isEqualTo(2007)
@@ -802,8 +802,8 @@ internal class YawnSimpleQueriesTest : BaseYawnDatabaseTest() {
     fun `people whose favorite book was written by their favorite author`() {
         transactor.open { session ->
             val result = session.query(PersonTable) { people ->
-                val favoriteBook = join(people.favoriteBook)
-                addEq(people.favoriteAuthor, favoriteBook.author)
+                val favoriteBooks = join(people.favoriteBook)
+                addEq(people.favoriteAuthor, favoriteBooks.author)
             }.list()
             assertThat(result.map { it.name }).containsExactlyInAnyOrder("J.K. Rowling", "J.R.R. Tolkien")
         }

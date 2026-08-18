@@ -21,8 +21,8 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
                 project(books.id)
             }.uniqueResult()!!
 
-            val bookRanking = session.query(BookRankingTable) { bookRankings ->
-                addEq(bookRankings.bestSeller.foreignKey, bookId)
+            val bookRanking = session.query(BookRankingTable) { rankings ->
+                addEq(rankings.bestSeller.foreignKey, bookId)
             }.uniqueResult()!!
 
             assertThat(bookRanking.ratingYear).isEqualTo(2007)
@@ -39,16 +39,16 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
                 project(books.id)
             }.uniqueResult()!!
 
-            val hpRanking = session.query(BookRankingTable) { bookRankings ->
-                addEq(bookRankings.bestSeller, hpBookId)
+            val hpRanking = session.query(BookRankingTable) { rankings ->
+                addEq(rankings.bestSeller, hpBookId)
             }.uniqueResult()!!
 
             assertThat(hpRanking.ratingYear).isEqualTo(2007)
             assertThat(hpRanking.ratingMonth).isEqualTo(1)
             assertThat(hpRanking.bestSeller.id).isEqualTo(hpBookId)
 
-            val lordOfTheRingsRanking = session.query(BookRankingTable) { bookRankings ->
-                addNotEq(bookRankings.bestSeller, hpBookId)
+            val lordOfTheRingsRanking = session.query(BookRankingTable) { rankings ->
+                addNotEq(rankings.bestSeller, hpBookId)
             }.uniqueResult()!!
 
             assertThat(lordOfTheRingsRanking.ratingYear).isEqualTo(1966)
@@ -70,15 +70,15 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
                 project(books.id)
             }.uniqueResult()!!
 
-            val singleInResult = session.query(BookRankingTable) { bookRankings ->
-                addIn(bookRankings.bestSeller, setOf(lordOfTheRingsBookId))
+            val singleInResult = session.query(BookRankingTable) { rankings ->
+                addIn(rankings.bestSeller, setOf(lordOfTheRingsBookId))
             }.list()
 
             assertThat(singleInResult.map { Pair(it.ratingYear, it.bestSeller.name) })
                 .containsExactly(Pair(1966, "Lord of the Rings"))
 
-            val multipleInResult = session.query(BookRankingTable) { bookRankings ->
-                addIn(bookRankings.bestSeller, setOf(hpBookId, lordOfTheRingsBookId))
+            val multipleInResult = session.query(BookRankingTable) { rankings ->
+                addIn(rankings.bestSeller, setOf(hpBookId, lordOfTheRingsBookId))
             }.list()
 
             assertThat(multipleInResult.map { Pair(it.ratingYear, it.bestSeller.name) })
@@ -91,15 +91,15 @@ internal class YawnForeignAndCompositeKeyTest : BaseYawnDatabaseTest() {
 
     @Test
     fun `simplified foreign key in clause and subquery syntax`() {
-        val subQuery = Yawn.createProjectedDetachedCriteria(PersonTable) { people ->
+        val selectFavoriteBookIds = Yawn.createProjectedDetachedCriteria(PersonTable) { people ->
             addIn(people.name, "J.K. Rowling", "Luan Nico")
 
             project(people.favoriteBook.foreignKey)
         }
 
         transactor.open { session ->
-            val bookRankings = session.query(BookRankingTable) { bookRankings ->
-                addIn(bookRankings.bestSeller, subQuery)
+            val bookRankings = session.query(BookRankingTable) { rankings ->
+                addIn(rankings.bestSeller, selectFavoriteBookIds)
             }.list()
 
             assertThat(bookRankings.map { Pair(it.ratingYear, it.bestSeller.name) })

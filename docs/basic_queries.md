@@ -105,7 +105,7 @@ Use `forShare()` for "find or create" patterns where you need to prevent concurr
 
 ```kotlin
 val existing = yawn.query(BookTable) { books ->
-    addEq(books.token, bookToken)
+    addEq(books.id, bookId)
 }
     .forShare()
     .uniqueResult()

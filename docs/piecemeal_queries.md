@@ -61,10 +61,10 @@ KSP generates the scope aliases and a `TableDefType` alias for every `@YawnEntit
 table-definition, and projection generics:
 
 ```kotlin
-private fun BookEntityQueryScope.addPublishedFilter(
+private fun BookEntityQueryScope.addHasPublisherFilter(
     books: BookTableDefType,
 ) {
-    addEq(books.published, true)
+    addEq(books.hasPublisher, true)
 }
 ```
 
