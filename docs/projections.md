@@ -111,9 +111,8 @@ yawn.project(VisitTable) { visits ->
 This groups visits by brand and returns each brand's most recent visit time, sorted with the most-recently-visited
 brands first - a "top-N per group" query expressed as a single SQL-side query instead of fetching every row and
 sorting in Kotlin. The value returned by `orderDescBy`/`orderAscBy` must be passed to `project(...)` (nesting it
-inside a `pair`/`triple`/`@YawnProjection` data class is fine): Hibernate can only order by an alias that is actually
-present in the query's SELECT list, so if the returned value isn't projected, resolving the order will fail at query
-time.
+inside a `pair`/`triple`/`@YawnProjection` data class is fine): the expression can only be ordered by once it's also
+selected, so if the returned value isn't projected, resolving the order will fail at query time.
 
 ### Project to Data Class
 

@@ -42,10 +42,10 @@ internal class YawnQueryScopeWithOrderDelegate<SOURCE : Any, T : Any>(
 /**
  * Orders by a projected/aggregate expression (e.g. `YawnProjections.max(col)`), ascending.
  *
- * Unlike a plain column, such an expression has no property name of its own for Hibernate to order by, so this
- * assigns it a unique SQL alias internally and returns the now-orderable projection - pass the *returned*
- * instance to `project(...)` (nesting it inside a `pair`/`triple`/`@YawnProjection` data class is fine), since
- * Hibernate can only order by an alias that is actually present in the query's SELECT list.
+ * Unlike a plain column, such an expression has no name of its own to order by, so this gives it one and returns
+ * the now-orderable projection - pass the *returned* instance to `project(...)` (nesting it inside a
+ * `pair`/`triple`/`@YawnProjection` data class is fine). It can only be ordered by once it's also selected, so if
+ * the returned value isn't projected, resolving the order will fail at query time.
  *
  * ```kotlin
  * yawn.project(VisitTable) { visits ->
