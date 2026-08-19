@@ -119,7 +119,11 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
      * since it is not the query being paginated).
      *
      * Defaults to `false` to preserve existing behavior for callers whose entities have no eager collection
-     * associations, since the two-phase approach costs an extra query.
+     * associations, since the two-phase approach costs an extra query. This mirrors the shape of the pre-Yawn
+     * `createCriteria` helper, which always paginated this way regardless of whether the entity had an eager
+     * collection - the two-phase approach may end up becoming the default (or the only) behavior once it has
+     * seen enough production use here to justify the extra query unconditionally; the flag exists so that can
+     * happen as a gradual, opt-in rollout rather than a behavior change forced on every caller at once.
      */
     fun <ID : Any> listPaginatedWithTotalResults(
         page: Page,

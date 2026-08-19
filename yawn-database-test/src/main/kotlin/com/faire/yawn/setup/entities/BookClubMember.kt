@@ -12,18 +12,18 @@ import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 @Entity
-@Table(name = "widget_parts")
+@Table(name = "book_club_members")
 @YawnEntity
-internal class WidgetPart : TimestampedEntity<WidgetPart>() {
+internal class BookClubMember : TimestampedEntity<BookClubMember>() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    override lateinit var id: YawnId<WidgetPart>
+    override lateinit var id: YawnId<BookClubMember>
         protected set
 
     @Column
     lateinit var name: String
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "widget_id")
-    lateinit var widget: Widget
+    @JoinColumn(name = "book_club_id")
+    lateinit var bookClub: BookClub
 }

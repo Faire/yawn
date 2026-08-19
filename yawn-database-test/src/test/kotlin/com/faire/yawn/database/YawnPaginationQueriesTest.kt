@@ -4,8 +4,8 @@ import com.faire.yawn.pagination.Page
 import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.pagination.PaginationResult
 import com.faire.yawn.query.YawnQueryOrder
+import com.faire.yawn.setup.entities.BookClubTable
 import com.faire.yawn.setup.entities.BookTable
-import com.faire.yawn.setup.entities.WidgetTable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -142,11 +142,11 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
     @Test
     fun `list with total results - eager collection fan-out truncates without avoidEagerFetchFanout`() {
         transactor.open { session ->
-            // "Widget A" has 5 parts (see BookFixtures) - more than the page size below - so the eager
-            // `parts` collection's join fetch fans it out into enough SQL rows to exhaust the page's LIMIT
-            // budget by itself. Without avoidEagerFetchFanout, "Widget B" is starved off this page even
-            // though it should be the 2nd of 3 distinct widgets, ordered ascending by name.
-            val (total, widgets) = session.query(WidgetTable)
+            // The Andersen Fan Club has 5 members (see BookFixtures) - more than the page size below - so the
+            // eager `members` collection's join fetch fans it out into enough SQL rows to exhaust the page's
+            // LIMIT budget by itself. Without avoidEagerFetchFanout, the Rowling Fan Club is starved off this
+            // page even though it should be the 2nd of 3 distinct book clubs, ordered ascending by name.
+            val (total, bookClubs) = session.query(BookClubTable)
                 .listPaginatedWithTotalResults(
                     page = PageNumber.zeroIndexed(0) / 2,
                     orders = listOf { YawnQueryOrder.asc(name) },
@@ -154,7 +154,7 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
                 )
 
             assertThat(total).isEqualTo(3)
-            assertThat(widgets.map { it.name }.distinct()).containsExactly("Widget A")
+            assertThat(bookClubs.map { it.name }.distinct()).containsExactly("Andersen Fan Club")
         }
     }
 
@@ -162,7 +162,7 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
     fun `list with total results - avoidEagerFetchFanout paginates by distinct entity, not fanned row`() {
         transactor.open { session ->
             fun paginate(page: Page): PaginationResult<String> {
-                return session.query(WidgetTable)
+                return session.query(BookClubTable)
                     .listPaginatedWithTotalResults(
                         page = page,
                         orders = listOf { YawnQueryOrder.asc(name) },
@@ -174,11 +174,11 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
 
             val (total1, page1) = paginate(PageNumber.zeroIndexed(0) / 2)
             assertThat(total1).isEqualTo(3)
-            assertThat(page1).containsExactly("Widget A", "Widget B")
+            assertThat(page1).containsExactly("Andersen Fan Club", "Rowling Fan Club")
 
             val (total2, page2) = paginate(PageNumber.zeroIndexed(1) / 2)
             assertThat(total2).isEqualTo(3)
-            assertThat(page2).containsExactly("Widget C")
+            assertThat(page2).containsExactly("Tolkien Fan Club")
 
             val (total3, page3) = paginate(PageNumber.zeroIndexed(2) / 2)
             assertThat(total3).isEqualTo(3)
@@ -189,7 +189,7 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
     @Test
     fun `list with total results - avoidEagerFetchFanout preserves all fanned-out rows for the returned entity`() {
         transactor.open { session ->
-            val (_, widgets) = session.query(WidgetTable)
+            val (_, bookClubs) = session.query(BookClubTable)
                 .listPaginatedWithTotalResults(
                     page = PageNumber.zeroIndexed(0) / 1,
                     orders = listOf { YawnQueryOrder.asc(name) },
@@ -197,14 +197,14 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
                     avoidEagerFetchFanout = true,
                 )
 
-            val widgetA = widgets.single()
-            assertThat(widgetA.name).isEqualTo("Widget A")
-            assertThat(widgetA.parts.map { it.name }).containsExactlyInAnyOrder(
-                "Widget A - Part 1",
-                "Widget A - Part 2",
-                "Widget A - Part 3",
-                "Widget A - Part 4",
-                "Widget A - Part 5",
+            val andersenFanClub = bookClubs.single()
+            assertThat(andersenFanClub.name).isEqualTo("Andersen Fan Club")
+            assertThat(andersenFanClub.members.map { it.name }).containsExactlyInAnyOrder(
+                "Andersen Fan Club - Member 1",
+                "Andersen Fan Club - Member 2",
+                "Andersen Fan Club - Member 3",
+                "Andersen Fan Club - Member 4",
+                "Andersen Fan Club - Member 5",
             )
         }
     }
