@@ -222,17 +222,17 @@ internal class BookFixtures(
                 judgesComments = "Good construction and solid line work"
             }
 
-            // "Widget A" is deliberately given more parts than any tested page size, so it alone can fan out
-            // enough SQL rows to exhaust a page's LIMIT budget - see YawnPaginationQueriesTest.
-            val widgetA = createWidget { name = "Widget A" }
-            createWidgetPart(widgetA) { name = "Widget A - Part 1" }
-            createWidgetPart(widgetA) { name = "Widget A - Part 2" }
-            createWidgetPart(widgetA) { name = "Widget A - Part 3" }
-            createWidgetPart(widgetA) { name = "Widget A - Part 4" }
-            createWidgetPart(widgetA) { name = "Widget A - Part 5" }
+            // The Andersen Fan Club is deliberately given more members than any tested page size, so it alone can
+            // fan out enough SQL rows to exhaust a page's LIMIT budget - see YawnPaginationQueriesTest.
+            val andersenFanClub = createBookClub { name = "Andersen Fan Club" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 1" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 2" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 3" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 4" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 5" }
 
-            createWidget { name = "Widget B" }
-            createWidget { name = "Widget C" }
+            createBookClub { name = "Rowling Fan Club" }
+            createBookClub { name = "Tolkien Fan Club" }
         }
     }
 
@@ -274,16 +274,16 @@ internal class BookFixtures(
             return update(BookReview(), setup)
         }
 
-        fun createWidget(setup: Widget.() -> Unit): Widget {
-            return update(Widget(), setup)
+        fun createBookClub(setup: BookClub.() -> Unit): BookClub {
+            return update(BookClub(), setup)
         }
 
-        fun createWidgetPart(
-            widget: Widget,
-            setup: WidgetPart.() -> Unit,
-        ): WidgetPart {
-            return update(WidgetPart()) {
-                this.widget = widget
+        fun createBookClubMember(
+            bookClub: BookClub,
+            setup: BookClubMember.() -> Unit,
+        ): BookClubMember {
+            return update(BookClubMember()) {
+                this.bookClub = bookClub
                 setup()
             }
         }
@@ -337,8 +337,8 @@ internal class BookFixtures(
             BookCover::class,
             BookCoverRanking::class,
             BookReview::class,
-            Widget::class,
-            WidgetPart::class,
+            BookClub::class,
+            BookClubMember::class,
         )
     }
 }
