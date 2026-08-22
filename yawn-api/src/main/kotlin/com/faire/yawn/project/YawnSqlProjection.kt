@@ -3,32 +3,40 @@ package com.faire.yawn.project
 import org.hibernate.Criteria
 import org.hibernate.criterion.CriteriaQuery
 import org.hibernate.criterion.Projection
+import org.hibernate.type.StandardBasicTypes
 import org.hibernate.type.Type
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.sql.Date
+import kotlin.reflect.KClass
 
 /**
  * Hibernate [Projection] for a single raw SQL value.
  *
- * Yawn implements this rather than calling `Projections.sqlProjection`, because rendering the SQL ourselves is
- * what gives us access to [CriteriaQuery] at render time. That is the only place the ORM will resolve an entity
+ * Yawn implements this rather than calling `Projections.sqlProjection`, because rendering the SQL gives
+ * access to [CriteriaQuery] at render time. That is the only place the ORM will resolve an entity
  * property to the physical column(s) backing it, which raw SQL has to name.
  *
- * This renders exactly what Hibernate's own SQL projection does: [sqlExpression] verbatim, with `{alias}`
- * substituted, selected under [columnAlias]. The expression is therefore expected to name its own result.
+ * This encodes the concept of being a single-column projection, including mapping the leaf's Kotlin result
+ * type to the ORM's. Subclasses supply [renderSql], and the alias to select it under.
  */
-internal class YawnSqlProjection(
-    private val sqlExpression: String,
-    private val columnAlias: String,
-    private val type: Type,
+internal abstract class YawnSqlProjection(
+    protected val columnAlias: String,
+    resultType: KClass<*>,
 ) : Projection {
-    override fun toSqlString(
+    private val type: Type = resultType.toHibernateType()
+
+    /** Builds the select fragment, including its `as` clause. */
+    protected abstract fun renderSql(
+        criteria: Criteria,
+        criteriaQuery: CriteriaQuery,
+    ): String
+
+    final override fun toSqlString(
         criteria: Criteria,
         position: Int,
         criteriaQuery: CriteriaQuery,
-    ): String {
-        // `{alias}` is substituted with the SQL alias of the table this criteria selects from, matching how
-        // Hibernate's own SQL projections behave.
-        return sqlExpression.replace(TABLE_ALIAS_PLACEHOLDER, criteriaQuery.getSQLAlias(criteria))
-    }
+    ): String = renderSql(criteria, criteriaQuery)
 
     override fun toGroupSqlString(
         criteria: Criteria,
@@ -60,6 +68,20 @@ internal class YawnSqlProjection(
     override fun isGrouped(): Boolean = false
 
     private companion object {
-        private const val TABLE_ALIAS_PLACEHOLDER = "{alias}"
+        private fun KClass<*>.toHibernateType(): Type = when (this) {
+            String::class -> StandardBasicTypes.STRING
+            Long::class -> StandardBasicTypes.LONG
+            Int::class -> StandardBasicTypes.INTEGER
+            Double::class -> StandardBasicTypes.DOUBLE
+            Float::class -> StandardBasicTypes.FLOAT
+            Boolean::class -> StandardBasicTypes.BOOLEAN
+            Short::class -> StandardBasicTypes.SHORT
+            Byte::class -> StandardBasicTypes.BYTE
+            BigDecimal::class -> StandardBasicTypes.BIG_DECIMAL
+            BigInteger::class -> StandardBasicTypes.BIG_INTEGER
+            // SQL `date(...)` expressions (and friends) come back from the database as [java.sql.Date].
+            Date::class -> StandardBasicTypes.DATE
+            else -> error("Unsupported SQL projection result type: $this")
+        }
     }
 }
