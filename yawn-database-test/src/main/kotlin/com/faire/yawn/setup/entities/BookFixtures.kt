@@ -221,6 +221,18 @@ internal class BookFixtures(
                 ranking = 2
                 judgesComments = "Good construction and solid line work"
             }
+
+            // The Andersen Fan Club is deliberately given more members than any tested page size, so it alone can
+            // fan out enough SQL rows to exhaust a page's LIMIT budget - see YawnPaginationQueriesTest.
+            val andersenFanClub = createBookClub { name = "Andersen Fan Club" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 1" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 2" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 3" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 4" }
+            createBookClubMember(andersenFanClub) { name = "Andersen Fan Club - Member 5" }
+
+            createBookClub { name = "Rowling Fan Club" }
+            createBookClub { name = "Tolkien Fan Club" }
         }
     }
 
@@ -260,6 +272,20 @@ internal class BookFixtures(
 
         fun createBookReview(setup: BookReview.() -> Unit): BookReview {
             return update(BookReview(), setup)
+        }
+
+        fun createBookClub(setup: BookClub.() -> Unit): BookClub {
+            return update(BookClub(), setup)
+        }
+
+        fun createBookClubMember(
+            bookClub: BookClub,
+            setup: BookClubMember.() -> Unit,
+        ): BookClubMember {
+            return update(BookClubMember()) {
+                this.bookClub = bookClub
+                setup()
+            }
         }
 
         fun createBook(
@@ -311,6 +337,8 @@ internal class BookFixtures(
             BookCover::class,
             BookCoverRanking::class,
             BookReview::class,
+            BookClub::class,
+            BookClubMember::class,
         )
     }
 }
