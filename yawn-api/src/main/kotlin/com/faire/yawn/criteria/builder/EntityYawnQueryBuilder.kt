@@ -106,23 +106,19 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     }
 
     /**
-     * @param avoidEagerFetchFanout If the entity being queried (or one of the entities joined into it) has an
-     * eager `@OneToMany`/`@ManyToMany` association, the join used to fetch that collection fans a single logical
-     * row out into one SQL row per associated row. Applying `LIMIT`/`OFFSET` directly on top of that fanned-out
-     * join truncates at the SQL row level rather than the distinct-entity level: a single entity with many
-     * associated rows can consume the entire page's row budget by itself, so a page that should contain
-     * [Page.pageSize] distinct entities can silently come back with fewer.
+     * @param avoidEagerFetchFanout Pagination can silently return fewer than [Page.pageSize] entities when the
+     * queried entity (or one it's joined to) has an eager `@OneToMany`/`@ManyToMany` association: fetching that
+     * association can make a single entity take up more than its fair share of a page, crowding out entities
+     * that should have made the cut.
      *
-     * Setting this to `true` avoids that by paginating in two phases: first querying for just the ordered
-     * [uniqueColumn] values for this page (a projection query, so no entity hydration and thus no fan-out), then
-     * re-fetching the full entities for those ids in a second, unpaginated query (which can safely eager-fetch,
-     * since it is not the query being paginated).
+     * Setting this to `true` avoids that by deciding which entities belong on the page first, and only then
+     * fetching those entities (along with their associations) - so a page's worth of associations can never
+     * crowd out a page's worth of entities.
      *
      * Defaults to `false` to preserve existing behavior for callers whose entities have no eager collection
-     * associations, since the two-phase approach costs an extra query. This may end up becoming the default (or
-     * the only) behavior once it has seen enough real-world use to justify the extra query unconditionally; the
-     * flag exists so that can happen as a gradual, opt-in rollout rather than a behavior change forced on every
-     * caller at once.
+     * associations, since this costs an extra query. This may end up becoming the default (or the only) behavior
+     * once it has seen enough real-world use to justify that cost unconditionally; the flag exists so that can
+     * happen as a gradual, opt-in rollout rather than a behavior change forced on every caller at once.
      */
     fun <ID : Any> listPaginatedWithTotalResults(
         page: Page,
