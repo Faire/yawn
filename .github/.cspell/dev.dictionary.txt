@@ -1,6 +1,7 @@
 # terms related to programming or keywords on specific languages
 allprojects # part of the gradle DSL
 autodetection # a feature in junit to automatically detect tests
+fanout # describes a single row expanding into many rows, e.g. via a SQL join fetching a collection
 gradlew # the gradle wrapper script
 ilike # sql term meaning "case-insensitive like"
 insertable # a hibernate flag on Columns/JoinColumns
