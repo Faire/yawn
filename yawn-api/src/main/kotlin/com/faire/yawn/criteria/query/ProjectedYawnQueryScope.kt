@@ -4,6 +4,7 @@ import com.faire.yawn.YawnTableDef
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.project.YawnRawSqlProjection
 import com.faire.yawn.project.YawnSqlScope
+import com.faire.yawn.project.resolveOnce
 import com.faire.yawn.query.YawnQuery
 import kotlin.reflect.typeOf
 
@@ -40,7 +41,7 @@ private constructor(
         projection: YawnQueryProjection<SOURCE, PROJECTION>,
     ): YawnQueryProjection<SOURCE, PROJECTION> {
         ensureUniqueProjection()
-        return projection
+        return projection.resolveOnce()
     }
 
     /**

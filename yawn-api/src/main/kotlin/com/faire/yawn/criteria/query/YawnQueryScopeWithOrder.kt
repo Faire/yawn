@@ -3,6 +3,7 @@ package com.faire.yawn.criteria.query
 import com.faire.yawn.project.AliasedYawnQueryProjection
 import com.faire.yawn.project.YawnPathProvider
 import com.faire.yawn.project.YawnQueryProjection
+import com.faire.yawn.project.resolveOnce
 import com.faire.yawn.query.YawnQuery
 import com.faire.yawn.query.YawnQueryOrder
 
@@ -57,7 +58,7 @@ internal class YawnQueryScopeWithOrderDelegate<SOURCE : Any, T : Any>(
 fun <SOURCE : Any, TO> YawnQueryScopeWithOrder<SOURCE, *>.orderAscBy(
     projection: YawnQueryProjection<SOURCE, TO>,
 ): YawnQueryProjection<SOURCE, TO> {
-    val aliased = AliasedYawnQueryProjection(projection)
+    val aliased = AliasedYawnQueryProjection(projection.resolveOnce())
     order(YawnQueryOrder.asc(aliased))
     return aliased
 }
@@ -66,7 +67,7 @@ fun <SOURCE : Any, TO> YawnQueryScopeWithOrder<SOURCE, *>.orderAscBy(
 fun <SOURCE : Any, TO> YawnQueryScopeWithOrder<SOURCE, *>.orderDescBy(
     projection: YawnQueryProjection<SOURCE, TO>,
 ): YawnQueryProjection<SOURCE, TO> {
-    val aliased = AliasedYawnQueryProjection(projection)
+    val aliased = AliasedYawnQueryProjection(projection.resolveOnce())
     order(YawnQueryOrder.desc(aliased))
     return aliased
 }

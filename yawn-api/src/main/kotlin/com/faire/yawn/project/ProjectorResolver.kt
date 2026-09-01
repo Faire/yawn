@@ -51,3 +51,17 @@ class ProjectorResolver<SOURCE : Any> {
         return ProjectionMapper { results -> node.transform(innerMapper.map(results)) }
     }
 }
+
+/**
+ * Resolves a projector's tree once, up front, into the [ResolvedProjectionAdapter] that will execute it.
+ *
+ * Anything already expressed as a [YawnQueryProjection] has no tree to walk and is returned unchanged. Use this
+ * wherever a projection is stored and then used repeatedly, because [YawnQueryProjection.project] runs once per
+ * result row: [YawnProjector] can satisfy that interface on its own, but only by re-resolving the whole tree on
+ * every single call.
+ */
+fun <SOURCE : Any, TO> YawnQueryProjection<SOURCE, TO>.resolveOnce(): YawnQueryProjection<SOURCE, TO> {
+    if (this !is YawnProjector<SOURCE, TO>) return this
+
+    return ResolvedProjectionAdapter(ProjectorResolver<SOURCE>().resolve(this))
+}
