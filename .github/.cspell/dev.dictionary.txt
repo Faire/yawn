@@ -4,6 +4,7 @@ autodetection # a feature in junit to automatically detect tests
 fanout # describes a single row expanding into many rows, e.g. via a SQL join fetching a collection
 gradlew # the gradle wrapper script
 ilike # sql term meaning "case-insensitive like"
+Impls # as in DefaultImpls, the synthetic class Kotlin puts interface method bodies in
 insertable # a hibernate flag on Columns/JoinColumns
 jvmargs # a gradle property to set jvm arguments
 lateinit # keyword in Kotlin
@@ -13,3 +14,4 @@ sarif # a standard for test results (https://gcc.gnu.org/wiki/SARIF)
 typealiases # the plural form of typealias
 usertype # in Hibernate, a type with a custom adapter defined by the user
 Xjsr # a jvm flag to enable JSR 305 annotations
+Xjvm # as in -Xjvm-default, a compiler flag controlling how interface bodies are emitted
