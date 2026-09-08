@@ -1,5 +1,4 @@
 # usernames, handles and names of users mentioned in the codebase
-Adriel
 arturbosch # github.com/arturbosch
 budan # github.com/QuinnB73
 duchesne # github.com/PJDuchesne
