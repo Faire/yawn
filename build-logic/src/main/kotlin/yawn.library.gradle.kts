@@ -56,3 +56,18 @@ extensions.configure<MavenPublishBaseExtension> {
         }
     }
 }
+
+kotlin {
+    compilerOptions {
+        // Compile interface bodies as real JVM default methods, rather than into synthetic `DefaultImpls`
+        // classes that every implementor needs a generated forwarder to reach. SAM conversions do not generate
+        // that forwarder for a default *inherited* by a `fun interface`, so the call throws. This is
+        // https://youtrack.jetbrains.com/issue/KT-80400, fixed upstream in 2.3.0-Beta1 and the compiler default
+        // from 2.2. `YawnValueProjector` inherits its defaults from `YawnProjector`, so it is exactly this case;
+        // `ResolvedProjectionAdapterTest.a projector can be projected directly` fails without this flag.
+        //
+        // `all-compatibility` keeps emitting `DefaultImpls` alongside, so already-published consumers still link.
+        // Only the module declaring the interface needs the flag; consumers of the artifact do not.
+        freeCompilerArgs.add("-Xjvm-default=all-compatibility")
+    }
+}
