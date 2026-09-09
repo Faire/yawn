@@ -79,12 +79,4 @@ sealed interface ProjectionLeaf<SOURCE : Any> {
         val render: YawnSqlScope<SOURCE>.() -> String,
         val resultType: KClass<*>,
     ) : ProjectionLeaf<SOURCE>
-
-    /**
-     * Wraps another leaf with a SQL modifier (e.g. DISTINCT).
-     */
-    data class Modifier<SOURCE : Any>(
-        val kind: ModifierKind,
-        val inner: ProjectionLeaf<SOURCE>,
-    ) : ProjectionLeaf<SOURCE>
 }
