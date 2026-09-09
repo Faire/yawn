@@ -47,7 +47,6 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
         is ProjectionLeaf.RowCount -> Projections.rowCount()
         is ProjectionLeaf.Sql -> HibernateYawnSqlProjection(leaf)
         is ProjectionLeaf.SqlValue -> ScopedYawnSqlProjection(context, leaf)
-        is ProjectionLeaf.Modifier -> compileModifier(context, leaf)
     }
 
     private fun compileAggregate(
@@ -64,12 +63,5 @@ class ResolvedProjectionAdapter<SOURCE : Any, TO>(
             AggregateKind.MAX -> Projections.max(path)
             AggregateKind.GROUP_BY -> Projections.groupProperty(path)
         }
-    }
-
-    private fun compileModifier(
-        context: YawnCompilationContext,
-        leaf: ProjectionLeaf.Modifier<SOURCE>,
-    ): Projection = when (leaf.kind) {
-        ModifierKind.DISTINCT -> Projections.distinct(compileLeaf(context, leaf.inner))
     }
 }

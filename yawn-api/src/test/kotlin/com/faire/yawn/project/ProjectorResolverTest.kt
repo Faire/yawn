@@ -10,7 +10,6 @@ import com.faire.yawn.project.AggregateKind.GROUP_BY
 import com.faire.yawn.project.AggregateKind.MAX
 import com.faire.yawn.project.AggregateKind.MIN
 import com.faire.yawn.project.AggregateKind.SUM
-import com.faire.yawn.project.ModifierKind.DISTINCT
 import com.faire.yawn.query.YawnCompilationContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -173,22 +172,6 @@ internal class ProjectorResolverTest {
     }
 
     @Test
-    fun `modifier wraps leaf`() {
-        val projector = YawnValueProjector {
-            val from = ProjectionNode.property(authorCol)
-            ProjectionNode.Value(ProjectionLeaf.Modifier(DISTINCT, from.leaf), from.mapper)
-        }
-
-        val resolved = resolve(projector)
-
-        val leaf = resolved.nodes.single().leaf as ProjectionLeaf.Modifier
-        assertThat(leaf.kind).isEqualTo(DISTINCT)
-        assertThat(leaf.inner).isEqualTo(ProjectionLeaf.Property(authorCol))
-
-        assertThat(resolved.mapRow(listOf("Tolkien"))).isEqualTo("Tolkien")
-    }
-
-    @Test
     fun `row count projection`() {
         val projector = YawnValueProjector {
             ProjectionNode.rowCount()
@@ -214,13 +197,11 @@ internal class ProjectorResolverTest {
                     // topAuthorStats: nested composite
                     YawnProjector {
                         ProjectionNode.composite(
-                            // authorInfo: pair(distinct(author), count(pages))
+                            // authorInfo: pair(author, count(pages))
                             {
                                 ProjectionNode.composite(
                                     YawnValueProjector<Any, String> {
-                                        ProjectionNode.Value(
-                                            ProjectionLeaf.Modifier(DISTINCT, ProjectionLeaf.Property(authorCol)),
-                                        )
+                                        ProjectionNode.property(authorCol)
                                     },
                                     YawnValueProjector<Any, Long> {
                                         ProjectionNode.aggregateAs(COUNT, pagesCol)
@@ -272,8 +253,7 @@ internal class ProjectorResolverTest {
 
         // Verify node types in order
         assertThat(resolved.nodes[0].leaf).isEqualTo(ProjectionLeaf.Aggregate(GROUP_BY, nameCol))
-        assertThat(resolved.nodes[1].leaf)
-            .isEqualTo(ProjectionLeaf.Modifier(DISTINCT, ProjectionLeaf.Property(authorCol)))
+        assertThat(resolved.nodes[1].leaf).isEqualTo(ProjectionLeaf.Property(authorCol))
         assertThat(resolved.nodes[2].leaf).isEqualTo(ProjectionLeaf.Aggregate(COUNT, pagesCol))
         assertThat(resolved.nodes[3].leaf).isEqualTo(ProjectionLeaf.Aggregate(AVG, pagesCol))
         assertThat(resolved.nodes[4].leaf).isEqualTo(ProjectionLeaf.Aggregate(MAX, pagesCol))

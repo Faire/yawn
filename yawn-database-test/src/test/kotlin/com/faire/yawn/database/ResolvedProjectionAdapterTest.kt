@@ -7,8 +7,6 @@ import com.faire.yawn.project.AggregateKind.GROUP_BY
 import com.faire.yawn.project.AggregateKind.MAX
 import com.faire.yawn.project.AggregateKind.MIN
 import com.faire.yawn.project.AggregateKind.SUM
-import com.faire.yawn.project.ModifierKind.DISTINCT
-import com.faire.yawn.project.ProjectionLeaf
 import com.faire.yawn.project.ProjectionNode
 import com.faire.yawn.project.ResolvedProjectionAdapter
 import com.faire.yawn.project.YawnProjection
@@ -126,28 +124,6 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             }.uniqueResult()!!
 
             assertThat(count).isEqualTo(6L)
-        }
-    }
-
-    @Test
-    fun `distinct modifier`() {
-        transactor.open { session ->
-            val authors = session.project(BookTable) { books ->
-                val authors = join(books.author)
-                project(
-                    YawnValueProjector<Book, String> {
-                        ProjectionNode.Value(
-                            ProjectionLeaf.Modifier(DISTINCT, ProjectionLeaf.Property(authors.name)),
-                        )
-                    },
-                )
-            }.list()
-
-            assertThat(authors).containsExactlyInAnyOrder(
-                "J.R.R. Tolkien",
-                "J.K. Rowling",
-                "Hans Christian Andersen",
-            )
         }
     }
 
