@@ -4,11 +4,8 @@ import com.faire.yawn.adapter.YawnValueAdapter
 import com.faire.yawn.project.ProjectionLeaf
 import com.faire.yawn.project.ProjectionNode
 import com.faire.yawn.project.YawnPathProvider
-import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.project.YawnValueProjector
 import com.faire.yawn.query.YawnCompilationContext
-import org.hibernate.criterion.Projection
-import org.hibernate.criterion.Projections
 
 /**
  * Base class for all Yawn Table Definitions.
@@ -111,19 +108,9 @@ abstract class YawnTableDef<SOURCE : Any, D : Any>(
         name,
         tableDefProvider,
     ),
-        YawnQueryProjection<SOURCE, T>,
         YawnValueProjector<SOURCE, T> {
         val foreignKey: REF
             get() = foreignKeyProvider(name)
-
-        override fun compile(context: YawnCompilationContext): Projection {
-            return Projections.property(generatePath(context))
-        }
-
-        override fun project(value: Any?): T {
-            @Suppress("UNCHECKED_CAST")
-            return value as T
-        }
 
         override fun projection(): ProjectionNode.Value<SOURCE, T> {
             return ProjectionNode.Value(ProjectionLeaf.Property(this))

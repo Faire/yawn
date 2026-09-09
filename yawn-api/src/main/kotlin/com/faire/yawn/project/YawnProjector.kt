@@ -1,8 +1,5 @@
 package com.faire.yawn.project
 
-import com.faire.yawn.query.YawnCompilationContext
-import org.hibernate.criterion.Projection
-
 /**
  * A projection descriptor that can be resolved into a flat list of [ProjectionNode.Value] nodes for query compilation.
  *
@@ -10,26 +7,14 @@ import org.hibernate.criterion.Projection
  * [ProjectorResolver] resolution engine then walks this tree, flattening composites, eliminating constants and mapped
  * transforms, deduplicating identical leaves, and producing a [ResolvedProjection] that the query factory can compile.
  *
- * Extends [YawnQueryProjection] so that a projector can be handed to anything that still speaks the older
- * interface - `project(...)` above all - without every such signature needing an overload. That is what lets the
- * two coexist while projections migrate onto [ProjectionNode].
- *
- * Note that [compile] and [project] resolve the tree on **every** call, and [project] is called once per result
- * row. Callers that hold on to a projection should resolve it once up front instead.
+ * A projector can compile into a [YawnQueryProjection] by resolving it via the
+ * [com.faire.yawn.criteria.query.ProjectedYawnQueryScope.project] method.
  *
  * @param SOURCE the type of the entity being queried.
  * @param TO the result type of this projection.
  */
-fun interface YawnProjector<SOURCE : Any, TO> : YawnQueryProjection<SOURCE, TO> {
+fun interface YawnProjector<SOURCE : Any, TO> {
     fun projection(): ProjectionNode<SOURCE, TO>
-
-    override fun compile(context: YawnCompilationContext): Projection = resolve().compile(context)
-
-    override fun project(value: Any?): TO = resolve().project(value)
-
-    private fun resolve(): ResolvedProjectionAdapter<SOURCE, TO> {
-        return ResolvedProjectionAdapter(ProjectorResolver<SOURCE>().resolve(this))
-    }
 }
 
 /**

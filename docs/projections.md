@@ -7,7 +7,7 @@ How do Projections work on **Yawn**? As with our other APIs, it is actually heav
 The first step is to call `yawn.project` (instead of `yawn.query`). That will do two things:
 
 - tell **Yawn** to expect your lambda to return a `YawnQueryProjection`
-- give access to the `project` method, which returns the `YawnQueryProjection`
+- give access to the `project` method, which compiles the descriptor into a `YawnQueryProjection`
 
 So the expectation is that within the `yawn.project` lambda, the last instruction should be a call to `project`, which will satisfy the return type and tell
 **Yawn** which type is being projected to (and how to map the projection).
