@@ -1,10 +1,8 @@
 package com.faire.yawn
 
+import com.faire.yawn.project.ProjectionNode
 import com.faire.yawn.project.YawnPathProvider
-import com.faire.yawn.project.YawnQueryProjection
-import com.faire.yawn.query.YawnCompilationContext
-import org.hibernate.criterion.Projection
-import org.hibernate.criterion.Projections
+import com.faire.yawn.project.YawnValueProjector
 
 /**
  * A Yawn definition that can be queried, i.e. either a [YawnTableDef] or a [com.faire.yawn.project.YawnProjectionDef].
@@ -18,20 +16,16 @@ abstract class YawnDef<SOURCE : Any, D : Any> {
      * Base class for all Yawn Column-like definitions.
      * This can be either a column from a table or a projection.
      *
+     * Implements [YawnValueProjector] so that columns can be used directly as projections
+     * in both the v2 [ProjectionNode] tree and as arguments to [com.faire.yawn.project.YawnProjections] methods.
+     *
      * @param F the type of the column.
      */
-    abstract inner class YawnColumnDef<F> : YawnQueryProjection<SOURCE, F>, YawnPathProvider<SOURCE> {
+    abstract inner class YawnColumnDef<F> : YawnValueProjector<SOURCE, F>, YawnPathProvider<SOURCE> {
         open fun adaptValue(value: F): Any? {
             return value
         }
 
-        override fun compile(context: YawnCompilationContext): Projection {
-            return Projections.property(generatePath(context))
-        }
-
-        override fun project(value: Any?): F {
-            @Suppress("UNCHECKED_CAST")
-            return value as F
-        }
+        override fun projection(): ProjectionNode.Value<SOURCE, F> = ProjectionNode.property(this)
     }
 }

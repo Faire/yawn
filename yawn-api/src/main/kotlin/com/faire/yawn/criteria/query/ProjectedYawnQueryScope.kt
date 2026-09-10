@@ -1,6 +1,9 @@
 package com.faire.yawn.criteria.query
 
 import com.faire.yawn.YawnTableDef
+import com.faire.yawn.project.ProjectorResolver
+import com.faire.yawn.project.ResolvedProjectionAdapter
+import com.faire.yawn.project.YawnProjector
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.project.YawnRawSqlProjection
 import com.faire.yawn.project.YawnSqlScope
@@ -36,6 +39,21 @@ private constructor(
         }
     }
 
+    /**
+     * Resolves [projector] (the descriptor of the projection tree) into a compiled [YawnQueryProjection] this query
+     * will use, by flattening the tree, deduplicating leaves, and composing mappers - once per query execution.
+     */
+    fun project(
+        projector: YawnProjector<SOURCE, PROJECTION>,
+    ): YawnQueryProjection<SOURCE, PROJECTION> {
+        return project(ResolvedProjectionAdapter(ProjectorResolver<SOURCE>().resolve(projector)))
+    }
+
+    /**
+     * Projects a [YawnQueryProjection] written by hand, for anything Yawn cannot describe as a
+     * [com.faire.yawn.project.ProjectionNode]. It is already something a query can run, so there is nothing to
+     * resolve; the caller owns its correctness, including that it selects exactly one column per value.
+     */
     fun project(
         projection: YawnQueryProjection<SOURCE, PROJECTION>,
     ): YawnQueryProjection<SOURCE, PROJECTION> {
@@ -47,7 +65,7 @@ private constructor(
      * Projects a single value computed by a raw SQL [expression], e.g. `SUM(quantity * price)`.
      *
      * Use this instead of implementing [YawnQueryProjection] by hand when all you need is one custom SQL value.
-     * The result composes anywhere an ordinary column does; see [YawnSingleValueProjection].
+     * The result composes anywhere an ordinary column does; see [com.faire.yawn.project.YawnSingleValueProjection].
      *
      * Reference columns through [YawnSqlScope.sql], which substitutes the physical column backing a property,
      * already qualified by its table's alias:

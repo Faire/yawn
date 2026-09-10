@@ -3,7 +3,7 @@ package com.faire.yawn.database
 import com.faire.yawn.Yawn
 import com.faire.yawn.criteria.query.YawnQueryScopeWithWhere
 import com.faire.yawn.project.YawnProjections
-import com.faire.yawn.project.YawnQueryProjection
+import com.faire.yawn.project.YawnProjector
 import com.faire.yawn.setup.entities.Book
 import com.faire.yawn.setup.entities.BookEntityQueryScope
 import com.faire.yawn.setup.entities.BookProjectedQueryScope
@@ -53,7 +53,7 @@ internal class YawnTypeAliasUsageTest : BaseYawnDatabaseTest() {
      */
     private fun BookProjectedQueryScope<Pair<String, Long>>.authorAndTotalPages(
         books: BookTableDefType,
-    ): YawnQueryProjection<Book, Pair<String, Long>> {
+    ): YawnProjector<Book, Pair<String, Long>> {
         val authors = join(books.author)
         return YawnProjections.pair(
             YawnProjections.groupBy(authors.name),
