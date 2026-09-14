@@ -1,5 +1,6 @@
 package com.faire.yawn.project
 
+import com.faire.yawn.query.YawnCompilationContext
 import org.hibernate.Criteria
 import org.hibernate.criterion.CriteriaQuery
 import org.hibernate.criterion.Projection
@@ -11,32 +12,34 @@ import java.sql.Date
 import kotlin.reflect.KClass
 
 /**
- * Hibernate [Projection] for a single raw SQL value.
+ * Hibernate [Projection] for a single raw SQL value, as
+ * [com.faire.yawn.criteria.query.ProjectedYawnQueryScope.sqlValue] produces.
  *
- * Yawn implements this rather than calling `Projections.sqlProjection`, because rendering the SQL gives
- * access to [CriteriaQuery] at render time. That is the only place the ORM will resolve an entity
- * property to the physical column(s) backing it, which raw SQL has to name.
+ * Yawn implements this rather than calling `Projections.sqlProjection`, because rendering the SQL gives access to
+ * [CriteriaQuery] at render time. That is the only place the ORM will resolve an entity property to the physical
+ * column(s) backing it, which raw SQL has to name, and it is what [YawnSqlScope.sql] is built on.
  *
- * This encodes the concept of being a single-column projection, including mapping the leaf's Kotlin result
- * type to the ORM's. Subclasses supply [renderSql], and the alias to select it under.
+ * Yawn also owns the result alias. The expression a caller writes is bare, and is selected under a name taken from
+ * the compilation [context] and unique within it, so two SQL values in one query can never be read from the same
+ * column and the caller never has to invent a name.
+ *
+ * So `sqlValue<Long> { "SUM(${'$'}{books.numberOfPages.sql})" }` renders as `SUM(this_.numberOfPages) as _yawn_ct0`.
  */
-internal abstract class YawnSqlProjection(
-    protected val columnAlias: String,
-    resultType: KClass<*>,
+internal class YawnSqlProjection<SOURCE : Any>(
+    private val context: YawnCompilationContext,
+    private val leaf: ProjectionLeaf.SqlValue<SOURCE>,
 ) : Projection {
-    private val type: Type = resultType.toHibernateType()
+    private val columnAlias: String = context.generateResultAlias()
+    private val type: Type = leaf.resultType.toHibernateType()
 
-    /** Builds the select fragment, including its `as` clause. */
-    protected abstract fun renderSql(
-        criteria: Criteria,
-        criteriaQuery: CriteriaQuery,
-    ): String
-
-    final override fun toSqlString(
+    override fun toSqlString(
         criteria: Criteria,
         position: Int,
         criteriaQuery: CriteriaQuery,
-    ): String = renderSql(criteria, criteriaQuery)
+    ): String {
+        val scope = CriteriaSqlScope<SOURCE>(context, criteria, criteriaQuery)
+        return "${leaf.render(scope)} as $columnAlias"
+    }
 
     override fun toGroupSqlString(
         criteria: Criteria,

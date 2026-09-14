@@ -332,17 +332,13 @@ internal class ProjectorResolverTest {
     @Test
     fun `sql leaf projection`() {
         val projector = YawnValueProjector<Any, Long> {
-            ProjectionNode.sql(
-                sqlExpression = "LENGTH({alias}.name) AS name_length",
-                columnAlias = "name_length",
-                resultType = Long::class,
-            )
+            ProjectionNode.Value(ProjectionLeaf.SqlValue({ "LENGTH(${nameCol.sql})" }, Long::class))
         }
 
         val resolved = resolve(projector)
 
-        val leaf = resolved.nodes.single().leaf as ProjectionLeaf.Sql
-        assertThat(leaf.sqlExpression).isEqualTo("LENGTH({alias}.name) AS name_length")
+        val leaf = resolved.nodes.single().leaf as ProjectionLeaf.SqlValue
+        assertThat(leaf.resultType).isEqualTo(Long::class)
 
         assertThat(resolved.mapRow(listOf(10L))).isEqualTo(10L)
     }
@@ -353,11 +349,7 @@ internal class ProjectorResolverTest {
             ProjectionNode.composite(
                 YawnValueProjector<Any, String> { ProjectionNode.property(nameCol) },
                 YawnValueProjector<Any, Long> {
-                    ProjectionNode.sql(
-                        sqlExpression = "111 AS sentinel",
-                        columnAlias = "sentinel",
-                        resultType = Long::class,
-                    )
+                    ProjectionNode.Value(ProjectionLeaf.SqlValue({ "111" }, Long::class))
                 },
                 YawnValueProjector<Any, Long> { ProjectionNode.property(pagesCol) },
             ) { name, sentinel, pages -> Triple(name, sentinel, pages) }

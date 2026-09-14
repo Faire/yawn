@@ -11,11 +11,13 @@ import com.faire.yawn.project.ProjectionNode
 import com.faire.yawn.project.ResolvedProjectionAdapter
 import com.faire.yawn.project.YawnProjection
 import com.faire.yawn.project.YawnProjector
+import com.faire.yawn.project.YawnSqlScope
 import com.faire.yawn.project.YawnValueProjector
 import com.faire.yawn.query.YawnQueryOrder
 import com.faire.yawn.setup.entities.Book
 import com.faire.yawn.setup.entities.Book.Language.ENGLISH
 import com.faire.yawn.setup.entities.BookTable
+import com.faire.yawn.setup.entities.BookTableDefType
 import com.faire.yawn.setup.entities.PublisherTable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -218,15 +220,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
     fun `sql leaf projection`() {
         transactor.open { session ->
             val results = session.project(BookTable) {
-                project(
-                    YawnValueProjector<Book, Long> {
-                        ProjectionNode.sql(
-                            sqlExpression = "COUNT(*) AS total",
-                            columnAlias = "total",
-                            resultType = Long::class,
-                        )
-                    },
-                )
+                project(sqlValue<Long> { "COUNT(*)" })
             }.uniqueResult()!!
 
             assertThat(results).isEqualTo(6L)
@@ -646,7 +640,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                     YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.createdAt) },
-                            sqlDate<Book, Date>(CREATED_ON_SQL, CREATED_ON_ALIAS),
+                            sqlValue<Date> { "CAST(${books.createdAt.sql} AS DATE)" },
                         ) { createdAt, createdOn -> createdAt to createdOn }
                     },
                 )
@@ -661,7 +655,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.name) },
                             YawnValueProjector { ProjectionNode.property(books.createdAt) },
-                            sqlDate<Book, Date>(CREATED_ON_SQL, CREATED_ON_ALIAS),
+                            sqlValue<Date> { "CAST(${books.createdAt.sql} AS DATE)" },
                         ) { name, createdAt, createdOn -> Triple(name, createdAt, createdOn) }
                     },
                 )
@@ -686,7 +680,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                     YawnProjector {
                         ProjectionNode.composite(
                             YawnValueProjector { ProjectionNode.property(books.createdAt) },
-                            sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS),
+                            sqlValue<Date?> { ratedOn(books) },
                         ) { createdAt, ratedOn -> createdAt to ratedOn }
                     },
                 )
@@ -700,7 +694,7 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
             // uniqueResult mapping of a null date
             val nullDate = session.project(BookTable) { books ->
                 addEq(books.name, "Harry Potter")
-                project(sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS))
+                project(sqlValue<Date?> { ratedOn(books) })
             }.uniqueResult()
 
             assertThat(nullDate).isNull()
@@ -723,8 +717,8 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
                 project(
                     ResolvedProjectionAdapterTest_BookDatesProjection.create(
                         name = books.name,
-                        createdOn = sqlDate<Book, Date>(CREATED_ON_SQL, CREATED_ON_ALIAS),
-                        ratedOn = sqlDate<Book, Date?>(RATED_ON_SQL, RATED_ON_ALIAS),
+                        createdOn = sqlValue<Date> { "CAST(${books.createdAt.sql} AS DATE)" },
+                        ratedOn = sqlValue<Date?> { ratedOn(books) },
                     ),
                 )
             }
@@ -748,30 +742,12 @@ internal class ResolvedProjectionAdapterTest : BaseYawnDatabaseTest() {
     }
 
     /**
-     * A raw SQL projection whose result is a [java.sql.Date]; [TO] may be nullable or not.
+     * Yields a null date for books without a rating, so that a nullable [java.sql.Date] gets exercised.
+     *
+     * Note that H2 has no `date(...)` function; `CAST(x AS DATE)` is the portable equivalent.
      */
-    private fun <SOURCE : Any, TO : Date?> sqlDate(
-        expression: String,
-        alias: String,
-    ): YawnValueProjector<SOURCE, TO> = YawnValueProjector {
-        ProjectionNode.sql(
-            sqlExpression = "$expression AS $alias",
-            columnAlias = alias,
-            resultType = Date::class,
-        )
-    }
+    private fun YawnSqlScope<Book>.ratedOn(books: BookTableDefType): String =
+        "CASE WHEN ${books.rating.sql} IS NULL THEN NULL ELSE CAST(${books.createdAt.sql} AS DATE) END"
 
     private fun Instant.toUtcSqlDate(): Date = Date.valueOf(atZone(ZoneOffset.UTC).toLocalDate())
-
-    private companion object {
-        private const val CREATED_ON_ALIAS = "created_on"
-        private const val RATED_ON_ALIAS = "rated_on"
-
-        /** H2 has no `date(...)` function; `CAST(x AS DATE)` is the portable equivalent. */
-        private const val CREATED_ON_SQL = "CAST({alias}.createdAt AS DATE)"
-
-        /** Yields a null date for books without a rating. */
-        private const val RATED_ON_SQL =
-            "CASE WHEN {alias}.rating IS NULL THEN NULL ELSE CAST({alias}.createdAt AS DATE) END"
-    }
 }

@@ -41,36 +41,18 @@ sealed interface ProjectionLeaf<SOURCE : Any> {
     }
 
     /**
-     * A raw SQL projection of a single computed value.
-     *
-     * The [sqlExpression] may use `{alias}` placeholders for table alias substitution.
-     * [columnAlias] is the name the projected column is selected as, which the query factory uses to read
-     * the value back out of the result set. [resultType] is used to map that SQL result to a Kotlin type.
-     * It is up to the user to guarantee type-safety when using raw SQL projections!
-     *
-     * A leaf projects **exactly one** column, because it occupies exactly one slot in the resolved result
-     * row (see [ProjectionNode.Value], whose mapper receives a single value). To project several values,
-     * combine several leaves under a [ProjectionNode.Composite] instead.
-     *
-     * Note that this describes the projection in ORM-agnostic terms; adapting a single column to whatever
-     * arity the underlying ORM expects is the query factory's job. Note also that the single-column shape
-     * can only be enforced for what is *declared*: a [sqlExpression] that in fact selects two columns
-     * would still shift every subsequent result slot, and validating the implementation of custom
-     * projections remains the caller's responsibility.
-     */
-    data class Sql<SOURCE : Any>(
-        val sqlExpression: String,
-        val columnAlias: String,
-        val resultType: KClass<*>,
-    ) : ProjectionLeaf<SOURCE>
-
-    /**
      * A raw SQL projection of a single computed value, assembled at render time.
      *
-     * Unlike [Sql], the expression is built by [render] rather than supplied up front, because the ORM will only
-     * resolve an entity property to its physical column while it is rendering the query. That is what makes
+     * The expression is built by [render] rather than supplied up front, because the ORM will only resolve an
+     * entity property to its physical column while it is rendering the query. That is what makes
      * [YawnSqlScope.sql] possible. The expression is bare: the query factory selects it under an alias it
      * generates, so two SQL values in the same query can never be read from the same column.
+     *
+     * A leaf projects **exactly one** column, because it occupies exactly one slot in the resolved result row
+     * (see [ProjectionNode.Value], whose mapper receives a single value). To project several values, combine
+     * several leaves under a [ProjectionNode.Composite] instead. That shape can only be enforced for what is
+     * *declared*: an expression that in fact selects two columns would still shift every subsequent result
+     * slot, and guaranteeing the type-safety of raw SQL remains the caller's responsibility.
      *
      * Note that this cannot use structural equality the way the other leaves do, since [render] is a function.
      * Two of these therefore never deduplicate onto one result slot, even when they would render identically.
