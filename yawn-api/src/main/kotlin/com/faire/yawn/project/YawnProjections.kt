@@ -98,16 +98,52 @@ object YawnProjections {
         projection: YawnProjector<SOURCE, FROM?>,
         defaultValue: FROM,
     ): YawnProjector<SOURCE, FROM> {
-        return YawnProjector { ProjectionNode.mapped(projection) { it ?: defaultValue } }
+        return mapping(projection) { it ?: defaultValue }
+    }
+
+    /**
+     * Transforms a projected value into another type, in memory.
+     *
+     * Use this to keep a projection class type-safe when a column does not already hold the type it wants - a
+     * conversion, a wrapper, a value compliance rule - rather than projecting to an intermediate representation
+     * and mapping it afterwards.
+     *
+     * Note this does not change the query in any way: the same column is selected, and [transform] runs on each
+     * row as its results come back.
+     */
+    fun <SOURCE : Any, FROM, TO> mapping(
+        projection: YawnProjector<SOURCE, FROM>,
+        transform: (FROM) -> TO,
+    ): YawnProjector<SOURCE, TO> {
+        return YawnProjector { ProjectionNode.mapped(projection, transform) }
+    }
+
+    /** Combines two projected values into one, in memory; see [mapping]. */
+    fun <SOURCE : Any, A, B, TO> mapping(
+        firstProjection: YawnProjector<SOURCE, A>,
+        secondProjection: YawnProjector<SOURCE, B>,
+        transform: (A, B) -> TO,
+    ): YawnProjector<SOURCE, TO> {
+        return YawnProjector { ProjectionNode.composite(firstProjection, secondProjection, transform) }
+    }
+
+    /** Combines three projected values into one, in memory; see [mapping]. */
+    fun <SOURCE : Any, A, B, C, TO> mapping(
+        firstProjection: YawnProjector<SOURCE, A>,
+        secondProjection: YawnProjector<SOURCE, B>,
+        thirdProjection: YawnProjector<SOURCE, C>,
+        transform: (A, B, C) -> TO,
+    ): YawnProjector<SOURCE, TO> {
+        return YawnProjector {
+            ProjectionNode.composite(firstProjection, secondProjection, thirdProjection, transform)
+        }
     }
 
     fun <SOURCE : Any, A, B> pair(
         firstProjection: YawnProjector<SOURCE, A>,
         secondProjection: YawnProjector<SOURCE, B>,
     ): YawnProjector<SOURCE, Pair<A, B>> {
-        return YawnProjector {
-            ProjectionNode.composite(firstProjection, secondProjection) { a, b -> a to b }
-        }
+        return mapping(firstProjection, secondProjection) { a, b -> a to b }
     }
 
     fun <SOURCE : Any, A, B, C> triple(
@@ -115,10 +151,6 @@ object YawnProjections {
         secondProjection: YawnProjector<SOURCE, B>,
         thirdProjection: YawnProjector<SOURCE, C>,
     ): YawnProjector<SOURCE, Triple<A, B, C>> {
-        return YawnProjector {
-            ProjectionNode.composite(firstProjection, secondProjection, thirdProjection) { a, b, c ->
-                Triple(a, b, c)
-            }
-        }
+        return mapping(firstProjection, secondProjection, thirdProjection) { a, b, c -> Triple(a, b, c) }
     }
 }
