@@ -3,11 +3,19 @@ package com.faire.yawn.database
 import com.faire.yawn.pagination.Page
 import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.pagination.PaginationResult
+import com.faire.yawn.project.YawnPathProvider
+import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.query.YawnQueryOrder
+import com.faire.yawn.setup.entities.Book
+import com.faire.yawn.setup.entities.BookClub
+import com.faire.yawn.setup.entities.BookClubMemberTableDef
 import com.faire.yawn.setup.entities.BookClubTable
 import com.faire.yawn.setup.entities.BookTable
+import com.faire.yawn.setup.entities.PersonTableDef
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import java.sql.SQLException
 
 internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
     @Test
@@ -223,6 +231,134 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
             // Before the fix the builder had inherited the page's `id IN (...)` filter and listed only two clubs.
             assertThat(bookClubs.list().map { it.name }.distinct())
                 .containsExactlyInAnyOrder("Andersen Fan Club", "Rowling Fan Club", "Tolkien Fan Club")
+        }
+    }
+
+    @Test
+    fun `list with total results - forceAnsiCompliance pages an eager collection by distinct entity`() {
+        transactor.open { session ->
+            fun paginate(page: Page): PaginationResult<BookClub> {
+                return session.query(BookClubTable)
+                    .listPaginatedWithTotalResults(
+                        page = page,
+                        orders = listOf { YawnQueryOrder.asc(name) },
+                        uniqueColumn = { id },
+                        forceAnsiCompliance = true,
+                    )
+            }
+
+            val (total1, page1) = paginate(PageNumber.zeroIndexed(0) / 2)
+            assertThat(total1).isEqualTo(3)
+            assertThat(page1.map { it.name }).containsExactly("Andersen Fan Club", "Rowling Fan Club")
+            assertThat(page1.first().members.map { it.name }).containsExactlyInAnyOrder(
+                "Andersen Fan Club - Member 1",
+                "Andersen Fan Club - Member 2",
+                "Andersen Fan Club - Member 3",
+                "Andersen Fan Club - Member 4",
+                "Andersen Fan Club - Member 5",
+            )
+
+            val (total2, page2) = paginate(PageNumber.zeroIndexed(1) / 2)
+            assertThat(total2).isEqualTo(3)
+            assertThat(page2.map { it.name }).containsExactly("Tolkien Fan Club")
+
+            val (total3, page3) = paginate(PageNumber.zeroIndexed(2) / 2)
+            assertThat(total3).isEqualTo(3)
+            assertThat(page3).isEmpty()
+        }
+    }
+
+    @Test
+    fun `list with total results - forceAnsiCompliance supports ordering by a joined table's column`() {
+        transactor.open { session ->
+            fun paginate(page: Page): PaginationResult<String> {
+                lateinit var authors: PersonTableDef<Book>
+                return session.query(BookTable) { books ->
+                    authors = join(books.author)
+                }.listPaginatedWithTotalResults(
+                    page = page,
+                    orders = listOf(
+                        { YawnQueryOrder.asc(authors.name) },
+                        { YawnQueryOrder.desc(name) },
+                    ),
+                    uniqueColumn = { id },
+                    forceAnsiCompliance = true,
+                ).map { it.name }
+            }
+
+            val (total1, books1) = paginate(PageNumber.zeroIndexed(0) / 2)
+            assertThat(total1).isEqualTo(6)
+            assertThat(books1).containsExactly("The Ugly Duckling", "The Little Mermaid")
+
+            val (total2, books2) = paginate(PageNumber.zeroIndexed(1) / 2)
+            assertThat(total2).isEqualTo(6)
+            assertThat(books2).containsExactly("The Emperor's New Clothes", "Harry Potter")
+
+            val (total3, books3) = paginate(PageNumber.zeroIndexed(2) / 2)
+            assertThat(total3).isEqualTo(6)
+            assertThat(books3).containsExactly("The Hobbit", "Lord of the Rings")
+
+            val (total4, books4) = paginate(PageNumber.zeroIndexed(3) / 2)
+            assertThat(total4).isEqualTo(6)
+            assertThat(books4).isEmpty()
+        }
+    }
+
+    @Test
+    fun `list with total results - forceAnsiCompliance groups by an order column of a joined collection`() {
+        transactor.open { session ->
+            // An INNER join on purpose: a LEFT join would page the member-less clubs first, because H2 sorts NULLs
+            // first, and this test is about the club that actually has members to order by.
+            lateinit var members: BookClubMemberTableDef<BookClub>
+            val (total, results) = session.query(BookClubTable) { clubs ->
+                members = join(clubs.members)
+            }.listPaginatedWithTotalResults(
+                page = PageNumber.zeroIndexed(0) / 2,
+                orders = listOf { YawnQueryOrder.asc(members.name) },
+                uniqueColumn = { id },
+                forceAnsiCompliance = true,
+            )
+
+            // Ordering by a joined collection's column is exactly the case ANSI SQL rejects unless that column is
+            // also grouped (see the guard test below). The page-of-keys query yields one row per (club, member
+            // name), so a page of 2 keys collapses to a single club; that is inherent to the grouped shape and
+            // matches the legacy helper.
+            assertThat(total).isEqualTo(1)
+            assertThat(results.map { it.name }).containsExactly("Andersen Fan Club")
+        }
+    }
+
+    @Test
+    fun `grouped query rejects an ungrouped order column of a joined collection on H2`() {
+        transactor.open { session ->
+            // This is the exact shape the test above would produce if forceAnsiCompliance stopped adding the order
+            // column to the GROUP BY: H2 (like Postgres and MySQL's ONLY_FULL_GROUP_BY) rejects it at the database.
+            assertThatThrownBy {
+                session.project(BookClubTable) { clubs ->
+                    val members = join(clubs.members)
+                    order(YawnQueryOrder.asc(members.name))
+                    project(YawnProjections.groupBy(clubs.id))
+                }.list()
+            }
+                .rootCause()
+                .isInstanceOf(SQLException::class.java)
+                .hasMessageContaining("must be in the GROUP BY list")
+        }
+    }
+
+    @Test
+    fun `list with total results - forceAnsiCompliance rejects an order that is not a plain column`() {
+        transactor.open { session ->
+            assertThatThrownBy {
+                session.query(BookClubTable).listPaginatedWithTotalResults(
+                    page = PageNumber.zeroIndexed(0) / 2,
+                    orders = listOf { YawnQueryOrder.asc(YawnPathProvider<BookClub> { "name" }) },
+                    uniqueColumn = { id },
+                    forceAnsiCompliance = true,
+                )
+            }
+                .isInstanceOf(UnsupportedOperationException::class.java)
+                .hasMessageContaining("requires every order to be a plain column")
         }
     }
 

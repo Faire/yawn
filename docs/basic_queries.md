@@ -147,6 +147,30 @@ These operations are defined in `YawnQueryBuilder`, such as:
 - `listBatched` / `setBatched`
 - `listPaginatedWithTotalResults` / `countDistinct` (on `EntityYawnQueryBuilder`)
 
+### Paginating With a Total Count
+
+`listPaginatedWithTotalResults` (on `EntityYawnQueryBuilder`) returns one page of entities together with the total count, given a `Page`, the orders and
+the entity's unique column:
+
+```kotlin
+val page = yawn.query(BookTable) { books ->
+    addEq(books.originalLanguage, "English")
+}.listPaginatedWithTotalResults(
+    page = PageNumber.zeroIndexed(0) / 20,
+    orders = listOf { YawnQueryOrder.asc(name) },
+    uniqueColumn = { id },
+    forceAnsiCompliance = true,
+)
+```
+
+Two opt-in flags change how the page is fetched:
+
+- `avoidEagerFetchFanout = true` first decides which entities belong on the page (a query for just their keys), and only then fetches those entities, so an
+  eager `@OneToMany`/`@ManyToMany` association can never crowd entities off a page.
+- `forceAnsiCompliance = true` makes that page-of-keys query `GROUP BY` the unique column and every `ORDER BY` column, which ANSI SQL (MySQL's
+  `ONLY_FULL_GROUP_BY` mode, H2, Postgres) requires whenever an ordered column is not functionally dependent on the grouped key, for example when ordering by
+  a column of a joined collection. It implies the same two-phase fetch, and only supports ordering by plain columns of the root entity or of a joined table.
+
 ## Pass/Modify Queries Around
 
 For a complete guide to choosing helper types and sharing joins between query pieces, see [Building Queries Piecemeal](piecemeal_queries.md).
