@@ -382,6 +382,50 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
     }
 
     /**
+     * Dropping the `String` bound means a non-textual column type no longer fails to compile, so the guards have to
+     * hold for those too: the value is typed as the column, which leaves no way to express a pattern at all.
+     */
+    @Test
+    fun `like on a non-textual column cannot express a pattern`() {
+        transactor.open { session ->
+            val matched = session.query(BookTable) { books ->
+                addLike(books.numberOfPages, 100L)
+            }.list()
+            val equal = session.query(BookTable) { books ->
+                addEq(books.numberOfPages, 100L)
+            }.list()
+
+            assertThat(matched.map { it.name }).isEqualTo(equal.map { it.name })
+        }
+    }
+
+    @Test
+    fun `like with a match mode on a non-textual column is rejected`() {
+        transactor.open { session ->
+            assertThatThrownBy {
+                session.query(BookTable) { books ->
+                    addLike(books.numberOfPages, 1L, MatchMode.START)
+                }.list()
+            }
+                .isInstanceOf(UnsupportedOperationException::class.java)
+                .hasMessageContaining("MatchMode.START is not supported")
+        }
+    }
+
+    @Test
+    fun `iLike on a non-textual column is rejected`() {
+        transactor.open { session ->
+            assertThatThrownBy {
+                session.query(BookTable) { books ->
+                    addILike(books.numberOfPages, 100L)
+                }.list()
+            }
+                .isInstanceOf(UnsupportedOperationException::class.java)
+                .hasMessageContaining("iLike is not supported")
+        }
+    }
+
+    /**
      * A single `or` mixing a plain column with a converted one, which previously forced callers to either split the
      * query in two or fall back to filtering in Kotlin.
      */
