@@ -165,7 +165,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
         )
     }
 
-    class Like<SOURCE : Any, F : String?>(
+    class Like<SOURCE : Any, F>(
         private val column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         private val value: F & Any,
         private val matchMode: MatchMode,
@@ -173,18 +173,39 @@ interface YawnQueryRestriction<SOURCE : Any> {
         override fun compile(
             context: YawnCompilationContext,
         ): Criterion {
-            return Restrictions.like(column.generatePath(context), column.adaptAsString(value), matchMode)
+            val path = column.generatePath(context)
+            return when (val adaptedValue = column.adaptNonNullValue(value)) {
+                is String -> Restrictions.like(path, adaptedValue, matchMode)
+                // The column is mapped by Hibernate itself (e.g. through an AttributeConverter), so the value has to
+                // be bound as the column's own type; Hibernate cannot build the pattern out of it for us.
+                else -> Restrictions.like(path, column.requireExactMatchMode(adaptedValue, matchMode))
+            }
         }
     }
 
-    class ILike<SOURCE : Any, F : String?>(
+    class ILike<SOURCE : Any, F>(
         private val column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         private val value: F & Any,
         private val matchMode: MatchMode,
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion = Restrictions.ilike(column.generatePath(context), column.adaptAsString(value), matchMode)
+        ): Criterion {
+            val path = column.generatePath(context)
+            return when (val adaptedValue = column.adaptNonNullValue(value)) {
+                is String -> Restrictions.ilike(path, adaptedValue, matchMode)
+                else -> throw UnsupportedOperationException(
+                    """
+                        iLike is not supported on column $column, whose value adapts to
+                        ${adaptedValue.javaClass.name} rather than a String.
+                        Hibernate's IlikeExpression stringifies the bound value, which then fails to bind against a
+                        column mapped through an AttributeConverter.
+                        Use `like` with the wildcards embedded in the value instead, or map the underlying String
+                        column and use `iLike` on that.
+                    """.trimIndent(),
+                )
+            }
+        }
     }
 
     class IsNotNull<SOURCE : Any, F>(
@@ -255,17 +276,40 @@ interface YawnQueryRestriction<SOURCE : Any> {
     }
 }
 
-private fun <SOURCE : Any, F : String?> YawnDef<SOURCE, *>.YawnColumnDef<F>.adaptAsString(value: F): String? {
-    val adaptedValue = adaptValue(value)
-    if (adaptedValue !is String?) {
-        error(
+/**
+ * Adapts [value] for binding, failing loudly if an adapter turned a non-null value into `null`.
+ *
+ * Pattern matching always needs a value to bind, so a `null` here can only mean a broken adapter in the metamodel.
+ */
+private fun <SOURCE : Any, F> YawnDef<SOURCE, *>.YawnColumnDef<F>.adaptNonNullValue(value: F & Any): Any {
+    return checkNotNull(adaptValue(value)) {
+        """
+            The adapter on column $this turned a non-null value into null.
+            This means a wrong adapter was code-generated into the metamodel.
+            Please open an issue on GitHub with your schema definition.
+        """.trimIndent()
+    }
+}
+
+/**
+ * Wildcards cannot be injected into a value that is bound as the column's own type, so [MatchMode] is only supported
+ * for columns that adapt down to a [String].
+ */
+private fun <SOURCE : Any, F> YawnDef<SOURCE, *>.YawnColumnDef<F>.requireExactMatchMode(
+    adaptedValue: Any,
+    matchMode: MatchMode,
+): Any {
+    if (matchMode != MatchMode.EXACT) {
+        throw UnsupportedOperationException(
             """
-                Like restriction can only be applied to String values,
-                but got: ${adaptedValue.javaClass} due to adapter on column $this.
-                This means a wrong adapter was code-generated into the metamodel.
-                Please open an issue on GitHub with your schema definition.
+                MatchMode.$matchMode is not supported on column $this, whose value adapts to
+                ${adaptedValue.javaClass.name} rather than a String.
+                Hibernate binds this value as the column's own type, so Yawn cannot wrap it in wildcards for you.
+                Embed the wildcards in the value itself and use MatchMode.EXACT instead,
+                e.g. like(column, EmailAddress("%@example.com")).
             """.trimIndent(),
         )
     }
+
     return adaptedValue
 }

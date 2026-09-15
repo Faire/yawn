@@ -259,7 +259,10 @@ sealed interface YawnQueryScopeWithWhere<SOURCE : Any, T : Any> {
     // TODO(yawn): addCaseInsensitiveNotEq
     // TODO(yawn): addCaseInsensitiveEq
 
-    fun <F : String?> addLike(
+    /**
+     * See [YawnRestrictions.like] for how string-backed custom column types are handled.
+     */
+    fun <F> addLike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
@@ -267,7 +270,10 @@ sealed interface YawnQueryScopeWithWhere<SOURCE : Any, T : Any> {
         add(YawnRestrictions.like(column, value, matchMode))
     }
 
-    fun <F : String?> addILike(
+    /**
+     * See [YawnRestrictions.iLike] for how string-backed custom column types are handled.
+     */
+    fun <F> addILike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
@@ -275,7 +281,10 @@ sealed interface YawnQueryScopeWithWhere<SOURCE : Any, T : Any> {
         add(YawnRestrictions.iLike(column, value, matchMode))
     }
 
-    fun <F : String?> addNotLike(
+    /**
+     * See [YawnRestrictions.like] for how string-backed custom column types are handled.
+     */
+    fun <F> addNotLike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
@@ -283,7 +292,10 @@ sealed interface YawnQueryScopeWithWhere<SOURCE : Any, T : Any> {
         add(YawnRestrictions.not(YawnRestrictions.like(column, value, matchMode)))
     }
 
-    fun <F : String?> addNotILike(
+    /**
+     * See [YawnRestrictions.iLike] for how string-backed custom column types are handled.
+     */
+    fun <F> addNotILike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,

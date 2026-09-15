@@ -57,6 +57,34 @@ val results = yawn.query(BookTable) { books ->
 
 - column with sub-query: [check the Sub-queries doc](sub_queries.md)
 
+## Pattern Matching on Custom Column Types
+
+`addLike` / `addILike` (and their `addNotLike` / `addNotILike` counterparts) are not restricted to plain `String` columns: they also work on custom types that
+are stored as text. How the value is bound depends on how the type reaches the database.
+
+A value class wrapping a `String` is unwrapped by its generated adapter, so `MatchMode` works exactly as it does for a `String` column:
+
+```kotlin
+val results = yawn.query(PersonTable) { people ->
+    addLike(people.phone, PhoneNumber("(555) 123-4567"), MatchMode.START)
+}.list()
+```
+
+This is often the only way to pattern-match such a column, since a value class that validates its own format cannot represent a partial pattern as a value.
+
+A type that Hibernate maps itself, for example through an `AttributeConverter`, is bound as the column's own type instead. Yawn cannot wrap an opaque value in
+wildcards, so they must already be part of the value and `MatchMode` has to stay `EXACT`:
+
+```kotlin
+val results = yawn.query(PersonTable) { people ->
+    addLike(people.email, EmailAddress("%@faire.com"))
+}.list()
+```
+
+Passing a `MatchMode` for one of these columns throws, rather than silently matching the wrong rows. `addILike` is not available for them at all, because
+Hibernate's `IlikeExpression` stringifies the bound value, which such a column cannot bind; use `addLike`, or map the underlying `String` column and use
+`addILike` on that.
+
 ## Non-Column-Based Operations
 
 Operations that do not require the column context are typically only available outside the lambda; such as:
