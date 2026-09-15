@@ -33,7 +33,7 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
 ) : YawnQueryBuilder<T, DEF, T, EntityYawnQueryBuilder<T, DEF>>(tableDef, queryFactory, query) {
     override fun builderReturn(): EntityYawnQueryBuilder<T, DEF> = this
     override fun clone(): EntityYawnQueryBuilder<T, DEF> {
-        return EntityYawnQueryBuilder(tableDef, queryFactory, query.copy())
+        return EntityYawnQueryBuilder(tableDef, queryFactory, query.clone())
     }
 
     inner class YawnJoinRef<F : Any, D : YawnTableDef<T, F>>(

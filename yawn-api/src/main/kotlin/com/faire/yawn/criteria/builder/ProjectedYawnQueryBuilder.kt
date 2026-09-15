@@ -34,7 +34,7 @@ class ProjectedYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>, RETURNS : Any
     }
 
     override fun clone(): ProjectedYawnQueryBuilder<T, DEF, RETURNS> {
-        return ProjectedYawnQueryBuilder(tableDef, queryFactory, query.copy())
+        return ProjectedYawnQueryBuilder(tableDef, queryFactory, query.clone())
     }
 
     // to be used by `create` only
