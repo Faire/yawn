@@ -1,5 +1,6 @@
 package com.faire.yawn.query
 
+import com.faire.yawn.RawStringColumn
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnTableDef
 import org.hibernate.criterion.Criterion
@@ -174,10 +175,6 @@ interface YawnQueryRestriction<SOURCE : Any> {
             context: YawnCompilationContext,
         ): Criterion {
             val path = column.generatePath(context)
-            if (column is YawnDef<*, *>.RawStringColumnDef) {
-                return StringPatternCriterion(path, matchMode.toMatchString(value as String), caseInsensitive = false)
-            }
-
             return when (val adaptedValue = column.adaptNonNullValue(value)) {
                 is String -> Restrictions.like(path, adaptedValue, matchMode)
                 // The column is mapped by Hibernate itself (e.g. through an AttributeConverter), so the value has to
@@ -196,10 +193,6 @@ interface YawnQueryRestriction<SOURCE : Any> {
             context: YawnCompilationContext,
         ): Criterion {
             val path = column.generatePath(context)
-            if (column is YawnDef<*, *>.RawStringColumnDef) {
-                return StringPatternCriterion(path, matchMode.toMatchString(value as String), caseInsensitive = true)
-            }
-
             return when (val adaptedValue = column.adaptNonNullValue(value)) {
                 is String -> Restrictions.ilike(path, adaptedValue, matchMode)
                 else -> throw UnsupportedOperationException(
@@ -213,6 +206,40 @@ interface YawnQueryRestriction<SOURCE : Any> {
                 )
             }
         }
+    }
+
+    /**
+     * [Like] against a column's text, see [RawStringColumn].
+     */
+    class RawLike<SOURCE : Any>(
+        private val column: RawStringColumn<SOURCE>,
+        private val pattern: String,
+        private val matchMode: MatchMode,
+    ) : YawnQueryRestriction<SOURCE> {
+        override fun compile(
+            context: YawnCompilationContext,
+        ): Criterion = StringPatternCriterion(
+            column.generatePath(context),
+            matchMode.toMatchString(pattern),
+            caseInsensitive = false,
+        )
+    }
+
+    /**
+     * [ILike] against a column's text, see [RawStringColumn].
+     */
+    class RawILike<SOURCE : Any>(
+        private val column: RawStringColumn<SOURCE>,
+        private val pattern: String,
+        private val matchMode: MatchMode,
+    ) : YawnQueryRestriction<SOURCE> {
+        override fun compile(
+            context: YawnCompilationContext,
+        ): Criterion = StringPatternCriterion(
+            column.generatePath(context),
+            matchMode.toMatchString(pattern),
+            caseInsensitive = true,
+        )
     }
 
     class IsNotNull<SOURCE : Any, F>(

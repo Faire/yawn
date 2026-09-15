@@ -525,15 +525,19 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
     }
 
     @Test
-    fun `a raw text view cannot be projected`() {
+    fun `raw not iLike on a converted column`() {
         transactor.open { session ->
-            assertThatThrownBy {
-                session.project(PersonTable) { people ->
-                    project(people.email.raw)
-                }.list()
-            }
-                .isInstanceOf(UnsupportedOperationException::class.java)
-                .hasMessageContaining("cannot be projected, only pattern-matched")
+            val people = session.query(PersonTable) { people ->
+                addNotILike(people.email.raw, "LUAN", MatchMode.START)
+            }.list()
+
+            assertThat(people.map { it.name }).containsExactlyInAnyOrder(
+                "J.R.R. Tolkien",
+                "J.K. Rowling",
+                "Hans Christian Andersen",
+                "Paul Duchesne",
+                "Quinn Budan",
+            )
         }
     }
 
