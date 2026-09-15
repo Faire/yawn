@@ -174,6 +174,10 @@ interface YawnQueryRestriction<SOURCE : Any> {
             context: YawnCompilationContext,
         ): Criterion {
             val path = column.generatePath(context)
+            if (column is YawnDef<*, *>.RawStringColumnDef) {
+                return StringPatternCriterion(path, matchMode.toMatchString(value as String), caseInsensitive = false)
+            }
+
             return when (val adaptedValue = column.adaptNonNullValue(value)) {
                 is String -> Restrictions.like(path, adaptedValue, matchMode)
                 // The column is mapped by Hibernate itself (e.g. through an AttributeConverter), so the value has to
@@ -192,6 +196,10 @@ interface YawnQueryRestriction<SOURCE : Any> {
             context: YawnCompilationContext,
         ): Criterion {
             val path = column.generatePath(context)
+            if (column is YawnDef<*, *>.RawStringColumnDef) {
+                return StringPatternCriterion(path, matchMode.toMatchString(value as String), caseInsensitive = true)
+            }
+
             return when (val adaptedValue = column.adaptNonNullValue(value)) {
                 is String -> Restrictions.ilike(path, adaptedValue, matchMode)
                 else -> throw UnsupportedOperationException(
@@ -200,8 +208,7 @@ interface YawnQueryRestriction<SOURCE : Any> {
                         ${adaptedValue.javaClass.name} rather than a String.
                         Hibernate's IlikeExpression stringifies the bound value, which then fails to bind against a
                         column mapped through an AttributeConverter.
-                        Use `like` with the wildcards embedded in the value instead, or map the underlying String
-                        column and use `iLike` on that.
+                        Match the column as text instead, passing a String pattern: iLike(column.raw, "...").
                     """.trimIndent(),
                 )
             }
@@ -293,7 +300,7 @@ private fun <SOURCE : Any, F> YawnDef<SOURCE, *>.YawnColumnDef<F>.adaptNonNullVa
 
 /**
  * Wildcards cannot be injected into a value that is bound as the column's own type, so [MatchMode] is only supported
- * for columns that adapt down to a [String].
+ * for columns that adapt down to a [String]; match the column as text to get the full range.
  */
 private fun <SOURCE : Any, F> YawnDef<SOURCE, *>.YawnColumnDef<F>.requireExactMatchMode(
     adaptedValue: Any,
@@ -305,8 +312,7 @@ private fun <SOURCE : Any, F> YawnDef<SOURCE, *>.YawnColumnDef<F>.requireExactMa
                 MatchMode.$matchMode is not supported on column $this, whose value adapts to
                 ${adaptedValue.javaClass.name} rather than a String.
                 Hibernate binds this value as the column's own type, so Yawn cannot wrap it in wildcards for you.
-                Embed the wildcards in the value itself and use MatchMode.EXACT instead,
-                e.g. like(column, EmailAddress("%@example.com")).
+                Match the column as text instead, passing a String pattern: like(column.raw, "...", MatchMode.$matchMode).
             """.trimIndent(),
         )
     }

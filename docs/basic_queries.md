@@ -81,9 +81,26 @@ val results = yawn.query(PersonTable) { people ->
 }.list()
 ```
 
-Passing a `MatchMode` for one of these columns throws, rather than silently matching the wrong rows. `addILike` is not available for them at all, because
-Hibernate's `IlikeExpression` stringifies the bound value, which such a column cannot bind; use `addLike`, or map the underlying `String` column and use
-`addILike` on that.
+Passing a `MatchMode` for one of these columns throws, rather than silently matching the wrong rows.
+
+### Matching a column as text
+
+When embedding the wildcards in the value is awkward or impossible — a partial pattern, or a type that validates its own format — use `raw` to match the column
+as text. The pattern is bound as a `String` against the underlying column, so the whole `MatchMode` range and the case-insensitive variants work regardless of
+how the property is mapped:
+
+```kotlin
+val results = yawn.query(PersonTable) { people ->
+    addLike(people.email.raw, "luan", MatchMode.START)
+}.list()
+
+val caseInsensitive = yawn.query(PersonTable) { people ->
+    addILike(people.email.raw, "@FAIRE.COM", MatchMode.END)
+}.list()
+```
+
+Note that `raw` steps outside the column's type: it takes a `String` pattern rather than a value of the column's own type, and it is only accepted by the
+pattern-matching criteria — it cannot be projected, and the column has to map to a single text column.
 
 ## Non-Column-Based Operations
 
