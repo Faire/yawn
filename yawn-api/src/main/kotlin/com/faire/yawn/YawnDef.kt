@@ -27,5 +27,22 @@ abstract class YawnDef<SOURCE : Any, D : Any> {
         }
 
         override fun projection(): ProjectionNode.Value<SOURCE, F> = ProjectionNode.property(this)
+
+        /**
+         * A text view of this column, for pattern matching against a `String` pattern rather than a value of the
+         * column's own type.
+         *
+         * This is what to reach for when [F] is a custom type stored as text: the pattern is bound as a `String`
+         * against the underlying column, so `MatchMode` and the case-insensitive variants work even when Hibernate
+         * maps the property through an `AttributeConverter`.
+         *
+         * ```
+         * addLike(people.email.raw, "@example.com", MatchMode.END)
+         * ```
+         *
+         * Only the pattern-matching restrictions accept this view, and the column has to map to a single text column.
+         */
+        val raw: RawStringColumn<SOURCE>
+            get() = RawStringColumn(this)
     }
 }
