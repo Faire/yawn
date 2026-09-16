@@ -382,50 +382,6 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
     }
 
     /**
-     * Dropping the `String` bound means a non-textual column type no longer fails to compile, so the guards have to
-     * hold for those too: the value is typed as the column, which leaves no way to express a pattern at all.
-     */
-    @Test
-    fun `like on a non-textual column cannot express a pattern`() {
-        transactor.open { session ->
-            val matched = session.query(BookTable) { books ->
-                addLike(books.numberOfPages, 100L)
-            }.list()
-            val equal = session.query(BookTable) { books ->
-                addEq(books.numberOfPages, 100L)
-            }.list()
-
-            assertThat(matched.map { it.name }).isEqualTo(equal.map { it.name })
-        }
-    }
-
-    @Test
-    fun `like with a match mode on a non-textual column is rejected`() {
-        transactor.open { session ->
-            assertThatThrownBy {
-                session.query(BookTable) { books ->
-                    addLike(books.numberOfPages, 1L, MatchMode.START)
-                }.list()
-            }
-                .isInstanceOf(UnsupportedOperationException::class.java)
-                .hasMessageContaining("MatchMode.START is not supported")
-        }
-    }
-
-    @Test
-    fun `iLike on a non-textual column is rejected`() {
-        transactor.open { session ->
-            assertThatThrownBy {
-                session.query(BookTable) { books ->
-                    addILike(books.numberOfPages, 100L)
-                }.list()
-            }
-                .isInstanceOf(UnsupportedOperationException::class.java)
-                .hasMessageContaining("iLike is not supported")
-        }
-    }
-
-    /**
      * `raw` matches the column as text, which is the only way to pattern-match a converted column: the pattern is
      * bound as a String against the underlying column instead of as the property's own type.
      */
@@ -538,6 +494,21 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
                 "Paul Duchesne",
                 "Quinn Budan",
             )
+        }
+    }
+
+    /**
+     * A non-textual column is not eligible for the typed helpers, but its text can still be matched explicitly.
+     * Note that this gives up any index on the column, since the comparison forces a cast.
+     */
+    @Test
+    fun `raw like on a non-textual column matches its text`() {
+        transactor.open { session ->
+            val books = session.query(BookTable) { books ->
+                addLike(books.numberOfPages.raw, "1", MatchMode.START)
+            }.list()
+
+            assertThat(books.map { it.numberOfPages }).containsExactlyInAnyOrder(1_000, 100, 110, 120)
         }
     }
 

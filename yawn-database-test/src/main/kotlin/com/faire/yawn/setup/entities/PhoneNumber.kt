@@ -1,9 +1,11 @@
 package com.faire.yawn.setup.entities
 
+import com.faire.yawn.YawnStringifiable
+
 @JvmInline
 internal value class PhoneNumber(
     val value: String,
-) {
+) : YawnStringifiable {
     init {
         require(regex.matches(value)) { "Phone number must match pattern (XXX) XXX-XXXX" }
     }

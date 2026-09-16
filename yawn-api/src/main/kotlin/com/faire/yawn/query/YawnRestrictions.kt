@@ -2,6 +2,7 @@ package com.faire.yawn.query
 
 import com.faire.yawn.RawStringColumn
 import com.faire.yawn.YawnDef
+import com.faire.yawn.YawnStringifiable
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.query.YawnQueryRestriction.And
 import com.faire.yawn.query.YawnQueryRestriction.Between
@@ -156,14 +157,8 @@ object YawnRestrictions {
 
     /**
      * Pattern-matches [column] against [value].
-     *
-     * Besides plain `String` columns, this also accepts string-backed custom column types:
-     *
-     * * a value class wrapping a `String` is unwrapped by its generated adapter, so [matchMode] applies as usual;
-     * * a type Hibernate maps itself, e.g. through an `AttributeConverter`, is bound as the column's own type, so the
-     *   wildcards must already be part of [value] and [matchMode] must be left as [MatchMode.EXACT].
      */
-    fun <SOURCE : Any, F> like(
+    fun <SOURCE : Any, F : String?> like(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
@@ -173,12 +168,39 @@ object YawnRestrictions {
 
     /**
      * Case-insensitive counterpart of [like].
-     *
-     * This supports plain `String` columns and value classes wrapping a `String`, but not types Hibernate maps itself
-     * through an `AttributeConverter`: Hibernate's `IlikeExpression` stringifies the bound value, which such a column
-     * cannot bind. Match those as text instead, via [YawnDef.YawnColumnDef.raw].
      */
-    fun <SOURCE : Any, F> iLike(
+    fun <SOURCE : Any, F : String?> iLike(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        value: F & Any,
+        matchMode: MatchMode = MatchMode.EXACT,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(ILike(column, value, matchMode))
+    }
+
+    /**
+     * Pattern-matches a [YawnStringifiable] [column] against [value].
+     *
+     * A value class wrapping a `String` is unwrapped by its generated adapter, so [matchMode] applies as usual. A type
+     * Hibernate maps itself, e.g. through an `AttributeConverter`, is bound as the column's own type instead, so the
+     * wildcards must already be part of [value] and [matchMode] must be left as [MatchMode.EXACT]. Match the column as
+     * text via [YawnDef.YawnColumnDef.raw] to avoid both restrictions.
+     */
+    fun <SOURCE : Any, F : YawnStringifiable?> like(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        value: F & Any,
+        matchMode: MatchMode = MatchMode.EXACT,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(Like(column, value, matchMode))
+    }
+
+    /**
+     * Case-insensitive counterpart of [like] for a [YawnStringifiable] column.
+     *
+     * This works for a value class wrapping a `String`, but not for a type Hibernate maps through an
+     * `AttributeConverter`: Hibernate's `IlikeExpression` stringifies the bound value, which such a column cannot
+     * bind. Match those as text via [YawnDef.YawnColumnDef.raw].
+     */
+    fun <SOURCE : Any, F : YawnStringifiable?> iLike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
