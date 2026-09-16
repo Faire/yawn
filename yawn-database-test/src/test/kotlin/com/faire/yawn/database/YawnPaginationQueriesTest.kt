@@ -14,6 +14,7 @@ import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PersonTableDef
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.hibernate.sql.JoinType
 import org.junit.jupiter.api.Test
 import java.sql.SQLException
 
@@ -231,6 +232,37 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
             // Before the fix the builder had inherited the page's `id IN (...)` filter and listed only two clubs.
             assertThat(bookClubs.list().map { it.name }.distinct())
                 .containsExactlyInAnyOrder("Andersen Fan Club", "Rowling Fan Club", "Tolkien Fan Club")
+        }
+    }
+
+    @Test
+    fun `list with total results - avoidEagerFetchFanout pages an explicit collection join by distinct entity`() {
+        transactor.open { session ->
+            fun paginate(page: Page): PaginationResult<String> {
+                return session.query(BookClubTable) { clubs ->
+                    join(clubs.members, joinType = JoinType.LEFT_OUTER_JOIN)
+                }.listPaginatedWithTotalResults(
+                    page = page,
+                    orders = listOf { YawnQueryOrder.asc(name) },
+                    uniqueColumn = { id },
+                    avoidEagerFetchFanout = true,
+                ).map { it.name }
+            }
+
+            // An explicit join fans the page-of-keys query out as well, on any database: Hibernate only skips the
+            // eager fetch there. Without the GROUP BY on the unique column, the Andersen Fan Club's 5 member rows
+            // fill a page of 2 keys on their own and the Rowling Fan Club silently drops off the page.
+            val (total1, page1) = paginate(PageNumber.zeroIndexed(0) / 2)
+            assertThat(total1).isEqualTo(3)
+            assertThat(page1).containsExactly("Andersen Fan Club", "Rowling Fan Club")
+
+            val (total2, page2) = paginate(PageNumber.zeroIndexed(1) / 2)
+            assertThat(total2).isEqualTo(3)
+            assertThat(page2).containsExactly("Tolkien Fan Club")
+
+            val (total3, page3) = paginate(PageNumber.zeroIndexed(2) / 2)
+            assertThat(total3).isEqualTo(3)
+            assertThat(page3).isEmpty()
         }
     }
 

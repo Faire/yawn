@@ -111,10 +111,11 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     }
 
     /**
-     * @param forceAnsiCompliance `true` makes the page-of-keys query `GROUP BY` the unique column and every
-     * `ORDER BY` column, which ANSI SQL, MySQL `ONLY_FULL_GROUP_BY`, H2 and Postgres require whenever an ordered
-     * column is not functionally dependent on the grouped key (e.g. a column of a joined collection). It implies
-     * the same two-phase fetch as [avoidEagerFetchFanout].
+     * @param forceAnsiCompliance the page-of-keys query of the two-phase fetch always groups by the unique column
+     * (see [avoidEagerFetchFanout]); `true` makes it `GROUP BY` every `ORDER BY` column as well, which ANSI SQL,
+     * MySQL `ONLY_FULL_GROUP_BY`, H2 and Postgres require whenever an ordered column is not functionally dependent
+     * on the grouped key (e.g. a column of a joined collection; a column of the root entity never needs it). It
+     * implies the same two-phase fetch as [avoidEagerFetchFanout].
      *
      * Only the [orders] passed to this call are grouped, and each of them must be a plain column of the root
      * entity or of a joined table: association paths such as `asc(books.author)`, projected expressions from
@@ -130,6 +131,10 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
      * fetching those entities (along with their associations) - so a page's worth of associations can never
      * crowd out a page's worth of entities.
      *
+     * The page-of-keys query groups by [uniqueColumn], so a collection the criteria join explicitly cannot crowd
+     * entities off the page either. Ordering by that collection's own columns needs [forceAnsiCompliance] on
+     * strict databases.
+     *
      * Defaults to `false` to preserve existing behavior for callers whose entities have no eager collection
      * associations, since this costs an extra query. This may end up becoming the default (or the only) behavior
      * once it has seen enough real-world use to justify that cost unconditionally; the flag exists so that can
@@ -143,7 +148,7 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         avoidEagerFetchFanout: Boolean = false,
     ): PaginationResult<T> {
         // Resolved up front so an unsupported order fails before any SQL runs.
-        val groupedOrderColumns = if (forceAnsiCompliance) ansiCompliantOrderColumns(orders) else null
+        val groupedOrderColumns = if (forceAnsiCompliance) ansiCompliantOrderColumns(orders) else listOf()
         val totalResults = clone().countDistinct(uniqueColumn)
         val entities = if (forceAnsiCompliance || avoidEagerFetchFanout) {
             listPaginatedByIds(page, orders, uniqueColumn, groupedOrderColumns)
@@ -162,24 +167,23 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
      * Do not "simplify" this back into a single paginated entity query: that reintroduces silent truncation for
      * any entity with an eager `@OneToMany`/`@ManyToMany` association.
      *
-     * @param groupedOrderColumns when non-null (see `forceAnsiCompliance` on [listPaginatedWithTotalResults]), the
-     * page-of-keys query groups by the unique column and these order columns instead of plainly selecting the keys.
+     * The page-of-keys query always groups by the unique column, as the legacy helper did: without that, a
+     * collection the criteria join explicitly fans the keys out to one row per joined row (Hibernate only skips
+     * the eager fetch in a projection query), and a single entity can fill the whole page. Grouping by the unique
+     * column alone leaves the `ORDER BY` columns ungrouped, which strict databases accept only for columns that
+     * are functionally dependent on the key; see `forceAnsiCompliance` for the rest.
+     *
+     * @param groupedOrderColumns the order columns to group by on top of the unique column (see
+     * `forceAnsiCompliance` on [listPaginatedWithTotalResults]); empty when the caller did not ask for that.
      */
     private fun <ID : Any> listPaginatedByIds(
         page: Page,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<ID>,
-        groupedOrderColumns: List<YawnDef<T, *>.YawnColumnDef<*>>?,
+        groupedOrderColumns: List<YawnDef<T, *>.YawnColumnDef<*>>,
     ): List<T> {
         val pagedIds = clone()
-            .applyProjection { table ->
-                val key = table.uniqueColumn()
-                if (groupedOrderColumns != null) {
-                    project(groupedKeyProjector(key, groupedOrderColumns))
-                } else {
-                    project(key)
-                }
-            }
+            .applyProjection { table -> project(groupedKeyProjector(table.uniqueColumn(), groupedOrderColumns)) }
             .paginate(page = page, orders = orders)
             .list()
 
@@ -227,8 +231,9 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     }
 
     /**
-     * Selects [uniqueColumn] grouped together with [orderColumns], so the page-of-keys query is a valid grouped
-     * query under ANSI SQL; only the unique column's value survives into the result. Identical columns are
+     * Selects [uniqueColumn] as a `GROUP BY` column, so the page-of-keys query yields one row per entity however
+     * the criteria's joins fan the rows out, together with [orderColumns] when the query also has to be a valid
+     * grouped query under ANSI SQL; only the unique column's value survives into the result. Identical columns are
      * deduplicated by the projection resolver, so an order on the unique column itself is harmless.
      */
     private fun <ID : Any> groupedKeyProjector(

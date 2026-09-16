@@ -165,11 +165,12 @@ val page = yawn.query(BookTable) { books ->
 
 Two opt-in flags change how the page is fetched:
 
-- `avoidEagerFetchFanout = true` first decides which entities belong on the page (a query for just their keys), and only then fetches those entities, so an
-  eager `@OneToMany`/`@ManyToMany` association can never crowd entities off a page.
-- `forceAnsiCompliance = true` makes that page-of-keys query `GROUP BY` the unique column and every `ORDER BY` column, which ANSI SQL (MySQL's
-  `ONLY_FULL_GROUP_BY` mode, H2, Postgres) requires whenever an ordered column is not functionally dependent on the grouped key, for example when ordering by
-  a column of a joined collection. It implies the same two-phase fetch, and only supports ordering by plain columns of the root entity or of a joined table.
+- `avoidEagerFetchFanout = true` first decides which entities belong on the page (a query for just their keys, grouped by the unique column), and only then
+  fetches those entities, so neither an eager `@OneToMany`/`@ManyToMany` association nor an explicitly joined collection can crowd entities off a page.
+- `forceAnsiCompliance = true` additionally makes that page-of-keys query `GROUP BY` every `ORDER BY` column, which ANSI SQL (MySQL's
+  `ONLY_FULL_GROUP_BY` mode, H2, Postgres) requires whenever an ordered column is not functionally dependent on the grouped key, for example when ordering
+  by a column of a joined collection. It implies the same two-phase fetch, and only supports ordering by plain columns of the root entity or of a joined
+  table.
 
 ## Pass/Modify Queries Around
 
