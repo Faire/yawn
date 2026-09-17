@@ -57,6 +57,61 @@ val results = yawn.query(BookTable) { books ->
 
 - column with sub-query: [check the Sub-queries doc](sub_queries.md)
 
+## Pattern Matching on Custom Column Types
+
+`addLike` / `addILike` (and their `addNotLike` / `addNotILike` counterparts) are not restricted to plain `String` columns: they also work on custom types that
+are stored as text, as long as the type says so by implementing `YawnStringifiable`.
+
+```kotlin
+value class PhoneNumber(val value: String) : YawnStringifiable
+```
+
+Yawn cannot infer this on its own. A value class wrapping a `String` is visible to the processor, but a type mapped through an `AttributeConverter` is not, and
+the converter may not even be declared on the property. The interface is how the type states that its column holds text, and the claim is not verified, so only
+add it where that is true.
+
+Once marked, how the value is bound depends on how the type reaches the database. A value class wrapping a `String` is unwrapped by its generated adapter, so
+`MatchMode` works exactly as it does for a `String` column:
+
+```kotlin
+val results = yawn.query(PersonTable) { people ->
+    addLike(people.phone, PhoneNumber("(555) 123-4567"), MatchMode.START)
+}.list()
+```
+
+This is often the only way to pattern-match such a column, since a value class that validates its own format cannot represent a partial pattern as a value.
+
+A type that Hibernate maps itself, for example through an `AttributeConverter`, is bound as the column's own type instead. Yawn cannot wrap an opaque value in
+wildcards, so they must already be part of the value and `MatchMode` has to stay `EXACT`:
+
+```kotlin
+val results = yawn.query(PersonTable) { people ->
+    addLike(people.email, EmailAddress("%@faire.com"))
+}.list()
+```
+
+Passing a `MatchMode` for one of these columns throws, rather than silently matching the wrong rows.
+
+### Matching a column as text
+
+When the type cannot be marked, or embedding the wildcards in the value is awkward or impossible (a partial pattern, or a type that validates its own format),
+use `raw` to match the column as text. The pattern is bound as a `String` against the underlying column, so the whole `MatchMode` range and the case-insensitive
+variants work regardless of how the property is mapped:
+
+```kotlin
+val results = yawn.query(PersonTable) { people ->
+    addLike(people.email.raw, "luan", MatchMode.START)
+}.list()
+
+val caseInsensitive = yawn.query(PersonTable) { people ->
+    addILike(people.email.raw, "@FAIRE.COM", MatchMode.END)
+}.list()
+```
+
+Note that `raw` steps outside the column's type: it takes a `String` pattern rather than a value of the column's own type, and it is only accepted by the
+pattern-matching criteria, so it cannot be projected, and the column has to map to a single column. It is also the way to text-match a column that is not
+stored as text at all, for example prefix-matching a number, at the cost of giving up any index on that column since the comparison forces a cast.
+
 ## Non-Column-Based Operations
 
 Operations that do not require the column context are typically only available outside the lambda; such as:
