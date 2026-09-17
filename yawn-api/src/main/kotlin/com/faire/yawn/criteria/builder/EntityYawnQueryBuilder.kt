@@ -124,12 +124,8 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         page: Page,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<ID>,
-        forceAnsiCompliance: Boolean = false,
         avoidEagerFetchFanout: Boolean = false,
     ): PaginationResult<T> {
-        if (forceAnsiCompliance) {
-            throw UnsupportedOperationException("forceAnsiCompliance=true is not supported yet in Yawn")
-        }
         val totalResults = clone().countDistinct(uniqueColumn)
         val entities = if (avoidEagerFetchFanout) {
             listPaginatedByIdToAvoidEagerFetchFanout(page, orders, uniqueColumn)
