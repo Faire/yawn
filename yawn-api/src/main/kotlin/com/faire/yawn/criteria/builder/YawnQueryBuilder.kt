@@ -46,10 +46,10 @@ abstract class YawnQueryBuilder<
 ) : BaseYawnBuilder<CRITERIA>() {
     /**
      * The various Yawn Query Builders are mutable, which means changes are accumulated within the instance.
-     * If you want to run two different queries with the same base, you can either create e method that returns
+     * If you want to run two different queries with the same base, you can either create a method that returns
      * a new "base" instance each time, or, if you already have the instance, you can use the clone method.
-     * Note that this relies on the data class `copy()` method being correctly implemented in the underlying
-     * [YawnQuery] class.
+     * Note that this relies on [YawnQuery.clone] deep-copying the query's mutable state (its criteria, joins,
+     * orders and query hints), so that refining the clone never leaks back into the original builder.
      */
     protected abstract fun clone(): CRITERIA
 
