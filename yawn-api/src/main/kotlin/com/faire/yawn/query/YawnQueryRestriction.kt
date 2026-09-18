@@ -263,7 +263,7 @@ private fun <SOURCE : Any, F : String?> YawnDef<SOURCE, *>.YawnColumnDef<F>.adap
                 Like restriction can only be applied to String values,
                 but got: ${adaptedValue.javaClass} due to adapter on column $this.
                 This means a wrong adapter was code-generated into the metamodel.
-                Please open an issue on GitHub with your schema definition.
+                Please open an issue on GitHub (https://github.com/faire/yawn/issues) with your schema definition.
             """.trimIndent(),
         )
     }

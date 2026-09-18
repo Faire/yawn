@@ -143,6 +143,7 @@ internal class BookFixtures(
                 name = "Paul Duchesne"
                 email = EmailAddress("paul.duchesne@faire.com")
                 phone = PhoneNumber("(555) 123-4567")
+                externalId = 1_001uL
                 favoriteBook = lordOfTheRings
                 favoriteAuthor = andersen
             }
@@ -155,6 +156,8 @@ internal class BookFixtures(
                     centralOfficeCode = "987",
                     lineNumber = "6543",
                 )
+                // above Long.MAX_VALUE on purpose, to exercise the unsigned -> signed round trip
+                externalId = ULong.MAX_VALUE
                 favoriteBook = hp
                 favoriteAuthor = tolkien
             }
@@ -162,6 +165,7 @@ internal class BookFixtures(
                 name = "Quinn Budan"
                 email = EmailAddress("quinn@faire.com")
                 phone = PhoneNumber("(333) 000-1111")
+                externalId = 2_002uL
             }
             update(rowling) {
                 favoriteBook = lordOfTheRings
