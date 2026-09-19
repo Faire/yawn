@@ -1,12 +1,16 @@
 package com.faire.yawn.generators.adapters
 
+import com.faire.yawn.adapter.ValueClassAdapter
 import com.faire.yawn.util.YawnContext
 import com.faire.yawn.util.YawnParameter
-import com.faire.yawn.util.YawnProcessorException
 import com.faire.yawn.util.isValueClass
-import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.squareup.kotlinpoet.asClassName
 
+/**
+ * Attaches [ValueClassAdapter] to every column whose type is a Kotlin value class, so that query parameters are
+ * unwrapped to the representation Hibernate stores. See [ValueClassAdapter] for why the unwrapping happens at runtime.
+ */
 internal class ValueClassAdapterGenerator : ValueAdapterGenerator {
     override fun qualifies(
         yawnContext: YawnContext,
@@ -19,18 +23,6 @@ internal class ValueClassAdapterGenerator : ValueAdapterGenerator {
         yawnContext: YawnContext,
         fieldType: KSType,
     ): YawnParameter {
-        val declaration = fieldType.declaration as? KSClassDeclaration
-            ?: fail("Expected a class declaration for value class, but found ${fieldType.declaration}")
-        val primaryConstructor = declaration.primaryConstructor
-            ?: fail("Value class ${declaration.qualifiedName?.asString()} must have a primary constructor")
-        val valueClassProperty = primaryConstructor.parameters.singleOrNull()
-            ?: fail("Value class ${declaration.qualifiedName?.asString()} must have a single property in its primary constructor")
-        val valueClassPropertyName = valueClassProperty.name?.asString()
-            ?: fail("Value class property must have a name")
-        return YawnParameter("adapter = { it?.%N }", listOf(valueClassPropertyName))
+        return YawnParameter.simple("adapter = %T", ValueClassAdapter::class.asClassName())
     }
-}
-
-private fun fail(message: String): Nothing {
-    throw YawnProcessorException(message)
 }

@@ -42,6 +42,13 @@ internal class Person : TimestampedEntity<Person>(), PersonInterface {
     @Column
     var phone: PhoneNumber? = null
 
+    /**
+     * Test for unsigned types. A non-null [ULong] field is erased to a JVM `long`, which Hibernate maps as BIGINT;
+     * Yawn unwraps criteria arguments to the matching signed value at runtime.
+     */
+    @Column
+    var externalId: ULong = 0u
+
     @ManyToOne(fetch = FetchType.LAZY)
     var favoriteBook: Book? = null
 

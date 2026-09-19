@@ -2,6 +2,7 @@ package com.faire.yawn
 
 import com.faire.yawn.YawnTestUtils.YawnTestAssertContext.SOURCE
 import com.faire.yawn.YawnTestUtils.assertGeneratedEntity
+import com.faire.yawn.YawnTestUtils.assertGeneratedFile
 import com.faire.yawn.inheritance.ChildInheritanceEntity
 import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.utils.FakeToken
@@ -146,5 +147,37 @@ internal class YawnEntityProcessorTest {
         val tableDef = EntityWithCrossModuleValueClassTableDef<Any>(YawnTableDefParent.RootTableDefParent)
         val adapted = tableDef.pageNumber.adaptValue(PageNumber.zeroIndexed(42))
         assertThat(adapted).isEqualTo(42)
+    }
+
+    /**
+     * Value classes whose backing property is not accessible from generated code (the unsigned types, private
+     * backing properties) or that wrap other value classes cannot be unwrapped by generated property access,
+     * so the generated metamodel delegates to [com.faire.yawn.adapter.ValueClassAdapter] at runtime.
+     */
+    @Test
+    fun `generates value-class adapter for opaque value class columns`() {
+        assertGeneratedEntity<EntityWithOpaqueValueClasses> {
+            hasTableColumn<EntityWithOpaqueValueClasses, ULong>("isbn")
+            hasTableColumn<EntityWithOpaqueValueClasses, UInt?>("count")
+            hasTableColumn<EntityWithOpaqueValueClasses, PrivateBackedId?>("privateBacked")
+            hasTableColumn<EntityWithOpaqueValueClasses, WrappedULong>("wrapped")
+        }
+
+        assertGeneratedFile<EntityWithOpaqueValueClassesTable> {
+            containsLine("""ColumnDef("isbn", adapter = ValueClassAdapter)""")
+            containsLine("""ColumnDef("count", adapter = ValueClassAdapter)""")
+            containsLine("""ColumnDef("privateBacked", adapter = ValueClassAdapter)""")
+            containsLine("""ColumnDef("wrapped", adapter = ValueClassAdapter)""")
+        }
+
+        with(EntityWithOpaqueValueClassesTableDef<Any>(YawnTableDefParent.RootTableDefParent)) {
+            assertThat(isbn.adaptValue(42uL)).isEqualTo(42L)
+            // unsigned values above the signed range keep the same bits Hibernate stores in the erased `long` field
+            assertThat(isbn.adaptValue(ULong.MAX_VALUE)).isEqualTo(-1L)
+            assertThat(count.adaptValue(7u)).isEqualTo(7)
+            assertThat(count.adaptValue(null)).isNull()
+            assertThat(privateBacked.adaptValue(PrivateBackedId(3))).isEqualTo(3L)
+            assertThat(wrapped.adaptValue(WrappedULong(5u))).isEqualTo(5L)
+        }
     }
 }

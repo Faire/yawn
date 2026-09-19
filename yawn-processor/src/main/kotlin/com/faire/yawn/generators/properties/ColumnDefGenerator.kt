@@ -69,7 +69,7 @@ internal object ColumnDefGenerator : YawnPropertyGenerator() {
         val adapter = generateAdapterForPropertyIfNeeded(yawnContext, fieldType)
         val parameters = pathPrefixes + listOfNotNull(
             YawnParameter.string(fieldName), // "token"
-            adapter, // optional, e.g. for a value class: adapter = { it?.value }
+            adapter, // optional, e.g. for a value class: adapter = ValueClassAdapter
         )
 
         return generatePropertySpec(

@@ -56,15 +56,13 @@ abstract class YawnTableDef<SOURCE : Any, D : Any>(
      */
     inner class ColumnDef<F>(
         private vararg val path: String?,
-        private val adapter: YawnValueAdapter<F>? = null,
+        private val adapter: YawnValueAdapter<F> = YawnValueAdapter.IDENTITY,
     ) : YawnColumnDef<F>() {
         override fun generatePath(context: YawnCompilationContext): String {
             return listOfNotNull(context.generateAlias(parent), *path).joinToString(".")
         }
 
-        override fun adaptValue(value: F): Any? {
-            return adapter?.adapt(value) ?: super.adaptValue(value)
-        }
+        override fun adaptValue(value: F): Any? = adapter.adapt(value)
     }
 
     /**
