@@ -1,6 +1,7 @@
 package com.faire.yawn.database
 
 import com.faire.yawn.query.YawnRestrictions
+import com.faire.yawn.raw
 import com.faire.yawn.setup.custom.EmailAddress
 import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PersonTable
@@ -497,18 +498,16 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
         }
     }
 
-    /**
-     * A non-textual column is not eligible for the typed helpers, but its text can still be matched explicitly.
-     * Note that this gives up any index on the column, since the comparison forces a cast.
-     */
     @Test
-    fun `raw like on a non-textual column matches its text`() {
+    fun `a text view cannot be projected`() {
         transactor.open { session ->
-            val books = session.query(BookTable) { books ->
-                addLike(books.numberOfPages.raw, "1", MatchMode.START)
-            }.list()
-
-            assertThat(books.map { it.numberOfPages }).containsExactlyInAnyOrder(1_000, 100, 110, 120)
+            assertThatThrownBy {
+                session.project(PersonTable) { people ->
+                    project(people.email.raw)
+                }.list()
+            }
+                .isInstanceOf(UnsupportedOperationException::class.java)
+                .hasMessageContaining("cannot be projected, only pattern-matched")
         }
     }
 

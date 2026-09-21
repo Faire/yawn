@@ -1,6 +1,5 @@
 package com.faire.yawn.query
 
-import com.faire.yawn.RawStringColumn
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnStringifiable
 import com.faire.yawn.YawnTableDef
@@ -29,8 +28,6 @@ import com.faire.yawn.query.YawnQueryRestriction.NotEquals
 import com.faire.yawn.query.YawnQueryRestriction.NotEqualsProperty
 import com.faire.yawn.query.YawnQueryRestriction.NotIn
 import com.faire.yawn.query.YawnQueryRestriction.Or
-import com.faire.yawn.query.YawnQueryRestriction.RawILike
-import com.faire.yawn.query.YawnQueryRestriction.RawLike
 import org.hibernate.criterion.MatchMode
 
 /**
@@ -206,31 +203,6 @@ object YawnRestrictions {
         matchMode: MatchMode = MatchMode.EXACT,
     ): YawnQueryCriterion<SOURCE> {
         return YawnQueryCriterion(ILike(column, value, matchMode))
-    }
-
-    /**
-     * Pattern-matches a column's text against [pattern], see [YawnDef.YawnColumnDef.raw].
-     *
-     * Unlike [like], this works for any single text column no matter how Hibernate maps the property, and supports
-     * the full [MatchMode] range, since the pattern is bound as a `String` rather than as the column's own type.
-     */
-    fun <SOURCE : Any> like(
-        column: RawStringColumn<SOURCE>,
-        pattern: String,
-        matchMode: MatchMode = MatchMode.EXACT,
-    ): YawnQueryCriterion<SOURCE> {
-        return YawnQueryCriterion(RawLike(column, pattern, matchMode))
-    }
-
-    /**
-     * Case-insensitive counterpart of [like] on a column's text, see [YawnDef.YawnColumnDef.raw].
-     */
-    fun <SOURCE : Any> iLike(
-        column: RawStringColumn<SOURCE>,
-        pattern: String,
-        matchMode: MatchMode = MatchMode.EXACT,
-    ): YawnQueryCriterion<SOURCE> {
-        return YawnQueryCriterion(RawILike(column, pattern, matchMode))
     }
 
     fun <SOURCE : Any, F> isNotNull(

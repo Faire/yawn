@@ -94,8 +94,8 @@ Passing a `MatchMode` for one of these columns throws, rather than silently matc
 
 ### Matching a column as text
 
-When the type cannot be marked, or embedding the wildcards in the value is awkward or impossible (a partial pattern, or a type that validates its own format),
-use `raw` to match the column as text. The pattern is bound as a `String` against the underlying column, so the whole `MatchMode` range and the case-insensitive
+When embedding the wildcards in the value is awkward or impossible (a partial pattern, or a type that validates its own format and so cannot hold one), use
+`raw` to match the column as text. The pattern is bound as a `String` against the underlying column, so the whole `MatchMode` range and the case-insensitive
 variants work regardless of how the property is mapped:
 
 ```kotlin
@@ -108,9 +108,9 @@ val caseInsensitive = yawn.query(PersonTable) { people ->
 }.list()
 ```
 
-Note that `raw` steps outside the column's type: it takes a `String` pattern rather than a value of the column's own type, and it is only accepted by the
-pattern-matching criteria, so it cannot be projected, and the column has to map to a single column. It is also the way to text-match a column that is not
-stored as text at all, for example prefix-matching a number, at the cost of giving up any index on that column since the comparison forces a cast.
+`raw` is only available on a `YawnStringifiable` column, so a column that does not hold text cannot be matched as text: `books.numberOfPages.raw` does not
+compile. It yields a `ColumnDef<String>`, which the ordinary pattern-matching criteria accept, so no separate set of helpers is needed. Two things it does
+not do: the column has to map to a single column, and the view cannot be projected, since reading a converted column back as a `String` would be wrong.
 
 ## Non-Column-Based Operations
 

@@ -1,6 +1,5 @@
 package com.faire.yawn.criteria.query
 
-import com.faire.yawn.RawStringColumn
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnStringifiable
 import com.faire.yawn.YawnTableDef
@@ -335,50 +334,6 @@ sealed interface YawnQueryScopeWithWhere<SOURCE : Any, T : Any> {
         matchMode: MatchMode = MatchMode.EXACT,
     ) {
         add(YawnRestrictions.not(YawnRestrictions.iLike(column, value, matchMode)))
-    }
-
-    /**
-     * Pattern-matches a column's text, see [YawnDef.YawnColumnDef.raw].
-     */
-    fun addLike(
-        column: RawStringColumn<SOURCE>,
-        pattern: String,
-        matchMode: MatchMode = MatchMode.EXACT,
-    ) {
-        add(YawnRestrictions.like(column, pattern, matchMode))
-    }
-
-    /**
-     * Case-insensitively pattern-matches a column's text, see [YawnDef.YawnColumnDef.raw].
-     */
-    fun addILike(
-        column: RawStringColumn<SOURCE>,
-        pattern: String,
-        matchMode: MatchMode = MatchMode.EXACT,
-    ) {
-        add(YawnRestrictions.iLike(column, pattern, matchMode))
-    }
-
-    /**
-     * Negated [addLike] on a column's text, see [YawnDef.YawnColumnDef.raw].
-     */
-    fun addNotLike(
-        column: RawStringColumn<SOURCE>,
-        pattern: String,
-        matchMode: MatchMode = MatchMode.EXACT,
-    ) {
-        add(YawnRestrictions.not(YawnRestrictions.like(column, pattern, matchMode)))
-    }
-
-    /**
-     * Negated [addILike] on a column's text, see [YawnDef.YawnColumnDef.raw].
-     */
-    fun addNotILike(
-        column: RawStringColumn<SOURCE>,
-        pattern: String,
-        matchMode: MatchMode = MatchMode.EXACT,
-    ) {
-        add(YawnRestrictions.not(YawnRestrictions.iLike(column, pattern, matchMode)))
     }
 
     fun <F> addIsNotNull(
