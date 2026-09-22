@@ -57,6 +57,37 @@ val results = yawn.query(BookTable) { books ->
 
 - column with sub-query: [check the Sub-queries doc](sub_queries.md)
 
+## Pattern Matching on Custom Column Types
+
+`addLike` / `addILike` (and their `addNotLike` / `addNotILike` counterparts) are not restricted to plain `String` columns: they also work on custom types that
+are stored as text, as long as the type says so by implementing `YawnStringifiable`.
+
+```kotlin
+value class PhoneNumber(val value: String) : YawnStringifiable {
+    override fun asYawnString(): String = value
+}
+```
+
+Yawn cannot work this out on its own. A value class wrapping a `String` is visible to the processor, but a type mapped through an `AttributeConverter` is not,
+and the converter may not even be declared on the property. The interface is how a type states both that its column holds text and what that text is.
+
+Once implemented, such a column behaves exactly like a `String` one. Yawn builds the pattern from `asYawnString` and binds it as a `String` against the
+underlying column, so the whole `MatchMode` range and the case-insensitive variants work regardless of how the property is mapped:
+
+```kotlin
+val byPrefix = yawn.query(PersonTable) { people ->
+    addLike(people.email, EmailAddress("luan"), MatchMode.START)
+}.list()
+
+val caseInsensitive = yawn.query(PersonTable) { people ->
+    addILike(people.email, EmailAddress("@FAIRE.COM"), MatchMode.END)
+}.list()
+```
+
+Note that neither half of the claim is checked. Implement this only where the column really is text and `asYawnString` really is what the database stores.
+Getting either half wrong does not raise anything: the query is still valid SQL, and databases will happily compare a non-text column against a pattern, so
+it simply matches on the wrong text and can return the wrong rows. The property also has to map to a single column, which is enforced.
+
 ## Non-Column-Based Operations
 
 Operations that do not require the column context are typically only available outside the lambda; such as:

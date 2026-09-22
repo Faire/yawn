@@ -1,6 +1,7 @@
 package com.faire.yawn.query
 
 import com.faire.yawn.YawnDef
+import com.faire.yawn.YawnStringifiable
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.query.YawnQueryRestriction.And
 import com.faire.yawn.query.YawnQueryRestriction.Between
@@ -27,6 +28,8 @@ import com.faire.yawn.query.YawnQueryRestriction.NotEquals
 import com.faire.yawn.query.YawnQueryRestriction.NotEqualsProperty
 import com.faire.yawn.query.YawnQueryRestriction.NotIn
 import com.faire.yawn.query.YawnQueryRestriction.Or
+import com.faire.yawn.query.YawnQueryRestriction.StringifiableILike
+import com.faire.yawn.query.YawnQueryRestriction.StringifiableLike
 import org.hibernate.criterion.MatchMode
 
 /**
@@ -151,6 +154,9 @@ object YawnRestrictions {
         return YawnQueryCriterion(And(criteria))
     }
 
+    /**
+     * Pattern-matches [column] against [value].
+     */
     fun <SOURCE : Any, F : String?> like(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
@@ -159,12 +165,40 @@ object YawnRestrictions {
         return YawnQueryCriterion(Like(column, value, matchMode))
     }
 
+    /**
+     * Case-insensitive counterpart of [like].
+     */
     fun <SOURCE : Any, F : String?> iLike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
     ): YawnQueryCriterion<SOURCE> {
         return YawnQueryCriterion(ILike(column, value, matchMode))
+    }
+
+    /**
+     * Pattern-matches a [YawnStringifiable] [column] against [value].
+     *
+     * The pattern is built from [YawnStringifiable.asYawnString] and bound as a `String` against the column, so
+     * [matchMode] applies just as it does for a plain `String` column, whichever way the property is mapped.
+     */
+    fun <SOURCE : Any, F : YawnStringifiable?> like(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        value: F & Any,
+        matchMode: MatchMode = MatchMode.EXACT,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(StringifiableLike(column, value, matchMode))
+    }
+
+    /**
+     * Case-insensitive counterpart of [like] for a [YawnStringifiable] column.
+     */
+    fun <SOURCE : Any, F : YawnStringifiable?> iLike(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        value: F & Any,
+        matchMode: MatchMode = MatchMode.EXACT,
+    ): YawnQueryCriterion<SOURCE> {
+        return YawnQueryCriterion(StringifiableILike(column, value, matchMode))
     }
 
     fun <SOURCE : Any, F> isNotNull(

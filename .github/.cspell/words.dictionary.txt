@@ -4,4 +4,5 @@ delegatable # something that can be delegated
 delegators # plural of delegator; something that delegates
 finalizer # a person, thing, or event which finalizes a situation or process
 metamodel # a model that describes other models
+stringifiable # something that can be represented as a string
 superinterface # an interface that is extended by another interface

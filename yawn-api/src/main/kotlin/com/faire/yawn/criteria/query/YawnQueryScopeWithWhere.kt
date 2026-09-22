@@ -1,6 +1,7 @@
 package com.faire.yawn.criteria.query
 
 import com.faire.yawn.YawnDef
+import com.faire.yawn.YawnStringifiable
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.criteria.builder.DetachedProjectedYawnBuilder
 import com.faire.yawn.query.YawnQueryCriterion
@@ -284,6 +285,50 @@ sealed interface YawnQueryScopeWithWhere<SOURCE : Any, T : Any> {
     }
 
     fun <F : String?> addNotILike(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        value: F & Any,
+        matchMode: MatchMode = MatchMode.EXACT,
+    ) {
+        add(YawnRestrictions.not(YawnRestrictions.iLike(column, value, matchMode)))
+    }
+
+    /**
+     * See [YawnRestrictions.like] for how a [YawnStringifiable] column is matched.
+     */
+    fun <F : YawnStringifiable?> addLike(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        value: F & Any,
+        matchMode: MatchMode = MatchMode.EXACT,
+    ) {
+        add(YawnRestrictions.like(column, value, matchMode))
+    }
+
+    /**
+     * See [YawnRestrictions.iLike] for how a [YawnStringifiable] column is matched.
+     */
+    fun <F : YawnStringifiable?> addILike(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        value: F & Any,
+        matchMode: MatchMode = MatchMode.EXACT,
+    ) {
+        add(YawnRestrictions.iLike(column, value, matchMode))
+    }
+
+    /**
+     * See [YawnRestrictions.like] for how a [YawnStringifiable] column is matched.
+     */
+    fun <F : YawnStringifiable?> addNotLike(
+        column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        value: F & Any,
+        matchMode: MatchMode = MatchMode.EXACT,
+    ) {
+        add(YawnRestrictions.not(YawnRestrictions.like(column, value, matchMode)))
+    }
+
+    /**
+     * See [YawnRestrictions.iLike] for how a [YawnStringifiable] column is matched.
+     */
+    fun <F : YawnStringifiable?> addNotILike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
