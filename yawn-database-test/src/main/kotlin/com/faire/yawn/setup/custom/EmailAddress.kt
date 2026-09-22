@@ -5,4 +5,6 @@ import java.io.Serializable
 
 internal data class EmailAddress(
     val emailAddress: String,
-) : Serializable, YawnStringifiable
+) : Serializable, YawnStringifiable {
+    override fun asYawnString(): String = emailAddress
+}

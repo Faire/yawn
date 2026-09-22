@@ -26,6 +26,8 @@ internal value class PhoneNumber(
         get() = value.substring(10, 14)
 
     override fun toString(): String = value
+
+    override fun asYawnString(): String = value
 }
 
 private val regex = Regex("""^\(\d{3}\) \d{3}-\d{4}$""")

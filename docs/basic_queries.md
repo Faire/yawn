@@ -63,34 +63,29 @@ val results = yawn.query(BookTable) { books ->
 are stored as text, as long as the type says so by implementing `YawnStringifiable`.
 
 ```kotlin
-value class PhoneNumber(val value: String) : YawnStringifiable
+value class PhoneNumber(val value: String) : YawnStringifiable {
+    override fun asYawnString(): String = value
+}
 ```
 
-Yawn cannot infer this on its own. A value class wrapping a `String` is visible to the processor, but a type mapped through an `AttributeConverter` is not, and
-the converter may not even be declared on the property. The interface is how the type states that its column holds text, and the claim is not verified, so only
-add it where that is true.
+Yawn cannot work this out on its own. A value class wrapping a `String` is visible to the processor, but a type mapped through an `AttributeConverter` is not,
+and the converter may not even be declared on the property. The interface is how a type states both that its column holds text and what that text is.
 
-Once marked, how the value is bound depends on how the type reaches the database. A value class wrapping a `String` is unwrapped by its generated adapter, so
-`MatchMode` works exactly as it does for a `String` column:
+Once implemented, such a column behaves exactly like a `String` one. Yawn builds the pattern from `asYawnString` and binds it as a `String` against the
+underlying column, so the whole `MatchMode` range and the case-insensitive variants work regardless of how the property is mapped:
 
 ```kotlin
-val results = yawn.query(PersonTable) { people ->
-    addLike(people.phone, PhoneNumber("(555) 123-4567"), MatchMode.START)
+val byPrefix = yawn.query(PersonTable) { people ->
+    addLike(people.email, EmailAddress("luan"), MatchMode.START)
+}.list()
+
+val caseInsensitive = yawn.query(PersonTable) { people ->
+    addILike(people.email, EmailAddress("@FAIRE.COM"), MatchMode.END)
 }.list()
 ```
 
-This is often the only way to pattern-match such a column, since a value class that validates its own format cannot represent a partial pattern as a value.
-
-A type that Hibernate maps itself, for example through an `AttributeConverter`, is bound as the column's own type instead. Yawn cannot wrap an opaque value in
-wildcards, so they must already be part of the value and `MatchMode` has to stay `EXACT`:
-
-```kotlin
-val results = yawn.query(PersonTable) { people ->
-    addLike(people.email, EmailAddress("%@faire.com"))
-}.list()
-```
-
-Passing a `MatchMode` for one of these columns throws, rather than silently matching the wrong rows.
+Note that neither half of the claim is checked. Implement this only where the column really is text and `asYawnString` really is what the database stores,
+since getting it wrong matches the wrong rows rather than failing. The column also has to map to a single column, which is enforced.
 
 ## Non-Column-Based Operations
 

@@ -6,7 +6,6 @@ import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PersonTable
 import com.faire.yawn.setup.entities.PhoneNumber
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.hibernate.criterion.MatchMode
 import org.junit.jupiter.api.Test
 
@@ -367,17 +366,68 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
         }
     }
 
+    /**
+     * Yawn builds the pattern from [com.faire.yawn.YawnStringifiable.asYawnString], so a converted column gets the
+     * full MatchMode range rather than needing the wildcards baked into the value.
+     */
     @Test
-    fun `like on a converted column rejects a match mode`() {
+    fun `like on a converted column with a match mode`() {
         transactor.open { session ->
-            assertThatThrownBy {
-                session.query(PersonTable) { people ->
-                    addLike(people.email, EmailAddress("@faire.com"), MatchMode.END)
-                }.list()
-            }
-                .isInstanceOf(UnsupportedOperationException::class.java)
-                .hasMessageContaining("MatchMode.END is not supported")
-                .hasMessageContaining("Embed the wildcards in the value itself")
+            val people = session.query(PersonTable) { people ->
+                addLike(people.email, EmailAddress("@faire.com"), MatchMode.END)
+            }.list()
+
+            assertThat(people.map { it.name }).hasSize(6)
+        }
+    }
+
+    @Test
+    fun `like on a converted column with a partial pattern`() {
+        transactor.open { session ->
+            val people = session.query(PersonTable) { people ->
+                addLike(people.email, EmailAddress("luan"), MatchMode.START)
+            }.list()
+
+            assertThat(people.map { it.name }).containsExactlyInAnyOrder("Luan Nico")
+        }
+    }
+
+    @Test
+    fun `iLike on a converted column is case-insensitive`() {
+        transactor.open { session ->
+            val people = session.query(PersonTable) { people ->
+                addILike(people.email, EmailAddress("@FAIRE.COM"), MatchMode.END)
+            }.list()
+
+            assertThat(people.map { it.name }).hasSize(6)
+        }
+    }
+
+    @Test
+    fun `like on a converted column stays case-sensitive`() {
+        transactor.open { session ->
+            val people = session.query(PersonTable) { people ->
+                addLike(people.email, EmailAddress("@FAIRE.COM"), MatchMode.END)
+            }.list()
+
+            assertThat(people).isEmpty()
+        }
+    }
+
+    @Test
+    fun `not iLike on a converted column`() {
+        transactor.open { session ->
+            val people = session.query(PersonTable) { people ->
+                addNotILike(people.email, EmailAddress("LUAN"), MatchMode.START)
+            }.list()
+
+            assertThat(people.map { it.name }).containsExactlyInAnyOrder(
+                "J.R.R. Tolkien",
+                "J.K. Rowling",
+                "Hans Christian Andersen",
+                "Paul Duchesne",
+                "Quinn Budan",
+            )
         }
     }
 
@@ -403,20 +453,6 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
                 "The Hobbit",
                 "Lord of the Rings",
             )
-        }
-    }
-
-    @Test
-    fun `iLike on a converted column is rejected`() {
-        transactor.open { session ->
-            assertThatThrownBy {
-                session.query(PersonTable) { people ->
-                    addILike(people.email, EmailAddress("%@FAIRE.COM"))
-                }.list()
-            }
-                .isInstanceOf(UnsupportedOperationException::class.java)
-                .hasMessageContaining("iLike is not supported")
-                .hasMessageContaining("Use like instead, with the wildcards embedded")
         }
     }
 }

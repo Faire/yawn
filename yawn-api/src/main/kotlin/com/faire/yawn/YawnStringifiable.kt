@@ -1,16 +1,27 @@
 package com.faire.yawn
 
 /**
- * Marks a type whose database representation is text, making it eligible for pattern matching.
+ * A type whose database representation is text, making it eligible for pattern matching.
  *
- * Yawn cannot always work this out on its own: a value class wrapping a `String` is visible to the processor, but a
- * type Hibernate maps through an `AttributeConverter` is not, and the converter may not even be declared on the
- * property. Implementing this interface is how a type states that its column holds text.
+ * Yawn cannot work this out on its own: a value class wrapping a `String` is visible to the processor, but a type
+ * Hibernate maps through an `AttributeConverter` is not, and the converter may not even be declared on the property.
+ * Implementing this is how a type states that its column holds text, and says what that text is.
  *
  * ```
- * value class PhoneNumber(val value: String) : YawnStringifiable
+ * value class PhoneNumber(val value: String) : YawnStringifiable {
+ *     override fun asYawnString(): String = value
+ * }
  * ```
  *
- * The claim is not verified, so only add this to a type whose column really is text.
+ * Neither part of that is verified, so only implement this where the column really is text and [asYawnString] really
+ * is what the database stores. Getting it wrong matches the wrong rows rather than failing.
  */
-interface YawnStringifiable
+interface YawnStringifiable {
+    /**
+     * The text this value is stored as, which is what patterns are matched against.
+     *
+     * Yawn builds the pattern from this and binds it as a `String` against the column, so it must be the database
+     * representation rather than anything decorated for display.
+     */
+    fun asYawnString(): String
+}
