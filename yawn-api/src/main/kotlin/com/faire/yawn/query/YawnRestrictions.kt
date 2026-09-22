@@ -28,6 +28,8 @@ import com.faire.yawn.query.YawnQueryRestriction.NotEquals
 import com.faire.yawn.query.YawnQueryRestriction.NotEqualsProperty
 import com.faire.yawn.query.YawnQueryRestriction.NotIn
 import com.faire.yawn.query.YawnQueryRestriction.Or
+import com.faire.yawn.query.YawnQueryRestriction.StringifiableILike
+import com.faire.yawn.query.YawnQueryRestriction.StringifiableLike
 import org.hibernate.criterion.MatchMode
 
 /**
@@ -186,7 +188,7 @@ object YawnRestrictions {
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
     ): YawnQueryCriterion<SOURCE> {
-        return YawnQueryCriterion(Like(column, value, matchMode))
+        return YawnQueryCriterion(StringifiableLike(column, value, matchMode))
     }
 
     /**
@@ -201,7 +203,7 @@ object YawnRestrictions {
         value: F & Any,
         matchMode: MatchMode = MatchMode.EXACT,
     ): YawnQueryCriterion<SOURCE> {
-        return YawnQueryCriterion(ILike(column, value, matchMode))
+        return YawnQueryCriterion(StringifiableILike(column, value, matchMode))
     }
 
     fun <SOURCE : Any, F> isNotNull(

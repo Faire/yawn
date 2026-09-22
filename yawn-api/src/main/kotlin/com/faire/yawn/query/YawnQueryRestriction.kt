@@ -166,38 +166,62 @@ interface YawnQueryRestriction<SOURCE : Any> {
         )
     }
 
-    class Like<SOURCE : Any, F>(
+    class Like<SOURCE : Any, F : String?>(
         private val column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         private val value: F & Any,
         private val matchMode: MatchMode,
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion {
-            val path = column.generatePath(context)
-            if (value is YawnStringifiable) {
-                return StringPatternCriterion(path, matchMode.toMatchString(value.asYawnString()), false)
-            }
-
-            return Restrictions.like(path, column.adaptAsString(value), matchMode)
-        }
+        ): Criterion = Restrictions.like(column.generatePath(context), column.adaptAsString(value), matchMode)
     }
 
-    class ILike<SOURCE : Any, F>(
+    class ILike<SOURCE : Any, F : String?>(
         private val column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
         private val value: F & Any,
         private val matchMode: MatchMode,
     ) : YawnQueryRestriction<SOURCE> {
         override fun compile(
             context: YawnCompilationContext,
-        ): Criterion {
-            val path = column.generatePath(context)
-            if (value is YawnStringifiable) {
-                return StringPatternCriterion(path, matchMode.toMatchString(value.asYawnString()), true)
-            }
+        ): Criterion = Restrictions.ilike(column.generatePath(context), column.adaptAsString(value), matchMode)
+    }
 
-            return Restrictions.ilike(path, column.adaptAsString(value), matchMode)
-        }
+    /**
+     * [Like] for a [YawnStringifiable] column.
+     *
+     * Kept apart from [Like] rather than branching inside it: the pattern cannot go through Hibernate's own
+     * expressions, which resolve the bind type from the property and so hand a `String` to the column's
+     * `AttributeConverter`. [StringPatternCriterion] binds it against the column instead.
+     */
+    class StringifiableLike<SOURCE : Any, F : YawnStringifiable?>(
+        private val column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        private val value: F & Any,
+        private val matchMode: MatchMode,
+    ) : YawnQueryRestriction<SOURCE> {
+        override fun compile(
+            context: YawnCompilationContext,
+        ): Criterion = StringPatternCriterion(
+            column.generatePath(context),
+            matchMode.toMatchString(value.asYawnString()),
+            caseInsensitive = false,
+        )
+    }
+
+    /**
+     * [ILike] for a [YawnStringifiable] column, see [StringifiableLike].
+     */
+    class StringifiableILike<SOURCE : Any, F : YawnStringifiable?>(
+        private val column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
+        private val value: F & Any,
+        private val matchMode: MatchMode,
+    ) : YawnQueryRestriction<SOURCE> {
+        override fun compile(
+            context: YawnCompilationContext,
+        ): Criterion = StringPatternCriterion(
+            column.generatePath(context),
+            matchMode.toMatchString(value.asYawnString()),
+            caseInsensitive = true,
+        )
     }
 
     class IsNotNull<SOURCE : Any, F>(
@@ -271,10 +295,10 @@ interface YawnQueryRestriction<SOURCE : Any> {
 /**
  * Adapts [value] for binding as a `String`.
  *
- * Only reachable for a column the restriction's bound already limits to `String`, so anything else is a broken
- * adapter in the metamodel rather than a caller mistake.
+ * The bound already limits this to a `String` column, so anything else is a broken adapter in the metamodel rather
+ * than a caller mistake.
  */
-private fun <SOURCE : Any, F> YawnDef<SOURCE, *>.YawnColumnDef<F>.adaptAsString(value: F & Any): String {
+private fun <SOURCE : Any, F : String?> YawnDef<SOURCE, *>.YawnColumnDef<F>.adaptAsString(value: F & Any): String {
     val adaptedValue = adaptValue(value)
     check(adaptedValue is String) {
         """
