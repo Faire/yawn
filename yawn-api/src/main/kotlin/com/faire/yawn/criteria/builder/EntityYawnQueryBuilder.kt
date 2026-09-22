@@ -33,7 +33,7 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
 ) : YawnQueryBuilder<T, DEF, T, EntityYawnQueryBuilder<T, DEF>>(tableDef, queryFactory, query) {
     override fun builderReturn(): EntityYawnQueryBuilder<T, DEF> = this
     override fun clone(): EntityYawnQueryBuilder<T, DEF> {
-        return EntityYawnQueryBuilder(tableDef, queryFactory, query.copy())
+        return EntityYawnQueryBuilder(tableDef, queryFactory, query.clone())
     }
 
     inner class YawnJoinRef<F : Any, D : YawnTableDef<T, F>>(
@@ -124,12 +124,8 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         page: Page,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<ID>,
-        forceAnsiCompliance: Boolean = false,
         avoidEagerFetchFanout: Boolean = false,
     ): PaginationResult<T> {
-        if (forceAnsiCompliance) {
-            throw UnsupportedOperationException("forceAnsiCompliance=true is not supported yet in Yawn")
-        }
         val totalResults = clone().countDistinct(uniqueColumn)
         val entities = if (avoidEagerFetchFanout) {
             listPaginatedByIdToAvoidEagerFetchFanout(page, orders, uniqueColumn)

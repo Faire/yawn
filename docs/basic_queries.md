@@ -173,7 +173,9 @@ These operations are defined in `YawnQueryBuilder`, such as:
 - `uniqueResult`
 - `first`
 - `minBy` / `maxBy`
-- `paginateZeroIndexed`
+- `paginate` / `listPaginated` / `setPaginated` / `doPaginated`
+- `listBatched` / `setBatched`
+- `listPaginatedWithTotalResults` / `countDistinct` (on `EntityYawnQueryBuilder`)
 
 ## Pass/Modify Queries Around
 

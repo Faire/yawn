@@ -281,7 +281,7 @@ private fun <SOURCE : Any, F> YawnDef<SOURCE, *>.YawnColumnDef<F>.adaptAsString(
             Pattern matching on column $this needs a String, but its value adapted to
             ${adaptedValue?.javaClass?.name}.
             This means a wrong adapter was code-generated into the metamodel.
-            Please open an issue on GitHub with your schema definition.
+            Please open an issue on GitHub (https://github.com/faire/yawn/issues) with your schema definition.
         """.trimIndent()
     }
 

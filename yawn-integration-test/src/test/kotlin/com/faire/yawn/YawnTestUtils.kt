@@ -163,6 +163,10 @@ internal object YawnTestUtils {
 
             assertThat(lines.singleOrNull { it.startsWith(expectedPrefix) }).isNotNull()
         }
+
+        fun containsLine(expected: String) {
+            assertThat(lines.map { it.trim() }).contains(expected.trim())
+        }
     }
 }
 

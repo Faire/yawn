@@ -210,6 +210,23 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `list with total results - does not leak its pagination restrictions into the caller's builder`() {
+        transactor.open { session ->
+            val bookClubs = session.query(BookClubTable)
+            bookClubs.listPaginatedWithTotalResults(
+                page = PageNumber.zeroIndexed(0) / 2,
+                orders = listOf { YawnQueryOrder.asc(name) },
+                uniqueColumn = { id },
+                avoidEagerFetchFanout = true,
+            )
+
+            // Before the fix the builder had inherited the page's `id IN (...)` filter and listed only two clubs.
+            assertThat(bookClubs.list().map { it.name }.distinct())
+                .containsExactlyInAnyOrder("Andersen Fan Club", "Rowling Fan Club", "Tolkien Fan Club")
+        }
+    }
+
+    @Test
     fun `list with join`() {
         transactor.open { session ->
             val (total, books) = session.query(BookTable) { books ->
