@@ -84,8 +84,9 @@ val caseInsensitive = yawn.query(PersonTable) { people ->
 }.list()
 ```
 
-Note that neither half of the claim is checked. Implement this only where the column really is text and `asYawnString` really is what the database stores,
-since getting it wrong matches the wrong rows rather than failing. The column also has to map to a single column, which is enforced.
+Note that neither half of the claim is checked. Implement this only where the column really is text and `asYawnString` really is what the database stores.
+If `asYawnString` returns something other than the stored text, the query is still valid SQL and runs fine, it just compares against the wrong text, so it
+can silently return the wrong rows. The property also has to map to a single column, which is enforced.
 
 ## Non-Column-Based Operations
 

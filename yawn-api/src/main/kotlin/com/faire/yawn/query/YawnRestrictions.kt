@@ -179,9 +179,8 @@ object YawnRestrictions {
     /**
      * Pattern-matches a [YawnStringifiable] [column] against [value].
      *
-     * A value class wrapping a `String` is unwrapped by its generated adapter, so [matchMode] applies as usual. A type
-     * Hibernate maps itself, e.g. through an `AttributeConverter`, is bound as the column's own type instead, so the
-     * wildcards must already be part of [value] and [matchMode] must be left as [MatchMode.EXACT].
+     * The pattern is built from [YawnStringifiable.asYawnString] and bound as a `String` against the column, so
+     * [matchMode] applies just as it does for a plain `String` column, whichever way the property is mapped.
      */
     fun <SOURCE : Any, F : YawnStringifiable?> like(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
@@ -193,10 +192,6 @@ object YawnRestrictions {
 
     /**
      * Case-insensitive counterpart of [like] for a [YawnStringifiable] column.
-     *
-     * This works for a value class wrapping a `String`, but not for a type Hibernate maps through an
-     * `AttributeConverter`: Hibernate's `IlikeExpression` stringifies the bound value, which such a column cannot
-     * bind. Use [like] for those.
      */
     fun <SOURCE : Any, F : YawnStringifiable?> iLike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,

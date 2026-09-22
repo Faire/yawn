@@ -266,9 +266,7 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
     }
 
     /**
-     * A value class wrapping a String is unwrapped by its generated adapter, so the whole [MatchMode] range works.
-     *
-     * Note that [PhoneNumber] validates its own format, so a partial pattern cannot be expressed as a value at all;
+     * [PhoneNumber] validates its own format, so a partial pattern cannot be expressed as a value at all and
      * [MatchMode] is the only way to pattern-match such a column.
      */
     @Test
@@ -317,8 +315,8 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
     }
 
     /**
-     * [EmailAddress] is mapped by Hibernate through an `AttributeConverter`, so the value is bound as the column's own
-     * type and the wildcards have to be part of the value itself.
+     * [EmailAddress] is mapped by Hibernate through an `AttributeConverter`; wildcards can be written into the value
+     * itself and matched with the default [MatchMode.EXACT].
      */
     @Test
     fun `like on a converted column - emails on the faire domain`() {
@@ -366,10 +364,6 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
         }
     }
 
-    /**
-     * Yawn builds the pattern from [com.faire.yawn.YawnStringifiable.asYawnString], so a converted column gets the
-     * full MatchMode range rather than needing the wildcards baked into the value.
-     */
     @Test
     fun `like on a converted column with a match mode`() {
         transactor.open { session ->
@@ -431,10 +425,6 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
         }
     }
 
-    /**
-     * A single `or` mixing a plain column with a converted one, which previously forced callers to either split the
-     * query in two or fall back to filtering in Kotlin.
-     */
     @Test
     fun `like on a converted column combined with other restrictions in a single or`() {
         transactor.open { session ->

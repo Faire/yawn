@@ -14,7 +14,8 @@ package com.faire.yawn
  * ```
  *
  * Neither part of that is verified, so only implement this where the column really is text and [asYawnString] really
- * is what the database stores. Getting it wrong matches the wrong rows rather than failing.
+ * is what the database stores. If [asYawnString] returns something other than the stored text, the query is still
+ * valid SQL and runs fine, it just compares against the wrong text, so it can silently return the wrong rows.
  */
 interface YawnStringifiable {
     /**
