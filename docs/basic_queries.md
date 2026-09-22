@@ -92,26 +92,6 @@ val results = yawn.query(PersonTable) { people ->
 
 Passing a `MatchMode` for one of these columns throws, rather than silently matching the wrong rows.
 
-### Matching a column as text
-
-When embedding the wildcards in the value is awkward or impossible (a partial pattern, or a type that validates its own format and so cannot hold one), use
-`raw` to match the column as text. The pattern is bound as a `String` against the underlying column, so the whole `MatchMode` range and the case-insensitive
-variants work regardless of how the property is mapped:
-
-```kotlin
-val results = yawn.query(PersonTable) { people ->
-    addLike(people.email.raw, "luan", MatchMode.START)
-}.list()
-
-val caseInsensitive = yawn.query(PersonTable) { people ->
-    addILike(people.email.raw, "@FAIRE.COM", MatchMode.END)
-}.list()
-```
-
-`raw` is only available on a `YawnStringifiable` column, so a column that does not hold text cannot be matched as text: `books.numberOfPages.raw` does not
-compile. It yields a `ColumnDef<String>`, which the ordinary pattern-matching criteria accept, so no separate set of helpers is needed. Two things it does
-not do: the column has to map to a single column, and the view cannot be projected, since reading a converted column back as a `String` would be wrong.
-
 ## Non-Column-Based Operations
 
 Operations that do not require the column context are typically only available outside the lambda; such as:

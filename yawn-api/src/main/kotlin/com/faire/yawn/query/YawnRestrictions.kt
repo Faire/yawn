@@ -179,8 +179,7 @@ object YawnRestrictions {
      *
      * A value class wrapping a `String` is unwrapped by its generated adapter, so [matchMode] applies as usual. A type
      * Hibernate maps itself, e.g. through an `AttributeConverter`, is bound as the column's own type instead, so the
-     * wildcards must already be part of [value] and [matchMode] must be left as [MatchMode.EXACT]. Match the column as
-     * text via [YawnDef.YawnColumnDef.raw] to avoid both restrictions.
+     * wildcards must already be part of [value] and [matchMode] must be left as [MatchMode.EXACT].
      */
     fun <SOURCE : Any, F : YawnStringifiable?> like(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,
@@ -195,7 +194,7 @@ object YawnRestrictions {
      *
      * This works for a value class wrapping a `String`, but not for a type Hibernate maps through an
      * `AttributeConverter`: Hibernate's `IlikeExpression` stringifies the bound value, which such a column cannot
-     * bind. Match those as text via [YawnDef.YawnColumnDef.raw].
+     * bind. Use [like] for those.
      */
     fun <SOURCE : Any, F : YawnStringifiable?> iLike(
         column: YawnDef<SOURCE, *>.YawnColumnDef<F>,

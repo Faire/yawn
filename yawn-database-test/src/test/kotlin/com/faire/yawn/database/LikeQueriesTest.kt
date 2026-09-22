@@ -1,7 +1,6 @@
 package com.faire.yawn.database
 
 import com.faire.yawn.query.YawnRestrictions
-import com.faire.yawn.raw
 import com.faire.yawn.setup.custom.EmailAddress
 import com.faire.yawn.setup.entities.BookTable
 import com.faire.yawn.setup.entities.PersonTable
@@ -378,136 +377,7 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
             }
                 .isInstanceOf(UnsupportedOperationException::class.java)
                 .hasMessageContaining("MatchMode.END is not supported")
-                .hasMessageContaining("like(column.raw")
-        }
-    }
-
-    /**
-     * `raw` matches the column as text, which is the only way to pattern-match a converted column: the pattern is
-     * bound as a String against the underlying column instead of as the property's own type.
-     */
-    @Test
-    fun `raw like on a converted column - match mode END`() {
-        transactor.open { session ->
-            val people = session.query(PersonTable) { people ->
-                addLike(people.email.raw, "@faire.com", MatchMode.END)
-            }.list()
-
-            assertThat(people.map { it.name }).containsExactlyInAnyOrder(
-                "J.R.R. Tolkien",
-                "J.K. Rowling",
-                "Hans Christian Andersen",
-                "Paul Duchesne",
-                "Luan Nico",
-                "Quinn Budan",
-            )
-        }
-    }
-
-    /**
-     * A partial pattern like this cannot be expressed as an [EmailAddress] value at all, which is what the text view
-     * buys over embedding the wildcards in the value.
-     */
-    @Test
-    fun `raw like on a converted column - partial prefix`() {
-        transactor.open { session ->
-            val people = session.query(PersonTable) { people ->
-                addLike(people.email.raw, "luan", MatchMode.START)
-            }.list()
-
-            assertThat(people.map { it.name }).containsExactlyInAnyOrder("Luan Nico")
-        }
-    }
-
-    @Test
-    fun `raw iLike on a converted column is case-insensitive`() {
-        transactor.open { session ->
-            val people = session.query(PersonTable) { people ->
-                addILike(people.email.raw, "@FAIRE.COM", MatchMode.END)
-            }.list()
-
-            assertThat(people.map { it.name }).hasSize(6)
-        }
-    }
-
-    @Test
-    fun `raw like is case-sensitive`() {
-        transactor.open { session ->
-            val people = session.query(PersonTable) { people ->
-                addLike(people.email.raw, "@FAIRE.COM", MatchMode.END)
-            }.list()
-
-            assertThat(people).isEmpty()
-        }
-    }
-
-    @Test
-    fun `raw not like on a converted column`() {
-        transactor.open { session ->
-            val people = session.query(PersonTable) { people ->
-                addNotLike(people.email.raw, "luan", MatchMode.START)
-            }.list()
-
-            assertThat(people.map { it.name }).containsExactlyInAnyOrder(
-                "J.R.R. Tolkien",
-                "J.K. Rowling",
-                "Hans Christian Andersen",
-                "Paul Duchesne",
-                "Quinn Budan",
-            )
-        }
-    }
-
-    @Test
-    fun `raw like on a value class column - partial prefix`() {
-        transactor.open { session ->
-            val people = session.query(PersonTable) { people ->
-                addLike(people.phone.raw, "(555)", MatchMode.START)
-            }.list()
-
-            assertThat(people.map { it.name }).containsExactlyInAnyOrder("Paul Duchesne", "Luan Nico")
-        }
-    }
-
-    @Test
-    fun `raw like resolves a joined alias`() {
-        transactor.open { session ->
-            val books = session.query(BookTable) { books ->
-                val authors = join(books.author)
-                addLike(authors.email.raw, "tolkien", MatchMode.START)
-            }.list()
-
-            assertThat(books.map { it.name }).containsExactlyInAnyOrder("The Hobbit", "Lord of the Rings")
-        }
-    }
-
-    @Test
-    fun `raw not iLike on a converted column`() {
-        transactor.open { session ->
-            val people = session.query(PersonTable) { people ->
-                addNotILike(people.email.raw, "LUAN", MatchMode.START)
-            }.list()
-
-            assertThat(people.map { it.name }).containsExactlyInAnyOrder(
-                "J.R.R. Tolkien",
-                "J.K. Rowling",
-                "Hans Christian Andersen",
-                "Paul Duchesne",
-                "Quinn Budan",
-            )
-        }
-    }
-
-    @Test
-    fun `a text view cannot be projected`() {
-        transactor.open { session ->
-            assertThatThrownBy {
-                session.project(PersonTable) { people ->
-                    project(people.email.raw)
-                }.list()
-            }
-                .isInstanceOf(UnsupportedOperationException::class.java)
-                .hasMessageContaining("cannot be projected, only pattern-matched")
+                .hasMessageContaining("Embed the wildcards in the value itself")
         }
     }
 
@@ -546,7 +416,7 @@ internal class LikeQueriesTest : BaseYawnDatabaseTest() {
             }
                 .isInstanceOf(UnsupportedOperationException::class.java)
                 .hasMessageContaining("iLike is not supported")
-                .hasMessageContaining("iLike(column.raw")
+                .hasMessageContaining("Use like instead, with the wildcards embedded")
         }
     }
 }

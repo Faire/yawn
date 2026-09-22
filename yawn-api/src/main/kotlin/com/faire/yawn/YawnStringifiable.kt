@@ -11,8 +11,6 @@ package com.faire.yawn
  * value class PhoneNumber(val value: String) : YawnStringifiable
  * ```
  *
- * The claim is not verified, so only add this to a type whose column really is text. For a column that cannot
- * implement it, for example one owned by another library, match it as text instead via
- * [YawnDef.YawnColumnDef.raw].
+ * The claim is not verified, so only add this to a type whose column really is text.
  */
 interface YawnStringifiable
