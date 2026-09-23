@@ -114,6 +114,29 @@ sorting in Kotlin. The value returned by `orderDescBy`/`orderAscBy` must be pass
 inside a `pair`/`triple`/`@YawnProjection` data class is fine): the expression can only be ordered by once it's also
 selected, so if the returned value isn't projected, resolving the order will fail at query time.
 
+#### Ordering by reaching back into an already-built pair or triple
+
+The pattern above requires wrapping the aggregate with `orderDescBy`/`orderAscBy` up front and then remembering to
+carry the *returned* value into `project(...)` - easy to get wrong in a larger projection, since nothing stops you
+from projecting the original, unwrapped value by mistake. `YawnProjections.orderablePair`/`orderableTriple`, combined
+with `project(...)`'s two-argument overload, let you build the pair or triple normally first and then reach back into
+one of its own children to order by it, so there's nothing to thread through by hand:
+
+```kotlin
+yawn.project(VisitTable) { visits ->
+    project(
+        YawnProjections.orderablePair(YawnProjections.groupBy(visits.brandId), YawnProjections.max(visits.createdAt)),
+    ) { mostRecentVisitByBrand ->
+        orderDescBy(mostRecentVisitByBrand.second)
+    }
+}.list()
+```
+
+`orderDescBy`/`orderAscBy` also accept the `.first`/`.second`/`.third` of an orderable pair or triple directly, in
+addition to a plain aggregate: doing so replaces that child in place, so whatever it wraps is guaranteed to already
+be part of what `project(...)` resolves right below it. This currently only covers `orderablePair`/`orderableTriple`;
+ordering by a field of an `@YawnProjection` data class this way is not yet supported.
+
 ### Project to Data Class
 
 Sometimes you want to return more than a single field. For that, you can project to a data class with any assortment of columns you desire, built off of other

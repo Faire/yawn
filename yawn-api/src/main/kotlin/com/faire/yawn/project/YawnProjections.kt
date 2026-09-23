@@ -153,4 +153,39 @@ object YawnProjections {
     ): YawnProjector<SOURCE, Triple<A, B, C>> {
         return mapping(firstProjection, secondProjection, thirdProjection) { a, b, c -> Triple(a, b, c) }
     }
+
+    /**
+     * Like [pair], but returns a [YawnProjectionPair] exposing each child as a [ProjectionSlot], so that
+     * [com.faire.yawn.criteria.query.orderAscBy]/[com.faire.yawn.criteria.query.orderDescBy] can order by one of
+     * them from inside the configuring block of
+     * [com.faire.yawn.criteria.query.ProjectedYawnQueryScope.project]'s two-argument overload, rather than
+     * pre-wrapping it before the pair is built:
+     *
+     * ```kotlin
+     * project(
+     *     YawnProjections.orderablePair(YawnProjections.groupBy(visits.brandId), YawnProjections.max(visits.createdAt)),
+     * ) { pair ->
+     *     orderDescBy(pair.second)
+     * }
+     * ```
+     */
+    fun <SOURCE : Any, A, B> orderablePair(
+        firstProjection: YawnValueProjector<SOURCE, A>,
+        secondProjection: YawnValueProjector<SOURCE, B>,
+    ): YawnProjectionPair<SOURCE, A, B> {
+        return YawnProjectionPair(ProjectionSlot(firstProjection), ProjectionSlot(secondProjection))
+    }
+
+    /** Three-way counterpart to [orderablePair]; see its documentation. */
+    fun <SOURCE : Any, A, B, C> orderableTriple(
+        firstProjection: YawnValueProjector<SOURCE, A>,
+        secondProjection: YawnValueProjector<SOURCE, B>,
+        thirdProjection: YawnValueProjector<SOURCE, C>,
+    ): YawnProjectionTriple<SOURCE, A, B, C> {
+        return YawnProjectionTriple(
+            ProjectionSlot(firstProjection),
+            ProjectionSlot(secondProjection),
+            ProjectionSlot(thirdProjection),
+        )
+    }
 }

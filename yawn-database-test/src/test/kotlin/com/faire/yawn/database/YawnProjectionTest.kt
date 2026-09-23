@@ -543,6 +543,47 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `yawn query with group by ordered by an aggregate - orderable pair syntax`() {
+        transactor.open { session ->
+            // Same "top-N per group" query as the test above, but built with orderablePair/project's two-argument
+            // overload instead of orderDescBy/orderAscBy: the pair is built first with plain (unwrapped) children,
+            // then ordered by reaching back into its own `.second` slot, so there is no separate aliased value to
+            // remember to thread into `project(...)` by hand.
+            val resultsDesc = session.project(BookTable) { books ->
+                project(
+                    YawnProjections.orderablePair(
+                        YawnProjections.groupBy(books.originalLanguage),
+                        YawnProjections.max(books.numberOfPages),
+                    ),
+                ) { pair ->
+                    orderDescBy(pair.second)
+                }
+            }.list()
+
+            assertThat(resultsDesc).containsExactly(
+                ENGLISH to 1_000L,
+                DANISH to 120L,
+            )
+
+            val resultsAsc = session.project(BookTable) { books ->
+                project(
+                    YawnProjections.orderablePair(
+                        YawnProjections.groupBy(books.originalLanguage),
+                        YawnProjections.max(books.numberOfPages),
+                    ),
+                ) { pair ->
+                    orderAscBy(pair.second)
+                }
+            }.list()
+
+            assertThat(resultsAsc).containsExactly(
+                DANISH to 120L,
+                ENGLISH to 1_000L,
+            )
+        }
+    }
+
+    @Test
     fun `yawn query with group by ordered by one aggregate field among several`() {
         transactor.open { session ->
             // Group by author, projecting *two* aggregates per group (book count and total page count), but only
@@ -567,6 +608,32 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
                 AuthorBookStats("J.K. Rowling", numberOfBooks = 1, totalPages = 500),
                 // Andersen: The Little Mermaid (100) + The Ugly Duckling (110) + The Emperor's New Clothes (120)
                 AuthorBookStats("Hans Christian Andersen", numberOfBooks = 3, totalPages = 330),
+            )
+        }
+    }
+
+    @Test
+    fun `yawn query with group by ordered by one field among three via orderableTriple`() {
+        transactor.open { session ->
+            // Same shape as the test above (order by one aggregate among several), but via orderableTriple: only
+            // the middle slot (totalPages) is ordered by, and numberOfBooks/author are along for the ride.
+            val results = session.project(BookTable) { books ->
+                val authors = join(books.author)
+                project(
+                    YawnProjections.orderableTriple(
+                        YawnProjections.groupBy(authors.name),
+                        YawnProjections.sum(books.numberOfPages),
+                        YawnProjections.count(books.name),
+                    ),
+                ) { triple ->
+                    orderDescBy(triple.second)
+                }
+            }.list()
+
+            assertThat(results).containsExactly(
+                Triple("J.R.R. Tolkien", 1_300L, 2L),
+                Triple("J.K. Rowling", 500L, 1L),
+                Triple("Hans Christian Andersen", 330L, 3L),
             )
         }
     }

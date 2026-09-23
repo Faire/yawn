@@ -1,6 +1,7 @@
 package com.faire.yawn.criteria.query
 
 import com.faire.yawn.project.AliasedYawnValueProjector
+import com.faire.yawn.project.ProjectionSlot
 import com.faire.yawn.project.YawnPathProvider
 import com.faire.yawn.project.YawnValueProjector
 import com.faire.yawn.query.YawnQuery
@@ -69,4 +70,38 @@ fun <SOURCE : Any, TO> YawnQueryScopeWithOrder<SOURCE, *>.orderDescBy(
     val aliased = AliasedYawnValueProjector(projection)
     order(YawnQueryOrder.desc(aliased))
     return aliased
+}
+
+/**
+ * Orders by one child of an orderable composite (e.g. [com.faire.yawn.project.YawnProjectionPair], built via
+ * [com.faire.yawn.project.YawnProjections.orderablePair]), ascending.
+ *
+ * Unlike [orderAscBy] above, there is no return value to thread back into `project(...)`: [slot] is replaced with
+ * its aliased wrapper in place, so the composite picks it up automatically the next time it is resolved. Call this
+ * from the configuring block of [ProjectedYawnQueryScope.project]'s two-argument overload, after the composite
+ * itself has already been passed to `project(...)`:
+ *
+ * ```kotlin
+ * project(
+ *     YawnProjections.orderablePair(YawnProjections.groupBy(visits.brandId), YawnProjections.max(visits.createdAt)),
+ * ) { pair ->
+ *     orderDescBy(pair.second)
+ * }
+ * ```
+ */
+fun <SOURCE : Any, TO> YawnQueryScopeWithOrder<SOURCE, *>.orderAscBy(
+    slot: ProjectionSlot<SOURCE, TO>,
+) {
+    val aliased = AliasedYawnValueProjector(slot.current)
+    slot.current = aliased
+    order(YawnQueryOrder.asc(aliased))
+}
+
+/** Descending counterpart of the [ProjectionSlot] overload of [orderAscBy]. */
+fun <SOURCE : Any, TO> YawnQueryScopeWithOrder<SOURCE, *>.orderDescBy(
+    slot: ProjectionSlot<SOURCE, TO>,
+) {
+    val aliased = AliasedYawnValueProjector(slot.current)
+    slot.current = aliased
+    order(YawnQueryOrder.desc(aliased))
 }
