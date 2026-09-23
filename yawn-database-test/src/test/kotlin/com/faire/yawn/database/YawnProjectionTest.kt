@@ -545,10 +545,6 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     @Test
     fun `yawn query with group by ordered by an aggregate - orderable pair syntax`() {
         transactor.open { session ->
-            // Same "top-N per group" query as the test above, but built with orderablePair/project's two-argument
-            // overload instead of orderDescBy/orderAscBy: the pair is built first with plain (unwrapped) children,
-            // then ordered by reaching back into its own `.second` slot, so there is no separate aliased value to
-            // remember to thread into `project(...)` by hand.
             val resultsDesc = session.project(BookTable) { books ->
                 project(
                     YawnProjections.orderablePair(
@@ -615,8 +611,6 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     @Test
     fun `yawn query with group by ordered by one field among three via orderableTriple`() {
         transactor.open { session ->
-            // Same shape as the test above (order by one aggregate among several), but via orderableTriple: only
-            // the middle slot (totalPages) is ordered by, and numberOfBooks/author are along for the ride.
             val results = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 project(

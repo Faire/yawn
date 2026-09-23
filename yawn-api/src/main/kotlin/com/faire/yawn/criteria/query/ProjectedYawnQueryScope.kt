@@ -62,21 +62,9 @@ private constructor(
     }
 
     /**
-     * Like [project], but runs [configure] against [projector] first, letting it refine the composite before it is
-     * resolved - e.g. order by one of its own children via [orderAscBy]/[orderDescBy] taking a
-     * [com.faire.yawn.project.ProjectionSlot] (see [com.faire.yawn.project.YawnProjections.orderablePair]):
-     *
-     * ```kotlin
-     * project(
-     *     YawnProjections.orderablePair(YawnProjections.groupBy(visits.brandId), YawnProjections.max(visits.createdAt)),
-     * ) { pair ->
-     *     orderDescBy(pair.second)
-     * }
-     * ```
-     *
-     * Unlike passing an already-aliased projection to the single-argument [project], there is nothing to remember
-     * to thread through by hand: [configure] mutates [projector] in place, so whatever it does is guaranteed to
-     * already be part of what gets resolved below.
+     * Like [project], but runs [configure] against [projector] before resolving it, so it can be refined first -
+     * e.g. order by one of its own children via [orderAscBy]/[orderDescBy] taking a
+     * [com.faire.yawn.project.ProjectionSlot] (see [com.faire.yawn.project.YawnProjections.orderablePair]).
      */
     fun <PROJECTOR : YawnProjector<SOURCE, PROJECTION>> project(
         projector: PROJECTOR,
