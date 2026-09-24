@@ -153,4 +153,53 @@ object YawnProjections {
     ): YawnProjector<SOURCE, Triple<A, B, C>> {
         return mapping(firstProjection, secondProjection, thirdProjection) { a, b, c -> Triple(a, b, c) }
     }
+
+    /**
+     * Overload of [pair] for when both children are single-value projections: returns a [YawnProjectionPair]
+     * exposing each child as a [ProjectionSlot] instead of a plain `YawnProjector<SOURCE, Pair<A, B>>`, so that
+     * [com.faire.yawn.criteria.query.orderAscBy]/[com.faire.yawn.criteria.query.orderDescBy] can order by one of
+     * them from inside the configuring block of
+     * [com.faire.yawn.criteria.query.ProjectedYawnQueryScope.project]'s two-argument overload, rather than
+     * pre-wrapping it before the pair is built. Kotlin picks this overload automatically whenever both arguments
+     * happen to be [YawnValueProjector]s (e.g. columns/aggregates); passing a nested composite (like another
+     * [pair]) falls back to the plain overload above, since only a single SQL expression can be aliased and ordered
+     * by:
+     *
+     * ```kotlin
+     * project(
+     *     YawnProjections.pair(YawnProjections.groupBy(visits.brandId), YawnProjections.max(visits.createdAt)),
+     * ) { pair ->
+     *     orderDescBy(pair.second)
+     * }
+     * ```
+     */
+    fun <SOURCE : Any, A, B> pair(
+        firstProjection: YawnValueProjector<SOURCE, A>,
+        secondProjection: YawnValueProjector<SOURCE, B>,
+    ): YawnProjectionPair<SOURCE, A, B> {
+        return YawnProjectionPair(ProjectionSlot(firstProjection), ProjectionSlot(secondProjection))
+    }
+
+    /** Three-way counterpart to the single-value overload of [pair]; see its documentation. */
+    fun <SOURCE : Any, A, B, C> triple(
+        firstProjection: YawnValueProjector<SOURCE, A>,
+        secondProjection: YawnValueProjector<SOURCE, B>,
+        thirdProjection: YawnValueProjector<SOURCE, C>,
+    ): YawnProjectionTriple<SOURCE, A, B, C> {
+        return YawnProjectionTriple(
+            ProjectionSlot(firstProjection),
+            ProjectionSlot(secondProjection),
+            ProjectionSlot(thirdProjection),
+        )
+    }
+
+    /**
+     * Wraps [projection] in a [ProjectionSlot]. [ProjectionSlot]'s own constructor is internal to this module, so
+     * `@YawnProjection`-generated `create` overloads (compiled into the annotated class's own module) call this
+     * public bridge instead - see the single-value overload of [pair] for the hand-written equivalent of the
+     * pattern this powers.
+     */
+    fun <SOURCE : Any, TO> orderableSlot(projection: YawnValueProjector<SOURCE, TO>): ProjectionSlot<SOURCE, TO> {
+        return ProjectionSlot(projection)
+    }
 }

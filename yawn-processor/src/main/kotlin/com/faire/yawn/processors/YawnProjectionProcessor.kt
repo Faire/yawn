@@ -16,6 +16,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.TypeSpec
 import kotlin.reflect.KClass
 
 internal class YawnProjectionProcessor(codeGenerator: CodeGenerator) : BaseYawnProcessor(codeGenerator) {
@@ -27,6 +28,10 @@ internal class YawnProjectionProcessor(codeGenerator: CodeGenerator) : BaseYawnP
     }
 
     override val objectRefGenerator = YawnProjectionRefObjectGenerator
+
+    override fun generateAdditionalTypes(yawnContext: YawnContext): List<TypeSpec> {
+        return listOf(YawnProjectionRefObjectGenerator.generateOrderableRefType(yawnContext))
+    }
 
     override fun generateProperty(
         yawnContext: YawnContext,
