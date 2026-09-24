@@ -118,24 +118,29 @@ selected, so if the returned value isn't projected, resolving the order will fai
 
 The pattern above requires wrapping the aggregate with `orderDescBy`/`orderAscBy` up front and then remembering to
 carry the *returned* value into `project(...)` - easy to get wrong in a larger projection, since nothing stops you
-from projecting the original, unwrapped value by mistake. `YawnProjections.orderablePair`/`orderableTriple`, combined
-with `project(...)`'s two-argument overload, let you build the pair or triple normally first and then reach back into
-one of its own children to order by it, so there's nothing to thread through by hand:
+from projecting the original, unwrapped value by mistake. `YawnProjections.pair`/`triple`, combined with
+`project(...)`'s two-argument overload, let you build the pair or triple normally first and then reach back into one
+of its own children to order by it, so there's nothing to thread through by hand:
 
 ```kotlin
 yawn.project(VisitTable) { visits ->
     project(
-        YawnProjections.orderablePair(YawnProjections.groupBy(visits.brandId), YawnProjections.max(visits.createdAt)),
+        YawnProjections.pair(YawnProjections.groupBy(visits.brandId), YawnProjections.max(visits.createdAt)),
     ) { mostRecentVisitByBrand ->
         orderDescBy(mostRecentVisitByBrand.second)
     }
 }.list()
 ```
 
+There's no special name to remember here: `pair`/`triple` have an overload that Kotlin picks automatically whenever
+every child happens to be a single-value projection (a column, an aggregate, etc.) - that overload is the one that
+exposes `.first`/`.second`/`.third`. Passing a nested composite instead (like another `pair`) falls back to the
+regular overload, since only a single SQL expression can be given an alias to order by.
+
 `orderDescBy`/`orderAscBy` also accept the `.first`/`.second`/`.third` of an orderable pair or triple directly, in
 addition to a plain aggregate: doing so replaces that child in place, so whatever it wraps is guaranteed to already
 be part of what `project(...)` resolves right below it. A `@YawnProjection` data class supports the same pattern via
-its generated `createOrderable` function; see [Project to Data Class](#project-to-data-class) below.
+an overload of its generated `create` function; see [Project to Data Class](#project-to-data-class) below.
 
 ### Project to Data Class
 
@@ -199,16 +204,16 @@ yawn.project(BookTable) {
 
 #### Ordering by one field of a data class projection
 
-Like `orderablePair`/`orderableTriple` above, each `@YawnProjection` data class also gets a generated `createOrderable`
-function alongside `create`: it accepts single-value projections only, and returns each field wrapped in a
-[`ProjectionSlot`][projection-slot-file] that `orderAscBy`/`orderDescBy` can reach back into after the projection is
-built.
+Like the single-value overload of `pair`/`triple` above, each `@YawnProjection` data class also gets a generated
+overload of `create` (same name - picked automatically when every field happens to be a single-value projection):
+it returns each field wrapped in a [`ProjectionSlot`][projection-slot-file] that `orderAscBy`/`orderDescBy` can reach
+back into after the projection is built.
 
 ```kotlin
 yawn.project(BookTable) { books ->
   val authors = join(books.author)
   project(
-    AuthorAndBooksProjection.createOrderable(
+    AuthorAndBooksProjection.create(
       author = YawnProjections.groupBy(authors.name),
       numberOfBooks = YawnProjections.count(books.name),
     ),

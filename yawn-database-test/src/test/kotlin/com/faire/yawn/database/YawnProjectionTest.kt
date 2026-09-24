@@ -547,7 +547,7 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
         transactor.open { session ->
             val resultsDesc = session.project(BookTable) { books ->
                 project(
-                    YawnProjections.orderablePair(
+                    YawnProjections.pair(
                         YawnProjections.groupBy(books.originalLanguage),
                         YawnProjections.max(books.numberOfPages),
                     ),
@@ -563,7 +563,7 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
 
             val resultsAsc = session.project(BookTable) { books ->
                 project(
-                    YawnProjections.orderablePair(
+                    YawnProjections.pair(
                         YawnProjections.groupBy(books.originalLanguage),
                         YawnProjections.max(books.numberOfPages),
                     ),
@@ -609,12 +609,12 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     }
 
     @Test
-    fun `yawn query with group by ordered by one field of a generated projection via createOrderable`() {
+    fun `yawn query with group by ordered by one field of a generated projection via create`() {
         transactor.open { session ->
             val results = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 project(
-                    YawnProjectionTest_AuthorBookStatsProjection.createOrderable(
+                    YawnProjectionTest_AuthorBookStatsProjection.create(
                         author = YawnProjections.groupBy(authors.name),
                         numberOfBooks = YawnProjections.count(books.name),
                         totalPages = YawnProjections.sum(books.numberOfPages),
@@ -633,12 +633,12 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     }
 
     @Test
-    fun `yawn query with group by ordered by one field among three via orderableTriple`() {
+    fun `yawn query with group by ordered by one field among three via triple`() {
         transactor.open { session ->
             val results = session.project(BookTable) { books ->
                 val authors = join(books.author)
                 project(
-                    YawnProjections.orderableTriple(
+                    YawnProjections.triple(
                         YawnProjections.groupBy(authors.name),
                         YawnProjections.sum(books.numberOfPages),
                         YawnProjections.count(books.name),

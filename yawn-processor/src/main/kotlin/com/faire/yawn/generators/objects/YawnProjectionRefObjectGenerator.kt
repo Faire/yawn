@@ -67,7 +67,7 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
             .addModifiers(classDeclaration.getEffectiveVisibility())
             .addFunction(generateCreateFunction(yawnContext = yawnContext))
             .addFunction(
-                generateCreateOrderableFunction(
+                generateOrderableCreateOverload(
                     yawnContext = yawnContext,
                     orderableClassName = orderableClassName(originalClassName),
                 ),
@@ -78,8 +78,8 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
     /**
      * Generates the orderable counterpart of [generate]'s object: a class exposing each field as a [ProjectionSlot],
      * so [com.faire.yawn.criteria.query.orderAscBy]/[com.faire.yawn.criteria.query.orderDescBy] can order by one of
-     * them after the fact, the same way [com.faire.yawn.project.YawnProjectionPair] does for [YawnProjections.pair].
-     * Returned by [generate]'s object's `createOrderable` function.
+     * them after the fact, the same way [com.faire.yawn.project.YawnProjectionPair] does for the single-value
+     * overload of [YawnProjections.pair]. Returned by [generate]'s object's single-value overload of `create`.
      */
     fun generateOrderableRefType(yawnContext: YawnContext): TypeSpec {
         val classDeclaration = yawnContext.classDeclaration
@@ -213,37 +213,39 @@ internal object YawnProjectionRefObjectGenerator : YawnReferenceObjectGenerator 
     }
 
     /**
-     * Generates `createOrderable`: like `create`, but accepts single-value ([YawnValueProjector]) projections only,
-     * and returns [generateOrderableRefType]'s class instead of a bare [YawnProjector] - see its documentation.
+     * Generates an overload of `create` (same name - Kotlin picks this one automatically whenever every argument
+     * happens to be a [YawnValueProjector]) that accepts single-value projections only, and returns
+     * [generateOrderableRefType]'s class instead of a bare [YawnProjector] - see its documentation.
      *
-     * Unlike `create`, parameters are typed exactly `YawnValueProjector<SOURCE, Type>` (no widening for nullable
-     * fields): each field's [ProjectionSlot] is invariant in its type, so a projector accepted for e.g. a `Long?`
-     * field must itself already be typed `YawnValueProjector<SOURCE, Long?>`, not `YawnValueProjector<SOURCE, Long>`.
+     * Unlike the plain [generateCreateFunction] overload, parameters are typed exactly `YawnValueProjector<SOURCE,
+     * Type>` (no widening for nullable fields): each field's [ProjectionSlot] is invariant in its type, so a
+     * projector accepted for e.g. a `Long?` field must itself already be typed `YawnValueProjector<SOURCE, Long?>`,
+     * not `YawnValueProjector<SOURCE, Long>`.
      */
-    private fun generateCreateOrderableFunction(
+    private fun generateOrderableCreateOverload(
         yawnContext: YawnContext,
         orderableClassName: ClassName,
     ): FunSpec {
         val source = TypeVariableName("SOURCE", Any::class.asTypeName())
         val properties = computeProperties(yawnContext)
 
-        val createOrderable = FunSpec.builder("createOrderable")
+        val create = FunSpec.builder("create")
             .addTypeVariable(source)
             .returns(orderableClassName.parameterizedBy(source))
 
         for (property in properties) {
-            createOrderable.addParameter(property.name, yawnValueProjector.parameterizedBy(source, property.type))
+            create.addParameter(property.name, yawnValueProjector.parameterizedBy(source, property.type))
         }
 
         val slotArguments = properties.joinToString(separator = ",\n") {
             "${it.name} = %T.orderableSlot(${it.name})"
         }
-        createOrderable.addStatement(
+        create.addStatement(
             "return %T(\n$slotArguments\n)",
             orderableClassName,
             *Array(properties.size) { yawnProjectionsObject },
         )
 
-        return createOrderable.build()
+        return create.build()
     }
 }
