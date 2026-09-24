@@ -134,8 +134,8 @@ yawn.project(VisitTable) { visits ->
 
 `orderDescBy`/`orderAscBy` also accept the `.first`/`.second`/`.third` of an orderable pair or triple directly, in
 addition to a plain aggregate: doing so replaces that child in place, so whatever it wraps is guaranteed to already
-be part of what `project(...)` resolves right below it. This currently only covers `orderablePair`/`orderableTriple`;
-ordering by a field of an `@YawnProjection` data class this way is not yet supported.
+be part of what `project(...)` resolves right below it. A `@YawnProjection` data class supports the same pattern via
+its generated `createOrderable` function; see [Project to Data Class](#project-to-data-class) below.
 
 ### Project to Data Class
 
@@ -194,6 +194,27 @@ yawn.project(BookTable) {
       numberOfBooks = YawnProjections.count(books.name),
     ),
   )
+}
+```
+
+#### Ordering by one field of a data class projection
+
+Like `orderablePair`/`orderableTriple` above, each `@YawnProjection` data class also gets a generated `createOrderable`
+function alongside `create`: it accepts single-value projections only, and returns each field wrapped in a
+[`ProjectionSlot`][projection-slot-file] that `orderAscBy`/`orderDescBy` can reach back into after the projection is
+built.
+
+```kotlin
+yawn.project(BookTable) { books ->
+  val authors = join(books.author)
+  project(
+    AuthorAndBooksProjection.createOrderable(
+      author = YawnProjections.groupBy(authors.name),
+      numberOfBooks = YawnProjections.count(books.name),
+    ),
+  ) { authorAndBooks ->
+    orderDescBy(authorAndBooks.numberOfBooks)
+  }
 }
 ```
 
@@ -293,3 +314,4 @@ You can see even more complex examples [on this test file][yawn-projections-test
 
 [yawn-projections-file]: https://github.com/Faire/yawn/blob/main/yawn-api/src/main/kotlin/com/faire/yawn/project/YawnProjections.kt#L13
 [yawn-projections-test]: https://github.com/Faire/yawn/blob/main/yawn-database-test/src/test/kotlin/com/faire/yawn/database/YawnProjectionTest.kt
+[projection-slot-file]: https://github.com/Faire/yawn/blob/main/yawn-api/src/main/kotlin/com/faire/yawn/project/ProjectionSlot.kt

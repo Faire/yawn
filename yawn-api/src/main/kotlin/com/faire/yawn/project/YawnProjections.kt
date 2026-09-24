@@ -188,4 +188,13 @@ object YawnProjections {
             ProjectionSlot(thirdProjection),
         )
     }
+
+    /**
+     * Wraps [projection] in a [ProjectionSlot]. [ProjectionSlot]'s own constructor is internal to this module, so
+     * `@YawnProjection`-generated `createOrderable` functions (compiled into the annotated class's own module) call
+     * this public bridge instead - see [orderablePair] for the hand-written equivalent of the pattern this powers.
+     */
+    fun <SOURCE : Any, TO> orderableSlot(projection: YawnValueProjector<SOURCE, TO>): ProjectionSlot<SOURCE, TO> {
+        return ProjectionSlot(projection)
+    }
 }

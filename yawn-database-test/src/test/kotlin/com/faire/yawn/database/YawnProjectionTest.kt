@@ -609,6 +609,30 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `yawn query with group by ordered by one field of a generated projection via createOrderable`() {
+        transactor.open { session ->
+            val results = session.project(BookTable) { books ->
+                val authors = join(books.author)
+                project(
+                    YawnProjectionTest_AuthorBookStatsProjection.createOrderable(
+                        author = YawnProjections.groupBy(authors.name),
+                        numberOfBooks = YawnProjections.count(books.name),
+                        totalPages = YawnProjections.sum(books.numberOfPages),
+                    ),
+                ) { orderable ->
+                    orderDescBy(orderable.totalPages)
+                }
+            }.list()
+
+            assertThat(results).containsExactly(
+                AuthorBookStats("J.R.R. Tolkien", numberOfBooks = 2, totalPages = 1_300),
+                AuthorBookStats("J.K. Rowling", numberOfBooks = 1, totalPages = 500),
+                AuthorBookStats("Hans Christian Andersen", numberOfBooks = 3, totalPages = 330),
+            )
+        }
+    }
+
+    @Test
     fun `yawn query with group by ordered by one field among three via orderableTriple`() {
         transactor.open { session ->
             val results = session.project(BookTable) { books ->

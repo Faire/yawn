@@ -52,6 +52,15 @@ internal object YawnNamesGenerator {
     }
 
     /**
+     * For projections annotated with @YawnProjection, the type returned by its generated object's `createOrderable`
+     * function - exposes each field as a [com.faire.yawn.project.ProjectionSlot] so it can be ordered by afterwards.
+     * For example: YawnProjectionTest.SimpleBook -> YawnProjectionTest_SimpleBookOrderableProjection
+     */
+    fun generateOrderableProjectionClassName(originalClassName: ClassName): String {
+        return "${originalClassName.getUniqueSimpleName()}OrderableProjection"
+    }
+
+    /**
      * For embedded properties, we need to create an internal field to store the current path, and we need it to
      * not clash with any user defined values.
      */
