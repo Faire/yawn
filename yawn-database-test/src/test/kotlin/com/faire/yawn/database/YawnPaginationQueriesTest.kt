@@ -4,9 +4,15 @@ import com.faire.yawn.pagination.Page
 import com.faire.yawn.pagination.PageNumber
 import com.faire.yawn.pagination.PaginationResult
 import com.faire.yawn.query.YawnQueryOrder
+import com.faire.yawn.setup.entities.BookClub
 import com.faire.yawn.setup.entities.BookClubTable
 import com.faire.yawn.setup.entities.BookTable
+import com.faire.yawn.setup.entities.Publisher
+import com.faire.yawn.setup.entities.PublisherTable
+import com.faire.yawn.setup.hibernate.CapturingStatementInspector
 import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.Hibernate
+import org.hibernate.sql.JoinType
 import org.junit.jupiter.api.Test
 
 internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
@@ -223,6 +229,51 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
             // Before the fix the builder had inherited the page's `id IN (...)` filter and listed only two clubs.
             assertThat(bookClubs.list().map { it.name }.distinct())
                 .containsExactlyInAnyOrder("Andersen Fan Club", "Rowling Fan Club", "Tolkien Fan Club")
+        }
+    }
+
+    @Test
+    fun `list with total results - avoidEagerFetchFanout re-fetch does not re-apply the caller's filters`() {
+        transactor.open { session ->
+            lateinit var result: PaginationResult<BookClub>
+            val statements = CapturingStatementInspector.capture {
+                result = session.query(BookClubTable) { bookClubs ->
+                    addLike(bookClubs.name, "%Fan Club")
+                }.listPaginatedWithTotalResults(
+                    page = PageNumber.zeroIndexed(0) / 2,
+                    orders = listOf { YawnQueryOrder.asc(name) },
+                    uniqueColumn = { id },
+                    avoidEagerFetchFanout = true,
+                )
+            }
+
+            assertThat(result.results.map { it.name }).containsExactly("Andersen Fan Club", "Rowling Fan Club")
+            assertThat(statements).hasSize(3)
+            assertThat(statements.take(2)).allMatch { it.contains(" like ") }
+            assertThat(statements.last()).doesNotContain(" like ")
+        }
+    }
+
+    @Test
+    fun `list with total results - avoidEagerFetchFanout refetch joins a lazy collection in the same query`() {
+        transactor.open { session ->
+            lateinit var result: PaginationResult<Publisher>
+            val statements = CapturingStatementInspector.capture {
+                result = session.query(PublisherTable).listPaginatedWithTotalResults(
+                    page = PageNumber.zeroIndexed(0) / 10,
+                    orders = listOf { YawnQueryOrder.asc(name) },
+                    uniqueColumn = { id },
+                    avoidEagerFetchFanout = true,
+                    refetch = { publishers -> join(publishers.books, JoinType.LEFT_OUTER_JOIN) },
+                )
+                result.results.forEach { it.books.size }
+            }
+
+            assertThat(result.results.map { it.name })
+                .containsExactly("Co-Owned", "HarperCollins", "Penguin", "Random House")
+            assertThat(result.results).allMatch { Hibernate.isInitialized(it.books) }
+            assertThat(statements[2]).contains("left outer join books")
+            assertThat(statements).noneMatch { it.contains("where books0_.publisher_id=?") }
         }
     }
 

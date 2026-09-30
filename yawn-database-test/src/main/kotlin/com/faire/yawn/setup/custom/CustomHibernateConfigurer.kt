@@ -2,6 +2,7 @@ package com.faire.yawn.setup.custom
 
 import com.faire.yawn.setup.entities.BaseEntity
 import com.faire.yawn.setup.entities.YawnId
+import com.faire.yawn.setup.hibernate.CapturingStatementInspector
 import com.faire.yawn.setup.hibernate.YawnIdType
 import com.google.gson.GsonBuilder
 import com.google.inject.TypeLiteral
@@ -55,6 +56,7 @@ internal object CustomHibernateConfigurer {
         properties["hibernate.default_batch_fetch_size"] = 50
         properties["hibernate.max_fetch_depth"] = 2
         properties["hibernate.jdbc.batch_size"] = 50
+        properties["hibernate.session_factory.statement_inspector"] = CapturingStatementInspector
 
         return properties
     }

@@ -119,16 +119,22 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
      * associations, since this costs an extra query. This may end up becoming the default (or the only) behavior
      * once it has seen enough real-world use to justify that cost unconditionally; the flag exists so that can
      * happen as a gradual, opt-in rollout rather than a behavior change forced on every caller at once.
+     *
+     * @param refetch Only used when [avoidEagerFetchFanout] is `true`. Applied to the second query, which fetches the
+     * page's entities by [uniqueColumn]. That query drops this builder's filters, since the page's ids already satisfy
+     * them, and keeps its joins and orders. Use it to add joins that load associations with the entities, such as
+     * `join(table.lazyCollection, JoinType.LEFT_OUTER_JOIN)`, instead of loading them one entity at a time.
      */
     fun <ID : Any> listPaginatedWithTotalResults(
         page: Page,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<ID>,
         avoidEagerFetchFanout: Boolean = false,
+        refetch: EntityYawnQueryScope<T, DEF>.(tableDef: DEF) -> Unit = {},
     ): PaginationResult<T> {
         val totalResults = clone().countDistinct(uniqueColumn)
         val entities = if (avoidEagerFetchFanout) {
-            listPaginatedByIdToAvoidEagerFetchFanout(page, orders, uniqueColumn)
+            listPaginatedByIdToAvoidEagerFetchFanout(page, orders, uniqueColumn, refetch)
         } else {
             listPaginated(
                 page = page,
@@ -148,6 +154,7 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         page: Page,
         orders: List<DEF.() -> YawnQueryOrder<T>>,
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<ID>,
+        refetch: EntityYawnQueryScope<T, DEF>.(tableDef: DEF) -> Unit,
     ): List<T> {
         val pagedIds = clone()
             .applyProjection { table -> project(table.uniqueColumn()) }
@@ -164,8 +171,15 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         // cap on raw SQL rows, since an eager collection join can still fan a handful of entities out to many rows.
         // The re-applied `orders` reproduce the correct relative order among this page's entities, and `distinct()`
         // collapses the duplicate root-entity references Hibernate returns for fanned-out join rows.
-        return clone()
-            .applyFilter { table -> addIn(table.uniqueColumn(), pagedIds) }
+        // The caller's filters are dropped because every id in `pagedIds` already satisfies them; re-evaluating them
+        // (often subqueries) on the re-fetch only costs time. Joins are kept so that `orders` can still reference them.
+        val refetchQuery = clone()
+        refetchQuery.query.criteria.clear()
+        return refetchQuery
+            .applyFilter { table ->
+                addIn(table.uniqueColumn(), pagedIds)
+                refetch(table)
+            }
             .applyOrders(orders)
             .maxResults(EAGER_FETCH_FANOUT_REFETCH_MAX_RESULTS)
             .list()
