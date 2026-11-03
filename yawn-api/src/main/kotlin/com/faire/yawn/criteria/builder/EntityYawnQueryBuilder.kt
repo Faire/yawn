@@ -8,8 +8,12 @@ import com.faire.yawn.criteria.query.ProjectedYawnQueryScope
 import com.faire.yawn.criteria.query.YawnQueryScopeWithJoinDelegate
 import com.faire.yawn.pagination.Page
 import com.faire.yawn.pagination.PaginationResult
+import com.faire.yawn.project.AggregateKind.MAX
+import com.faire.yawn.project.AggregateKind.MIN
+import com.faire.yawn.project.ProjectionNode
 import com.faire.yawn.project.YawnProjections
 import com.faire.yawn.project.YawnQueryProjection
+import com.faire.yawn.project.YawnValueProjector
 import com.faire.yawn.query.YawnQuery
 import com.faire.yawn.query.YawnQueryFactory
 import com.faire.yawn.query.YawnQueryOrder
@@ -184,19 +188,27 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         }.maxResults(1).uniqueResult() != null
     }
 
+    /**
+     * Returns the largest non-null value of [column], or `null` if there is none. Works on nullable columns too,
+     * like `MAX` in SQL.
+     */
     fun <FROM : Comparable<FROM>> maxValueOf(
-        column: DEF.() -> YawnTableDef<T, *>.ColumnDef<FROM>,
+        column: DEF.() -> YawnTableDef<T, *>.ColumnDef<out FROM?>,
     ): FROM? {
         return applyProjection { table ->
-            project(YawnProjections.max(table.column()))
+            project(YawnValueProjector<T, FROM?> { ProjectionNode.aggregateAs(MAX, table.column()) })
         }.uniqueResult()
     }
 
+    /**
+     * Returns the smallest non-null value of [column], or `null` if there is none. Works on nullable columns too,
+     * like `MIN` in SQL.
+     */
     fun <FROM : Comparable<FROM>> minValueOf(
-        column: DEF.() -> YawnTableDef<T, *>.ColumnDef<FROM>,
+        column: DEF.() -> YawnTableDef<T, *>.ColumnDef<out FROM?>,
     ): FROM? {
         return applyProjection { table ->
-            project(YawnProjections.min(table.column()))
+            project(YawnValueProjector<T, FROM?> { ProjectionNode.aggregateAs(MIN, table.column()) })
         }.uniqueResult()
     }
 
