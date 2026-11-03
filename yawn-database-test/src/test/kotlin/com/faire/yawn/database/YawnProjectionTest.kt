@@ -655,6 +655,23 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
         }
     }
 
+    @Test
+    fun `yawn query with maxValueOf and minValueOf on a nullable column`() {
+        transactor.open { session ->
+            // only Lord of the Rings (10) and The Hobbit (9) have a rating; nulls are ignored
+            assertThat(session.query(BookTable).maxValueOf { rating }).isEqualTo(10)
+            assertThat(session.query(BookTable).minValueOf { rating }).isEqualTo(9)
+
+            // none of Andersen's books have a rating
+            fun andersenBooks() = session.query(BookTable) { books ->
+                val author = join(books.author)
+                addEq(author.name, "Hans Christian Andersen")
+            }
+            assertThat(andersenBooks().maxValueOf { rating }).isNull()
+            assertThat(andersenBooks().minValueOf { rating }).isNull()
+        }
+    }
+
     @YawnProjection
     data class NullabilityAllowance(
         val name: String,
