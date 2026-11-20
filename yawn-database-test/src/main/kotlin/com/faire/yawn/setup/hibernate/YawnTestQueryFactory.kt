@@ -78,4 +78,5 @@ private fun YawnLockMode.toHibernateLockMode(): LockMode = when (this) {
     YawnLockMode.NONE -> LockMode.NONE
     YawnLockMode.PESSIMISTIC_READ -> LockMode.PESSIMISTIC_READ
     YawnLockMode.PESSIMISTIC_WRITE -> LockMode.PESSIMISTIC_WRITE
+    YawnLockMode.PESSIMISTIC_WRITE_NOWAIT -> LockMode.UPGRADE_NOWAIT
 }

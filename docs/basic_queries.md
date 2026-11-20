@@ -113,7 +113,7 @@ Some operations that do require the column context are also available outside th
 
 ## Lock Modes
 
-Yawn supports pessimistic locking through the `setLockMode` (or the `forUpdate` and `forShare` helpers). These are useful when you need to prevent concurrent
+Yawn supports pessimistic locking through the `setLockMode` (or the `forUpdate`, `forUpdateNoWait` and `forShare` helpers). These are useful when you need to prevent concurrent
 modifications to rows you're reading.
 
 ### forUpdate (PESSIMISTIC_WRITE)
@@ -129,6 +129,22 @@ val results = yawn.query(BookTable) { books ->
 ```
 
 This is commonly used in event consumers and batch update operations where you need to prevent concurrent modifications.
+
+### forUpdateNoWait (PESSIMISTIC_WRITE_NOWAIT)
+
+Use `forUpdateNoWait()` when you want an exclusive lock like `forUpdate()`, but would rather fail fast than wait for another transaction to
+release it. This adds `FOR UPDATE NOWAIT` to the SQL query; if any selected row is already locked, the query fails immediately with an error:
+
+```kotlin
+val results = yawn.query(BookTable) { books ->
+    addEq(books.name, "The Hobbit")
+}
+    .forUpdateNoWait()
+    .list()
+```
+
+This is useful for jobs that should skip or retry work that is already being processed elsewhere, instead of queueing behind a held lock.
+How the error surfaces depends on your database and driver, so catch it at the call site if you intend to recover.
 
 ### forShare (PESSIMISTIC_READ)
 
@@ -164,6 +180,7 @@ Available lock modes:
 - `YawnLockMode.NONE` - No lock (default behavior)
 - `YawnLockMode.PESSIMISTIC_READ` - Shared lock (`FOR SHARE`)
 - `YawnLockMode.PESSIMISTIC_WRITE` - Exclusive lock (`FOR UPDATE`)
+- `YawnLockMode.PESSIMISTIC_WRITE_NOWAIT` - Exclusive lock that fails instead of waiting (`FOR UPDATE NOWAIT`)
 
 ## Terminal Operations
 

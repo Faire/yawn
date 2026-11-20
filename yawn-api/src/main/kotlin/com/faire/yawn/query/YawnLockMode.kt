@@ -39,4 +39,15 @@ enum class YawnLockMode {
      * concurrent modifications during batch updates.
      */
     PESSIMISTIC_WRITE,
+
+    /**
+     * An exclusive lock that fails immediately instead of waiting (SQL: `FOR UPDATE NOWAIT`).
+     *
+     * Behaves like [PESSIMISTIC_WRITE], but if any selected row is already locked by another
+     * transaction, the query fails with an error rather than blocking until the lock is released.
+     *
+     * Example use case: Jobs that should skip or retry work already being processed elsewhere,
+     * instead of piling up behind a held lock.
+     */
+    PESSIMISTIC_WRITE_NOWAIT,
 }

@@ -41,6 +41,20 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `forUpdateNoWait sets UPGRADE_NOWAIT lock mode`() {
+        transactor.open { session ->
+            val compiledQuery = getCompiledQuery {
+                session.query(BookTable) { books ->
+                    addEq(books.name, "The Hobbit")
+                }.forUpdateNoWait()
+            }
+
+            assertThat(compiledQuery.hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.UPGRADE_NOWAIT)
+            assertThat(compiledQuery.uniqueResult()?.name).isEqualTo("The Hobbit")
+        }
+    }
+
+    @Test
     fun `setLockMode with PESSIMISTIC_WRITE`() {
         transactor.open { session ->
             val compiledQuery = getCompiledQuery {
@@ -64,6 +78,20 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
             }
 
             assertThat(compiledQuery.hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.PESSIMISTIC_READ)
+            assertThat(compiledQuery.list().single().name).isEqualTo("The Hobbit")
+        }
+    }
+
+    @Test
+    fun `setLockMode with PESSIMISTIC_WRITE_NOWAIT`() {
+        transactor.open { session ->
+            val compiledQuery = getCompiledQuery {
+                session.query(BookTable) { books ->
+                    addEq(books.name, "The Hobbit")
+                }.setLockMode(YawnLockMode.PESSIMISTIC_WRITE_NOWAIT)
+            }
+
+            assertThat(compiledQuery.hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.UPGRADE_NOWAIT)
             assertThat(compiledQuery.list().single().name).isEqualTo("The Hobbit")
         }
     }
@@ -97,6 +125,22 @@ internal class YawnLockModeTest : BaseYawnDatabaseTest() {
             assertThat(compiledQuery.hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.PESSIMISTIC_WRITE)
             assertThat(compiledQuery.list().map { it.name })
                 .containsExactly("Lord of the Rings", "The Emperor's New Clothes")
+        }
+    }
+
+    @Test
+    fun `forUpdateNoWait can be combined with maxResults`() {
+        transactor.open { session ->
+            val compiledQuery = getCompiledQuery {
+                session.query(BookTable) { books ->
+                    orderAsc(books.name)
+                }
+                    .forUpdateNoWait()
+                    .maxResults(1)
+            }
+
+            assertThat(compiledQuery.hibernateCriteriaImpl.lockModes.values).containsOnly(LockMode.UPGRADE_NOWAIT)
+            assertThat(compiledQuery.list().map { it.name }).hasSize(1)
         }
     }
 
