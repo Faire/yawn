@@ -236,6 +236,18 @@ abstract class YawnQueryBuilder<
     }
 
     /**
+     * Locks selected rows with a PESSIMISTIC_WRITE_NOWAIT lock (SQL: `FOR UPDATE NOWAIT`).
+     *
+     * Like [forUpdate], but fails immediately with an error if any selected row is already
+     * locked by another transaction, instead of waiting for the lock to be released.
+     *
+     * @return this builder for chaining.
+     */
+    fun forUpdateNoWait(): CRITERIA {
+        return setLockMode(YawnLockMode.PESSIMISTIC_WRITE_NOWAIT)
+    }
+
+    /**
      * Locks selected rows with a PESSIMISTIC_READ lock (SQL: `FOR SHARE`).
      *
      * Use for "find or create" patterns where you need to prevent concurrent creates
