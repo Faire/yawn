@@ -68,11 +68,14 @@ internal abstract class BaseYawnProcessor(
         val classDef = generateClassDefinition(yawnContext)
         val typeAliases = generateTypeAliases(yawnContext)
 
-        val fileSpec = FileSpec.builder(packageName, newClassName)
+        val fileSpecBuilder = FileSpec.builder(packageName, newClassName)
             .addType(objectDef)
             .addType(classDef)
             .addTypeAliases(typeAliases)
-            .build()
+        for (additionalType in generateAdditionalTypes(yawnContext)) {
+            fileSpecBuilder.addType(additionalType)
+        }
+        val fileSpec = fileSpecBuilder.build()
 
         val outputFile = codeGenerator.createNewFile(
             Dependencies.ALL_FILES,
@@ -138,6 +141,9 @@ internal abstract class BaseYawnProcessor(
     protected abstract fun generateYawnDefClassName(originalClassName: ClassName): String
 
     protected open fun generateTypeAliases(yawnContext: YawnContext): List<TypeAliasSpec> = listOf()
+
+    /** Additional top-level types to emit alongside [objectRefGenerator]'s object and [generateClassDefinition]'s class. */
+    protected open fun generateAdditionalTypes(yawnContext: YawnContext): List<TypeSpec> = listOf()
 
     companion object {
         const val PARENT_PARAMETER_NAME = "parent"
