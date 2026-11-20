@@ -10,6 +10,7 @@ jvmargs # a gradle property to set jvm arguments
 lateinit # keyword in Kotlin
 metaspace # a memory space in the JVM
 mkdirs # gradle API to create directories
+nowait # sql term, as in FOR UPDATE NOWAIT
 sarif # a standard for test results (https://gcc.gnu.org/wiki/SARIF)
 typealiases # the plural form of typealias
 usertype # in Hibernate, a type with a custom adapter defined by the user
