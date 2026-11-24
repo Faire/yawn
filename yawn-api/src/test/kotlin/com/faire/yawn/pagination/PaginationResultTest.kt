@@ -113,4 +113,15 @@ internal class PaginationResultTest {
         assertThat(paginate(PageNumber.zeroIndexed(0)).hasNext()).isFalse()
         assertThat(paginate(PageNumber.zeroIndexed(1)).hasNext()).isFalse()
     }
+
+    @Test
+    fun `has next - next offset beyond the Int range`() {
+        // The next page starts at offset 5_000_005_000, which wraps to 705_037_704 in Int arithmetic
+        val page = PageNumber.zeroIndexed(1_000_000) / 5_000
+
+        assertThat(PaginationResult(totalResults = 3_000_000_000, results = listOf<Int>(), page = page).hasNext())
+            .isFalse()
+        assertThat(PaginationResult(totalResults = 6_000_000_000, results = listOf<Int>(), page = page).hasNext())
+            .isTrue()
+    }
 }
