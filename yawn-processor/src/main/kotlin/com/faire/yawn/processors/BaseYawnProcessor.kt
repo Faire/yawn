@@ -28,7 +28,7 @@ import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toClassName
-import java.io.PrintStream
+import com.squareup.kotlinpoet.ksp.writeTo
 import kotlin.reflect.KClass
 
 /**
@@ -74,13 +74,10 @@ internal abstract class BaseYawnProcessor(
             .addTypeAliases(typeAliases)
             .build()
 
-        val outputFile = codeGenerator.createNewFile(
-            Dependencies.ALL_FILES,
-            classDeclaration.packageName.asString(),
-            newClassName,
-        )
-
-        fileSpec.writeTo(PrintStream(outputFile))
+        // Only the annotated class's own file is declared. KSP traces the other files the generators reach by resolving
+        // types (parent classes, embedded types, join targets) and reprocesses this class when any of them change.
+        val dependencies = Dependencies(aggregating = false, classDeclaration.containingFile!!)
+        fileSpec.writeTo(codeGenerator, dependencies)
     }
 
     private fun buildYawnContext(
