@@ -100,7 +100,7 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     fun countDistinct(
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<*>,
     ): Long {
-        return applyProjection { table ->
+        return applyAggregateProjection { table ->
             project(YawnProjections.countDistinct(table.uniqueColumn()))
         }.uniqueResult() ?: 0
     }
@@ -126,7 +126,7 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
         uniqueColumn: DEF.() -> YawnTableDef<T, *>.ColumnDef<ID>,
         avoidEagerFetchFanout: Boolean = false,
     ): PaginationResult<T> {
-        val totalResults = clone().countDistinct(uniqueColumn)
+        val totalResults = countDistinct(uniqueColumn)
         val entities = if (avoidEagerFetchFanout) {
             listPaginatedByIdToAvoidEagerFetchFanout(page, orders, uniqueColumn)
         } else {
@@ -173,13 +173,13 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     }
 
     fun rowCount(): Long {
-        return applyProjection {
+        return applyAggregateProjection {
             project(YawnProjections.rowCount())
         }.maxResults(1).uniqueResult() ?: 0
     }
 
     fun exists(): Boolean {
-        return applyProjection {
+        return applyAggregateProjection {
             project(YawnProjections.selectConstant("1"))
         }.maxResults(1).uniqueResult() != null
     }
@@ -187,7 +187,7 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     fun <FROM : Comparable<FROM>> maxValueOf(
         column: DEF.() -> YawnTableDef<T, *>.ColumnDef<FROM>,
     ): FROM? {
-        return applyProjection { table ->
+        return applyAggregateProjection { table ->
             project(YawnProjections.max(table.column()))
         }.uniqueResult()
     }
@@ -195,9 +195,25 @@ class EntityYawnQueryBuilder<T : Any, DEF : YawnTableDef<T, T>>(
     fun <FROM : Comparable<FROM>> minValueOf(
         column: DEF.() -> YawnTableDef<T, *>.ColumnDef<FROM>,
     ): FROM? {
-        return applyProjection { table ->
+        return applyAggregateProjection { table ->
             project(YawnProjections.min(table.column()))
         }.uniqueResult()
+    }
+
+    /**
+     * Aggregates describe every row matching the filters, so they run on a copy of the query without its ordering
+     * or pagination: databases reject an ORDER BY on a non-aggregated column next to an aggregate, and an offset
+     * would skip past the single aggregate row. Working on a copy also keeps this builder reusable afterward.
+     */
+    private fun <RETURNS : Any?> applyAggregateProjection(
+        lambda: ProjectedYawnQueryScope<T, T, DEF, RETURNS>.(tableDef: DEF) -> YawnQueryProjection<T, RETURNS>,
+    ): ProjectedYawnQueryBuilder<T, DEF, RETURNS> {
+        val aggregateQuery = query.clone().apply {
+            orders.clear()
+            offset = null
+            maxResults = null
+        }
+        return ProjectedYawnQueryBuilder.create(tableDef, queryFactory, aggregateQuery, lambda)
     }
 
     fun orderAsc(

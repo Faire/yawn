@@ -194,6 +194,10 @@ These operations are defined in `YawnQueryBuilder`, such as:
 - `paginate` / `listPaginated` / `setPaginated` / `doPaginated`
 - `listBatched` / `setBatched`
 - `listPaginatedWithTotalResults` / `countDistinct` (on `EntityYawnQueryBuilder`)
+- `rowCount` / `exists` / `maxValueOf` / `minValueOf` (on `EntityYawnQueryBuilder`)
+
+The aggregate helpers (`rowCount`, `exists`, `countDistinct`, `maxValueOf`, and `minValueOf`) consider every row matching the query's filters and joins. They
+ignore any ordering, offset, or max results set on the builder, and they leave the builder unchanged, so you can still call `list` on it afterward.
 
 ## Pass/Modify Queries Around
 
