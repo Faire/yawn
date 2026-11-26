@@ -37,13 +37,13 @@ abstract class BaseYawnQueryScope<SOURCE : Any, T : Any, DEF : YawnDef<SOURCE, T
      * this does not accept the definition of an element collection.
      * @param lambda to be used to add criteria to the subquery.
      */
-    inline fun <reified ST : Any, DEF : YawnEntityTableDef<SOURCE, ST>, PROJECTION : Any?> createProjectedSubQuery(
+    fun <ST : Any, DEF : YawnEntityTableDef<SOURCE, ST>, PROJECTION : Any?> createProjectedSubQuery(
         tableDef: DEF,
-        noinline lambda: ProjectedYawnQueryScope<SOURCE, ST, DEF, PROJECTION>.(
+        lambda: ProjectedYawnQueryScope<SOURCE, ST, DEF, PROJECTION>.(
             tableDef: DEF,
         ) -> YawnQueryProjection<SOURCE, PROJECTION>,
     ): DetachedProjectedYawnBuilder<SOURCE, ST, DEF, PROJECTION> {
-        val query = YawnQuery<SOURCE, ST>(ST::class.java)
+        val query = YawnQuery<SOURCE, ST>(tableDef.entityClass)
         return DetachedProjectedYawnBuilder.create(tableDef, query, lambda)
     }
 

@@ -8,7 +8,9 @@ package com.faire.yawn
  *
  * @param SOURCE the type of the original table that the criteria is based off of.
  * @param D the type of the entity.
+ * @param entityClass the runtime reference to the class [D], provided by the generated definition.
  */
 abstract class YawnEntityTableDef<SOURCE : Any, D : Any>(
     parent: YawnTableDefParent,
+    internal val entityClass: Class<D>,
 ) : YawnTableDef<SOURCE, D>(parent)

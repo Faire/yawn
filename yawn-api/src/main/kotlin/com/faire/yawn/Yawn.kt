@@ -39,15 +39,15 @@ class Yawn(
     }
 
     companion object {
-        inline fun <reified T : Any, DEF : YawnTableDef<T, T>, PROJECTION : Any?> createProjectedDetachedCriteria(
+        fun <T : Any, DEF : YawnEntityTableDef<T, T>, PROJECTION : Any?> createProjectedDetachedCriteria(
             tableRef: YawnTableRef<T, DEF>,
-            noinline lambda:
-            ProjectedYawnQueryScope<T, T, DEF, PROJECTION>.(tableDef: DEF) -> YawnQueryProjection<T, PROJECTION>,
+            lambda: ProjectedYawnQueryScope<T, T, DEF, PROJECTION>.(
+                tableDef: DEF,
+            ) -> YawnQueryProjection<T, PROJECTION>,
         ): DetachedProjectedYawnBuilder<T, T, DEF, PROJECTION> {
-            val query = YawnQuery<T, T>(T::class.java)
-
-            @Suppress("UNCHECKED_CAST") // DEF is YawnTableDef<T, T>, so this cast is safe
+            @Suppress("UNCHECKED_CAST") // DEF is YawnEntityTableDef<T, T>, so this cast is safe
             val tableDef = tableRef.forSubQuery<T>() as DEF
+            val query = YawnQuery<T, T>(tableDef.entityClass)
             return DetachedProjectedYawnBuilder.create(tableDef, query, lambda)
         }
     }
