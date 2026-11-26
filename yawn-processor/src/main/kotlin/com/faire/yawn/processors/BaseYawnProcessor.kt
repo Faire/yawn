@@ -45,6 +45,13 @@ internal abstract class BaseYawnProcessor(
     protected abstract val annotationClass: KClass<out Annotation>
     protected abstract val yawnDefClass: KClass<out YawnDef<*, *>>
 
+    /**
+     * The class that the generated definition extends. This is [yawnDefClass] unless the definition extends a subclass
+     * of it, in which case [yawnDefClass] stays the class that declares the nested types (`ColumnDef` and the like),
+     * since those can only be named through the class that declares them.
+     */
+    protected open val yawnSuperClass: KClass<out YawnDef<*, *>> get() = yawnDefClass
+
     abstract val objectRefGenerator: YawnReferenceObjectGenerator
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -111,7 +118,10 @@ internal abstract class BaseYawnProcessor(
                     .build(),
             )
             .addTypeVariable(yawnContext.sourceTypeVariable)
-            .superclass(yawnContext.superClassName)
+            .superclass(
+                yawnSuperClass.asClassName()
+                    .parameterizedBy(yawnContext.sourceTypeVariable, yawnContext.classDeclaration.toClassName()),
+            )
             .run { additionalClassBuilder(yawnContext, this) }
 
         for (propertyDeclaration in yawnContext.classDeclaration.getAllPropertiesWithAllAnnotations()) {

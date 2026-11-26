@@ -3,6 +3,7 @@ package com.faire.yawn.processors
 import com.faire.ksp.getAllPropertiesWithAllAnnotations
 import com.faire.yawn.YawnDef
 import com.faire.yawn.YawnEntity
+import com.faire.yawn.YawnEntityTableDef
 import com.faire.yawn.YawnTableDef
 import com.faire.yawn.generators.objects.YawnTableRefObjectGenerator
 import com.faire.yawn.generators.properties.CollectionJoinColumnDefGenerator
@@ -57,6 +58,7 @@ private val entityTypeAliasGenerators = listOf(
 internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProcessor(codeGenerator) {
     override val annotationClass: KClass<out Annotation> = YawnEntity::class
     override val yawnDefClass: KClass<out YawnDef<*, *>> = YawnTableDef::class
+    override val yawnSuperClass: KClass<out YawnDef<*, *>> = YawnEntityTableDef::class
 
     override fun generateYawnDefClassName(originalClassName: ClassName): String {
         return generateTableDefClassName(originalClassName)
