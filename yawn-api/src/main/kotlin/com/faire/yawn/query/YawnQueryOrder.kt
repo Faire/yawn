@@ -22,7 +22,7 @@ import org.hibernate.criterion.Order
 data class YawnQueryOrder<SOURCE : Any>(
     val property: YawnPathProvider<SOURCE>,
     val direction: Direction,
-    val nullPrecedence: NullPrecedence,
+    val nullPrecedence: NullPrecedence = NONE,
 ) {
     /**
      * Sort direction, either ascending or descending.
