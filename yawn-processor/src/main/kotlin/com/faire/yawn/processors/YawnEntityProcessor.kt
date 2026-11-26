@@ -44,6 +44,7 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeAliasSpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.ksp.toClassName
 import kotlin.reflect.KClass
 
 private val entityTypeAliasGenerators = listOf(
@@ -105,6 +106,7 @@ internal class YawnEntityProcessor(codeGenerator: CodeGenerator) : BaseYawnProce
     ): TypeSpec.Builder {
         return classBuilder
             .addSuperclassConstructorParameter(PARENT_PARAMETER_NAME)
+            .addSuperclassConstructorParameter("%T::class.java", yawnContext.classDeclaration.toClassName())
             .addTypes(generateEmbeddedDefinitions(yawnContext))
     }
 
