@@ -1,7 +1,7 @@
 package com.faire.yawn.criteria.query
 
 import com.faire.yawn.YawnDef
-import com.faire.yawn.YawnTableDef
+import com.faire.yawn.YawnEntityTableDef
 import com.faire.yawn.criteria.builder.DetachedProjectedYawnBuilder
 import com.faire.yawn.project.YawnQueryProjection
 import com.faire.yawn.query.YawnQuery
@@ -33,10 +33,11 @@ abstract class BaseYawnQueryScope<SOURCE : Any, T : Any, DEF : YawnDef<SOURCE, T
      * @param DEF the table definition of the entity being sub-queried.
      * @param PROJECTION the type of the projection being returned by the subquery.
      *
-     * @param tableDef the table definition of the entity being sub-queried.
+     * @param tableDef the table definition of the entity being sub-queried. Only an entity can be sub-queried, so
+     * this does not accept the definition of an element collection.
      * @param lambda to be used to add criteria to the subquery.
      */
-    inline fun <reified ST : Any, DEF : YawnTableDef<SOURCE, ST>, PROJECTION : Any?> createProjectedSubQuery(
+    inline fun <reified ST : Any, DEF : YawnEntityTableDef<SOURCE, ST>, PROJECTION : Any?> createProjectedSubQuery(
         tableDef: DEF,
         noinline lambda: ProjectedYawnQueryScope<SOURCE, ST, DEF, PROJECTION>.(
             tableDef: DEF,

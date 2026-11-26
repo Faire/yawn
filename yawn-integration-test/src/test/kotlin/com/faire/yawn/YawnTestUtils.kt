@@ -21,7 +21,7 @@ internal object YawnTestUtils {
         noinline builder: YawnTestAssertContext.() -> Unit = {},
     ) {
         internalAssertGeneratedEntity(
-            expectedSuperClassDef = YawnTableDef::class,
+            expectedSuperClassDef = YawnEntityTableDef::class,
             expectedSuperClassRef = YawnTableRef::class,
             sourceClass = T::class,
             expectedVisibility = expectedVisibility,
@@ -63,8 +63,9 @@ internal object YawnTestUtils {
         expectedVisibility: KVisibility? = null,
         builder: YawnTestAssertContext.() -> Unit = {},
     ) {
-        val generatedClass = getGeneratedDefKClass(sourceClass, expectedSuperClassDef)
-        val generatedObject = getGeneratedDefKClass(sourceClass, expectedSuperClassRef)
+        val generatedObject = getGeneratedRefKClass(sourceClass, expectedSuperClassRef)
+        // a definition is named after its reference: `FooTable` is defined by `FooTableDef`
+        val generatedClass = Class.forName("${generatedObject.java.name}Def").kotlin
 
         // assert the correct superclass type
         val superClass = generatedClass.java.genericSuperclass as ParameterizedType
@@ -83,14 +84,14 @@ internal object YawnTestUtils {
         builder(YawnTestAssertContext(generatedClass, generatedObject))
     }
 
-    private fun getGeneratedDefKClass(
+    private fun getGeneratedRefKClass(
         clazz: KClass<*>,
-        expectedSuperClass: KClass<*>,
+        expectedSuperClassRef: KClass<out YawnRef<*, *>>,
     ): KClass<*> {
         val classPath = clazz.java.packageName
-        val defName = expectedSuperClass.simpleName!!.removePrefix("Yawn").removeSuffix("Ref")
+        val refName = expectedSuperClassRef.simpleName!!.removePrefix("Yawn").removeSuffix("Ref")
         val classNamePrefix = clazz.getClassNamePrefix()
-        val className = "$classNamePrefix$defName"
+        val className = "$classNamePrefix$refName"
         return Class.forName("$classPath.$className").kotlin
     }
 
