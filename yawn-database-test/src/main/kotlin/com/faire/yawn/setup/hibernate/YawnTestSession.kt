@@ -1,7 +1,7 @@
 package com.faire.yawn.setup.hibernate
 
 import com.faire.yawn.Yawn
-import com.faire.yawn.YawnTableDef
+import com.faire.yawn.YawnEntityTableDef
 import com.faire.yawn.YawnTableRef
 import com.faire.yawn.criteria.builder.EntityYawnQueryBuilder
 import com.faire.yawn.criteria.builder.ProjectedYawnQueryBuilder
@@ -27,19 +27,18 @@ internal class YawnTestSession(
         return entity
     }
 
-    inline fun <reified T : BaseEntity<T>, reified DEF : YawnTableDef<T, T>> query(
+    fun <T : BaseEntity<T>, DEF : YawnEntityTableDef<T, T>> query(
         tableRef: YawnTableRef<T, DEF>,
-        noinline lambda: EntityYawnQueryScope<T, DEF>.(tableDef: DEF) -> Unit = {},
+        lambda: EntityYawnQueryScope<T, DEF>.(tableDef: DEF) -> Unit = {},
     ): EntityYawnQueryBuilder<T, DEF> {
-        return yawn.query(T::class.java, tableRef, lambda)
+        return yawn.query(tableRef, lambda)
     }
 
-    inline fun <reified T : BaseEntity<T>, reified DEF : YawnTableDef<T, T>, PROJECTION : Any?> project(
+    fun <T : BaseEntity<T>, DEF : YawnEntityTableDef<T, T>, PROJECTION : Any?> project(
         tableRef: YawnTableRef<T, DEF>,
-        noinline lambda:
-        ProjectedYawnQueryScope<T, T, DEF, PROJECTION>.(tableDef: DEF) -> YawnQueryProjection<T, PROJECTION>,
+        lambda: ProjectedYawnQueryScope<T, T, DEF, PROJECTION>.(tableDef: DEF) -> YawnQueryProjection<T, PROJECTION>,
     ): ProjectedYawnQueryBuilder<T, DEF, PROJECTION> {
-        return yawn.project(T::class.java, tableRef, lambda)
+        return yawn.project(tableRef, lambda)
     }
 
     @Suppress("SystemTimeReplacedWithClock")

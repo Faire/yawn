@@ -16,25 +16,23 @@ import com.faire.yawn.query.YawnQueryFactory
 class Yawn(
     private val queryFactory: YawnQueryFactory,
 ) {
-    fun <T : Any, DEF : YawnTableDef<T, T>> query(
-        tClass: Class<T>,
+    fun <T : Any, DEF : YawnEntityTableDef<T, T>> query(
         tableRef: YawnTableRef<T, DEF>,
         lambda: EntityYawnQueryScope<T, DEF>.(tableDef: DEF) -> Unit = {},
     ): EntityYawnQueryBuilder<T, DEF> {
-        val query = YawnQuery<T, T>(tClass)
         val tableDef = tableRef.create(parent = RootTableDefParent)
+        val query = YawnQuery<T, T>(tableDef.entityClass)
         return EntityYawnQueryBuilder.create(tableDef, queryFactory, query, lambda)
     }
 
-    fun <T : Any, DEF : YawnTableDef<T, T>, PROJECTION : Any?> project(
-        tClass: Class<T>,
+    fun <T : Any, DEF : YawnEntityTableDef<T, T>, PROJECTION : Any?> project(
         tableRef: YawnTableRef<T, DEF>,
         lambda: ProjectedYawnQueryScope<T, T, DEF, PROJECTION>.(
             tableDef: DEF,
         ) -> YawnQueryProjection<T, PROJECTION>,
     ): ProjectedYawnQueryBuilder<T, DEF, PROJECTION> {
-        val query = YawnQuery<T, T>(tClass)
         val tableDef = tableRef.create(parent = RootTableDefParent)
+        val query = YawnQuery<T, T>(tableDef.entityClass)
         return ProjectedYawnQueryBuilder.create(tableDef, queryFactory, query, lambda)
     }
 
