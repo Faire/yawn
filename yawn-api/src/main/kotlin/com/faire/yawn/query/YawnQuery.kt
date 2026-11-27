@@ -88,8 +88,7 @@ data class YawnQuery<SOURCE : Any, T : Any>(
     }
 
     fun hasSubQuery(): Boolean {
-        @Suppress("UNCHECKED_CAST")
-        val criteriaStack = ArrayDeque(criteria) as ArrayDeque<YawnQueryCriterion<*>>
+        val criteriaStack = ArrayDeque<YawnQueryCriterion<*>>(criteria + joins.flatMap { it.joinCriteria })
 
         while (criteriaStack.isNotEmpty()) {
             val criterion = criteriaStack.removeLast()

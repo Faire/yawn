@@ -164,4 +164,24 @@ internal class YawnSubQueryTest : BaseYawnDatabaseTest() {
             assertThat(people.map { it.name }).containsExactlyInAnyOrder("J.R.R. Tolkien", "Hans Christian Andersen")
         }
     }
+
+    @Test
+    fun `can use a correlated subquery within join criteria`() {
+        transactor.open { session ->
+            // Books with a publisher, joined only when the book itself has 500+ pages
+            val books = session.query(BookTable) { books ->
+                join(books.publisher) {
+                    val selectLargeBook = createProjectedSubQuery(BookTable.forSubQuery()) { otherBooks ->
+                        addEq(otherBooks.id, books.id)
+                        addGt(otherBooks.numberOfPages, 500)
+                        project(otherBooks.id)
+                    }
+
+                    addExists(selectLargeBook)
+                }
+            }.list()
+
+            assertThat(books.map { it.name }).containsExactly("Lord of the Rings")
+        }
+    }
 }
