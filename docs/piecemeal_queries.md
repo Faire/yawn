@@ -43,7 +43,8 @@ Each call mutates and returns the same builder, so calls can also be chained. Do
 that is only meant to contribute part of a query.
 
 If a base query will be used to execute more than one variation, create a new base builder for each variation or call `clone()` before diverging.
-Mutations accumulate on a builder; executing it does not reset it.
+Mutations accumulate on a builder; executing it does not reset it. The aggregate helpers `rowCount`, `exists`, `countDistinct`, `maxValueOf`, and
+`minValueOf` are the exception: they run on a copy of the query, so you can count a fully built query and then list it.
 
 ## Choosing a type for a helper
 

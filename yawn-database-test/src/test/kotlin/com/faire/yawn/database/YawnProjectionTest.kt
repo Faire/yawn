@@ -390,6 +390,44 @@ internal class YawnProjectionTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `aggregate helpers ignore the ordering and pagination on the builder`() {
+        transactor.open { session ->
+            fun orderedPage() = session.query(BookTable)
+                .orderAsc { name }
+                .offset(1)
+                .maxResults(2)
+
+            assertThat(orderedPage().rowCount()).isEqualTo(6)
+            assertThat(orderedPage().exists()).isTrue()
+            assertThat(orderedPage().countDistinct { originalLanguage }).isEqualTo(2)
+            assertThat(orderedPage().maxValueOf { name }).isEqualTo("The Ugly Duckling")
+            assertThat(orderedPage().minValueOf { name }).isEqualTo("Harry Potter")
+        }
+    }
+
+    @Test
+    fun `aggregate helpers leave the builder reusable`() {
+        transactor.open { session ->
+            val shortBooks = session.query(BookTable) { books ->
+                addLt(books.numberOfPages, 500)
+            }
+
+            assertThat(shortBooks.rowCount()).isEqualTo(4)
+            assertThat(shortBooks.rowCount()).isEqualTo(4)
+            assertThat(shortBooks.exists()).isTrue()
+            assertThat(shortBooks.countDistinct { originalLanguage }).isEqualTo(2)
+            assertThat(shortBooks.maxValueOf { numberOfPages }).isEqualTo(300)
+            assertThat(shortBooks.minValueOf { numberOfPages }).isEqualTo(100)
+            assertThat(shortBooks.list().map { it.name }).containsExactlyInAnyOrder(
+                "The Hobbit",
+                "The Little Mermaid",
+                "The Ugly Duckling",
+                "The Emperor's New Clothes",
+            )
+        }
+    }
+
+    @Test
     fun `yawn query with pair projection`() {
         transactor.open { session ->
             val uniqueResult = session.project(BookTable) { books ->

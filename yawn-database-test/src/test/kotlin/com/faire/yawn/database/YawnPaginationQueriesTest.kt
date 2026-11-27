@@ -227,6 +227,23 @@ internal class YawnPaginationQueriesTest : BaseYawnDatabaseTest() {
     }
 
     @Test
+    fun `list with total results - counts every match regardless of ordering and offset on the builder`() {
+        transactor.open { session ->
+            val (total, books) = session.query(BookTable)
+                .orderAsc { name }
+                .offset(100)
+                .listPaginatedWithTotalResults(
+                    page = PageNumber.zeroIndexed(0) / 2,
+                    orders = listOf(),
+                    uniqueColumn = { id },
+                )
+
+            assertThat(total).isEqualTo(6)
+            assertThat(books.map { it.name }).containsExactly("Harry Potter", "Lord of the Rings")
+        }
+    }
+
+    @Test
     fun `list with join`() {
         transactor.open { session ->
             val (total, books) = session.query(BookTable) { books ->
