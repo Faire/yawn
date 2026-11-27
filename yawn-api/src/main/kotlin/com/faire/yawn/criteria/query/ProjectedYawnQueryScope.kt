@@ -62,6 +62,19 @@ private constructor(
     }
 
     /**
+     * Like [project], but runs [configure] against [projector] before resolving it, so it can be refined first -
+     * e.g. order by one of its own children via [orderAscBy]/[orderDescBy] taking a
+     * [com.faire.yawn.project.ProjectionSlot] (see [com.faire.yawn.project.YawnProjections.orderablePair]).
+     */
+    fun <PROJECTOR : YawnProjector<SOURCE, PROJECTION>> project(
+        projector: PROJECTOR,
+        configure: (PROJECTOR) -> Unit,
+    ): YawnQueryProjection<SOURCE, PROJECTION> {
+        configure(projector)
+        return project(projector)
+    }
+
+    /**
      * Projects a single value computed by a raw SQL [expression], e.g. `SUM(quantity * price)`.
      *
      * Use this instead of implementing [YawnQueryProjection] by hand when all you need is one custom SQL value.
