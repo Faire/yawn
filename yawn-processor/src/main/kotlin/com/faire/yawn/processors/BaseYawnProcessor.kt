@@ -28,7 +28,7 @@ import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toClassName
-import java.io.PrintStream
+import com.squareup.kotlinpoet.ksp.writeTo
 import kotlin.reflect.KClass
 
 /**
@@ -81,13 +81,16 @@ internal abstract class BaseYawnProcessor(
             .addTypeAliases(typeAliases)
             .build()
 
-        val outputFile = codeGenerator.createNewFile(
-            Dependencies.ALL_FILES,
-            classDeclaration.packageName.asString(),
-            newClassName,
+        // Only this class's file is declared: KSP traces the files generators reach by resolving types and reprocesses
+        // this class when one changes. So every cross-file read must go through type resolution; enumerating subclasses
+        // would read files KSP never links here, and adding a subclass would leave this output silently stale.
+        val dependencies = Dependencies(
+            aggregating = false,
+            checkNotNull(classDeclaration.containingFile) {
+                "Cannot generate a Yawn file for ${classDeclaration.qualifiedName?.asString()}: it has no source file"
+            },
         )
-
-        fileSpec.writeTo(PrintStream(outputFile))
+        fileSpec.writeTo(codeGenerator, dependencies)
     }
 
     private fun buildYawnContext(
