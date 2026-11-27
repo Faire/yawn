@@ -74,9 +74,15 @@ internal abstract class BaseYawnProcessor(
             .addTypeAliases(typeAliases)
             .build()
 
-        // Only the annotated class's own file is declared. KSP traces the other files the generators reach by resolving
-        // types (parent classes, embedded types, join targets) and reprocesses this class when any of them change.
-        val dependencies = Dependencies(aggregating = false, classDeclaration.containingFile!!)
+        // Only this class's file is declared: KSP traces the files generators reach by resolving types and reprocesses
+        // this class when one changes. So every cross-file read must go through type resolution; enumerating subclasses
+        // would read files KSP never links here, and adding a subclass would leave this output silently stale.
+        val dependencies = Dependencies(
+            aggregating = false,
+            checkNotNull(classDeclaration.containingFile) {
+                "Cannot generate a Yawn file for ${classDeclaration.qualifiedName?.asString()}: it has no source file"
+            },
+        )
         fileSpec.writeTo(codeGenerator, dependencies)
     }
 
