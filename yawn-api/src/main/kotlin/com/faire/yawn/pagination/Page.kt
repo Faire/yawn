@@ -14,8 +14,16 @@ data class Page(
 
     /**
      * The OFFSET to use in a paginated query for this page.
+     * Hibernate takes the offset as an Int, so pages that would start past [Int.MAX_VALUE] are rejected.
      */
-    fun computeOffset(): Int = pageNumber.zeroIndexedPageNumber * pageSize
+    fun computeOffset(): Int {
+        val offset = pageNumber.zeroIndexedPageNumber.toLong() * pageSize
+        check(offset <= Int.MAX_VALUE) {
+            "Zero-indexed page ${pageNumber.zeroIndexedPageNumber} of size $pageSize starts at offset $offset, " +
+                "which exceeds the maximum supported offset of ${Int.MAX_VALUE}"
+        }
+        return offset.toInt()
+    }
 
     /**
      * Returns a [Page] representing the following page after this one, with the same [pageSize].

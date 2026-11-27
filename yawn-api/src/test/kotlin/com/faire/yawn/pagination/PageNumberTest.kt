@@ -61,10 +61,13 @@ internal class PageNumberTest {
     fun `cannot create invalid page numbers`() {
         assertThatThrownBy { PageNumber.zeroIndexed(-1) }
             .isInstanceOf(IllegalStateException::class.java)
-            .withFailMessage("-1 is not a valid zero-indexed page number")
+            .hasMessage("-1 is not a valid zero-indexed page number")
         assertThatThrownBy { PageNumber.oneIndexed(0) }
             .isInstanceOf(IllegalStateException::class.java)
-            .withFailMessage("-1 is not a valid zero-indexed page number")
+            .hasMessage("0 is not a valid one-indexed page number")
+        assertThatThrownBy { PageNumber.oneIndexed(Int.MIN_VALUE) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("${Int.MIN_VALUE} is not a valid one-indexed page number")
     }
 
     @Test
@@ -72,5 +75,22 @@ internal class PageNumberTest {
         assertThat(PageNumber.zeroIndexed(0L).zeroIndexedPageNumber).isEqualTo(0)
         assertThat(PageNumber.oneIndexed(1L).oneIndexedPageNumber).isEqualTo(1)
         assertThat((PageNumber.starting() / 10L).pageSize).isEqualTo(10)
+    }
+
+    @Test
+    fun `Long overloads reject values outside the Int range instead of truncating them`() {
+        // 4_294_967_297 is 2^32 + 1, which truncates to 1 when converted to an Int
+        assertThatThrownBy { PageNumber.zeroIndexed(4_294_967_297L) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("4294967297 is not a valid zero-indexed page number")
+        assertThatThrownBy { PageNumber.zeroIndexed(-4_294_967_295L) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("-4294967295 is not a valid zero-indexed page number")
+        assertThatThrownBy { PageNumber.oneIndexed(4_294_967_298L) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("4294967298 is not a valid one-indexed page number")
+        assertThatThrownBy { PageNumber.starting() / 4_294_967_297L }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("4294967297 is not a valid page size")
     }
 }

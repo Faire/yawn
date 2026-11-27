@@ -24,7 +24,7 @@ data class PaginationResult<T : Any>(
      * Whether there is a next page, i.e. whether this is not the last page.
      */
     fun hasNext(): Boolean {
-        val nextOffset = page.next().computeOffset()
+        val nextOffset = (page.pageNumber.zeroIndexedPageNumber + 1L) * page.pageSize
         return nextOffset < totalResults
     }
 
